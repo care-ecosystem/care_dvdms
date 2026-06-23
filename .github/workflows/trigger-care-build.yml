@@ -1,0 +1,26 @@
+name: Trigger CARE Backend Build
+
+on:
+  push:
+    branches: [main, develop]
+
+jobs:
+  trigger-backend-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger CARE Backend Docker Build
+        id: dispatch
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.CARE_REPO_DISPATCH_TOKEN }}
+          repository: care-ecosystem/care  # TODO: update to your care fork/org
+          event-type: myplugin-updated     # TODO: rename event type
+          client-payload: '{"plugin": "care_myplugin", "ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
+
+      - name: Verify dispatch sent
+        run: |
+          echo "Dispatch event sent to care-ecosystem/care"
+          echo "Event type: myplugin-updated"
+          echo "Triggered from: ${{ github.ref }}"
+          echo "Commit SHA: ${{ github.sha }}"
+          echo "Check: https://github.com/care-ecosystem/care/actions"

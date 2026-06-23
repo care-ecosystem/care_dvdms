@@ -1,0 +1,43 @@
+[project]
+name = "care_myplugin"  # TODO: rename to care_yourplugin
+version = "0.1.0"
+description = "A CARE backend plugin."  # TODO: describe your plugin
+readme = "README.md"
+authors = [
+  {name = "care-ecosystem", email = "jagan.kumar@egovernments.org"} 
+]
+maintainers = [
+  {name = "care-ecosystem", email = "jagan.kumar@egovernments.org"} 
+]
+license = {text = "MIT"}
+dependencies = [
+    "django",
+    "celery",
+    "djangorestframework",
+]
+requires-python = ">= 3.10"
+
+[project.optional-dependencies]
+test = [
+    "ruff",
+]
+
+[project.urls]
+bugs = "https://github.com/care-ecosystem/care_myplugin/issues"  # TODO: update
+homepage = "https://github.com/care-ecosystem/care_myplugin"  # TODO: update
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "W",
+    "F",
+    "I",
+    "B",
+    "UP",
+]
+
+[tool.uv]
+package = true
