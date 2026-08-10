@@ -1,0 +1,1551 @@
+openapi: 3.0.3
+info:
+  title: DVDMS Integration Plugin 
+  description: |
+    API specification for managing facility-to-DVDMS institute mappings.
+
+    Each CARE facility can have exactly ONE institute mapping (UNIQUE on facility_id).
+    The mapping establishes the connection between CARE and the DVDMS system.
+  version: 1.0.0
+  contact:
+    name: Jagankumar E
+    email: jagan.kumar@egov.org.in
+
+servers:
+  - url: https://care.ohc.network/
+    description: Dev server
+  - url: https://care-k3s.digit.org/
+    description: Egov server
+
+tags:
+  - name: Institute Mappings
+    description: Manage facility to DVDMS institute mappings
+  - name: DVDMS Lookups
+    description: Lookup data directly from DVDMS system (warehouses, stores, etc.)
+  - name: Supplier Mappings
+    description: Manage supplier (warehouse) mappings for institute mappings
+  - name: Store Mappings
+    description: Manage store mappings for institute mappings
+
+security:
+  - BearerAuth: []
+
+paths:
+  /api/care_dvdms/facility/{facility_external_id}/institute-mapping/:
+    post:
+      tags:
+        - Institute Mappings
+      summary: Create institute mapping for a facility
+      description: |
+        Create a mapping between a CARE facility and DVDMS institute.
+        A facility can have only one institute mapping (UNIQUE on facility_external_id).
+
+        **Note:** facility_external_id is in the URL, so it's automatically set from the path parameter.
+      operationId: createInstituteMapping
+      parameters:
+        - name: facility_external_id
+          in: path
+          required: true
+          description: CARE facility external_id (UUID)
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InstituteMappingCreate'
+            example:
+              eaushadhi_institute_id: "000931"
+              eaushadhi_user_reference_id: "14462"
+              schema_version: "1.0"
+      responses:
+        '201':
+          description: Institute mapping created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstituteMapping'
+              example:
+                id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                facility_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                eaushadhi_institute_id: "000931"
+                eaushadhi_user_reference_id: "14462"
+                schema_version: "1.0"
+                meta: null
+                created_by:
+                  id: "uuid"
+                  username: "admin"
+                  first_name: "Admin"
+                  last_name: "User"
+                  email: "admin@example.com"
+                updated_by: null
+                created_date: "2026-05-19 19:29:35.868682+05:30"
+                modified_date: "2026-05-19 19:29:35.868682+05:30"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Conflict - this facility already has a mapping
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Institute mapping already exists for this facility"
+                code: "MAPPING_EXISTS"
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      tags:
+        - Institute Mappings
+      summary: Get institute mapping for a facility
+      description: |
+        Retrieve the institute mapping for a specific facility.
+        Returns 404 if no mapping exists.
+      operationId: getInstituteMapping
+      parameters:
+        - name: facility_external_id
+          in: path
+          required: true
+          description: CARE facility external_id (UUID)
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Institute mapping details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstituteMapping'
+              example:
+                id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                facility_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                eaushadhi_institute_id: "000931"
+                eaushadhi_user_reference_id: "14462"
+                schema_version: "1.0"
+                meta: null
+                created_by:
+                  id: "uuid"
+                  username: "admin"
+                  first_name: "Admin"
+                  last_name: "User"
+                  email: "admin@example.com"
+                updated_by: null
+                created_date: "2026-05-19 19:29:35.868682+05:30"
+                modified_date: "2026-05-19 19:29:35.868682+05:30"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: No institute mapping found for this facility
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "No institute mapping found for this facility"
+                code: "MAPPING_NOT_FOUND"
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      tags:
+        - Institute Mappings
+      summary: Update institute mapping for a facility
+      description: |
+        Update the institute mapping for a specific facility.
+        All fields are optional; only supplied fields are updated.
+      operationId: updateInstituteMapping
+      parameters:
+        - name: facility_external_id
+          in: path
+          required: true
+          description: CARE facility external_id (UUID)
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InstituteMappingUpdate'
+            examples:
+              update_user_reference:
+                summary: Update user reference ID
+                value:
+                  eaushadhi_user_reference_id: "14463"
+              update_schema_version:
+                summary: Update schema version
+                value:
+                  schema_version: "2.0"
+              update_multiple:
+                summary: Update multiple fields
+                value:
+                  eaushadhi_user_reference_id: "14464"
+                  schema_version: "2.0"
+                  meta:
+                    last_sync: "2026-05-20T10:30:00Z"
+                    notes: "Updated after migration"
+      responses:
+        '200':
+          description: Institute mapping updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstituteMapping'
+              example:
+                id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                facility_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                eaushadhi_institute_id: "000931"
+                eaushadhi_user_reference_id: "14464"
+                schema_version: "2.0"
+                meta:
+                  last_sync: "2026-05-20T10:30:00Z"
+                  notes: "Updated after migration"
+                created_by:
+                  id: "uuid"
+                  username: "admin"
+                  first_name: "Admin"
+                  last_name: "User"
+                  email: "admin@example.com"
+                updated_by:
+                  id: "uuid2"
+                  username: "updater"
+                  first_name: "Update"
+                  last_name: "User"
+                  email: "updater@example.com"
+                created_date: "2026-05-19 19:29:35.868682+05:30"
+                modified_date: "2026-05-20 10:35:22.123456+05:30"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: No institute mapping found for this facility
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "No institute mapping found for this facility"
+                code: "MAPPING_NOT_FOUND"
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ---------- DVDMS Lookups ----------
+  /api/care_dvdms/institute-mapping/{institute_mapping_id}/lookup/warehouses/:
+    get:
+      tags:
+        - DVDMS Lookups
+      summary: Lookup warehouses from DVDMS
+      description: |
+        Fetch the list of available warehouses directly from the DVDMS system
+        for the institute associated with this mapping.
+        Uses the institute mapping's credentials to query DVDMS API.
+      operationId: getDvdmsWarehouses
+      parameters:
+        - name: institute_mapping_id
+          in: path
+          required: true
+          description: Institute mapping UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of DVDMS warehouses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DvdmsWarehouse'
+              example:
+                - id: 99901062
+                  name: "Chas_Chc"
+                - id: 99901000
+                  name: "JMHIDPCL"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Institute mapping not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          description: Bad Gateway - Error communicating with DVDMS system
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Failed to fetch warehouses from DVDMS"
+                code: "DVDMS_API_ERROR"
+
+  /api/care_dvdms/institute-mapping/{institute_mapping_id}/lookup/stores/:
+    get:
+      tags:
+        - DVDMS Lookups
+      summary: Lookup stores from DVDMS
+      description: |
+        Fetch the list of available stores directly from the DVDMS system
+        for the institute associated with this mapping.
+        Requires a fromStoreid query parameter to specify the source warehouse.
+        Uses the institute mapping's credentials to query DVDMS API.
+      operationId: getDvdmsStores
+      parameters:
+        - name: institute_mapping_id
+          in: path
+          required: true
+          description: Institute mapping UUID
+          schema:
+            type: string
+            format: uuid
+        - name: fromStoreid
+          in: query
+          required: true
+          description: DVDMS warehouse/from_store ID to fetch stores for
+          schema:
+            type: string
+          example: "99901000"
+      responses:
+        '200':
+          description: List of DVDMS stores
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DvdmsStore'
+              example:
+                - id: 99901062
+                  name: "Chas_Chc"
+                - id: 99901000
+                  name: "JMHIDPCL"
+        '400':
+          description: Bad Request - fromStoreid is required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "fromStoreid query parameter is required"
+                code: "MISSING_PARAMETER"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Institute mapping not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          description: Bad Gateway - Error communicating with DVDMS system
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Failed to fetch stores from DVDMS"
+                code: "DVDMS_API_ERROR"
+
+  /api/care_dvdms/institute-mapping/{institute_mapping_id}/lookup/drugs/:
+    get:
+      tags:
+        - DVDMS Lookups
+      summary: Lookup drugs from DVDMS
+      description: |
+        Fetch the list of available drugs/items directly from the DVDMS system
+        for the institute associated with this mapping.
+        Supports filtering by group ID, subgroup ID, item category number, and item name.
+        Uses the institute mapping's credentials to query DVDMS API.
+      operationId: getDvdmsDrugs
+      parameters:
+        - name: institute_mapping_id
+          in: path
+          required: true
+          description: Institute mapping UUID
+          schema:
+            type: string
+            format: uuid
+        - name: hstnum_group_id
+          in: query
+          required: false
+          description: Filter by group ID
+          schema:
+            type: integer
+          example: 101047
+        - name: hstnum_subgroup_id
+          in: query
+          required: false
+          description: Filter by subgroup ID
+          schema:
+            type: integer
+          example: 0
+        - name: sstnum_item_cat_no
+          in: query
+          required: false
+          description: Filter by item category number
+          schema:
+            type: string
+          example: "10"
+        - name: hststr_item_name
+          in: query
+          required: false
+          description: Filter by item name (partial match/search)
+          schema:
+            type: string
+          example: "abc 500mg"
+      responses:
+        '200':
+          description: List of DVDMS drugs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DvdmsDrug'
+              example:
+                - hstnum_item_id: 10002270
+                  gnum_hospital_code: 998
+                  hstnum_group_id: 101047
+                  hstnum_subgroup_id: 0
+                  sstnum_item_cat_no: "10"
+                  hststr_item_name: "abc 500mg tablet(500mg ),Tablet"
+                  hstnum_batchno_req: 1
+                  hstnum_expirydate_req: 1
+                  gnum_inventory_unitid: 630001
+                  gdt_effective_frm: "Feb 11, 2025 12:00:00 AM"
+                  gnum_lstmod_seatid: 0
+                  gdt_entry_date: "Feb 11, 2025 11:31:54 AM"
+                  gnum_seatid: 14462
+                  gnum_isvalid: 1
+                  hststr_cpa_code: "0"
+                  hstnum_itembrand_id: 10103406
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Institute mapping not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          description: Bad Gateway - Error communicating with DVDMS system
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Failed to fetch drugs from DVDMS"
+                code: "DVDMS_API_ERROR"
+
+  /api/care_dvdms/institute-mapping/{institute_mapping_id}/lookup/groups/:
+    get:
+      tags:
+        - DVDMS Lookups
+      summary: Lookup groups from DVDMS
+      description: |
+        Fetch the list of available drug groups directly from the DVDMS system
+        for the institute associated with this mapping.
+        Uses the institute mapping's credentials to query DVDMS API.
+      operationId: getDvdmsGroups
+      parameters:
+        - name: institute_mapping_id
+          in: path
+          required: true
+          description: Institute mapping UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of DVDMS drug groups
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DvdmsGroup'
+              example:
+                - gnumHospitalCode: 998
+                  hstnumGroupId: 101038
+                  hststrGroupName: "Anticonvulsants/Antiepileptics"
+                  gstrRemarks: "As per GOI EDL 2011"
+                  gdtEffectiveFrm: "Apr 1, 2011 12:00:00 AM"
+                  gdtEntryDate: "Apr 12, 2017 10:45:40 AM"
+                  gnumSeatid: 10001
+                  gnumIsvalid: 1
+                  sstnumItemCatNo: 10
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Institute mapping not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          description: Bad Gateway - Error communicating with DVDMS system
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Failed to fetch groups from DVDMS"
+                code: "DVDMS_API_ERROR"
+
+  /api/care_dvdms/institute-mapping/{institute_mapping_id}/lookup/subgroups/:
+    get:
+      tags:
+        - DVDMS Lookups
+      summary: Lookup subgroups from DVDMS
+      description: |
+        Fetch the list of available drug subgroups directly from the DVDMS system
+        for the institute associated with this mapping.
+        Optionally filter by group ID to get subgroups for a specific group.
+        Uses the institute mapping's credentials to query DVDMS API.
+      operationId: getDvdmsSubgroups
+      parameters:
+        - name: institute_mapping_id
+          in: path
+          required: true
+          description: Institute mapping UUID
+          schema:
+            type: string
+            format: uuid
+        - name: groupid
+          in: query
+          required: false
+          description: Filter subgroups by parent group ID
+          schema:
+            type: integer
+          example: 101011
+      responses:
+        '200':
+          description: List of DVDMS drug subgroups
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DvdmsSubgroup'
+              example:
+                - gnumHospitalCode: 998
+                  hstnumSubgroupId: 101075
+                  hstnumGroupId: 101011
+                  hststrSubgroupName: "Anti Fungal Medicines"
+                  gdtEffectiveFrm: "Apr 1, 2011 12:00:00 AM"
+                  gstrRemarks: "As per GOI EDL 2011"
+                  gdtEntryDate: "Apr 12, 2017 11:10:21 AM"
+                  gnumSeatid: 10001
+                  gnumIsvalid: 1
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Institute mapping not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          description: Bad Gateway - Error communicating with DVDMS system
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Failed to fetch subgroups from DVDMS"
+                code: "DVDMS_API_ERROR"
+
+  /api/care_dvdms/institute-mapping/{institute_mapping_id}/lookup/units/:
+    get:
+      tags:
+        - DVDMS Lookups
+      summary: Lookup units from DVDMS
+      description: |
+        Fetch the list of available inventory units directly from the DVDMS system
+        for the institute associated with this mapping.
+        Uses the institute mapping's credentials to query DVDMS API.
+      operationId: getDvdmsUnits
+      parameters:
+        - name: institute_mapping_id
+          in: path
+          required: true
+          description: Institute mapping UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of DVDMS inventory units
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DvdmsUnit'
+              example:
+                - gnumUnitId: 630005
+                  gstrUnitName: "ML"
+                  gnumModuleId: 63
+                  gnumBaseunitId: 0
+                  gdtEffectiveFrm: "Jan 1, 0001"
+                  gnumLstmodSeatid: 0
+                  gdtEntryDate: "Jan 3, 0001"
+                  gnumSeatid: 10001
+                  gnumIsvalid: 1
+                  gnumUnitLevel: 3
+                  gnumHospitalCode: 998
+                  gnumDecimalAllowed: 0
+                  gnumBaseUnitvalue: 1.0
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Institute mapping not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          description: Bad Gateway - Error communicating with DVDMS system
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Failed to fetch units from DVDMS"
+                code: "DVDMS_API_ERROR"
+
+  # ---------- Supplier Mappings ----------
+  /api/care_dvdms/institute-mapping/{institute_mapping_id}/suppliers/:
+    post:
+      tags:
+        - Supplier Mappings
+      summary: Add a supplier mapping
+      description: |
+        Add a supplier (warehouse) mapping to the institute mapping.
+        Maps a CARE supplier to a DVDMS warehouse name for inward matching.
+        At most one supplier can be marked as default.
+      operationId: createSupplierMapping
+      parameters:
+        - name: institute_mapping_id
+          in: path
+          required: true
+          description: Institute mapping UUID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupplierMappingCreate'
+            example:
+              supplier_id: "b1e7c2a4-9d8f-4e6b-a3c1-7f2d8e5b9c34"
+              eaushadhi_warehouse_id: "99901000"
+              eaushadhi_warehouse_name: "Bokaro_DWH"
+              is_default: true
+      responses:
+        '201':
+          description: Supplier mapping created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupplierMapping'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Institute mapping not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflict - supplier already mapped or multiple defaults
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      tags:
+        - Supplier Mappings
+      summary: List supplier mappings
+      description: Get all supplier mappings for this institute mapping
+      operationId: listSupplierMappings
+      parameters:
+        - name: institute_mapping_id
+          in: path
+          required: true
+          description: Institute mapping UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of supplier mappings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SupplierMapping'
+              example:
+                count: 2
+                results:
+                  - id: "uuid1"
+                    supplier_id: "uuid"
+                    eaushadhi_warehouse_id: "99901000"
+                    eaushadhi_warehouse_name: "Bokaro_DWH"
+                    is_default: true
+                    created_date: "2026-05-19 19:29:35.868682+05:30"
+                  - id: "uuid2"
+                    supplier_id: "uuid"
+                    eaushadhi_warehouse_id: "99901001"
+                    eaushadhi_warehouse_name: "Ranchi_DWH"
+                    is_default: false
+                    created_date: "2026-05-19 19:29:35.868682+05:30"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Institute mapping not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/care_dvdms/institute-mapping/{institute_mapping_id}/suppliers/{supplier_mapping_id}/:
+    delete:
+      tags:
+        - Supplier Mappings
+      summary: Remove supplier mapping
+      description: Soft-delete a supplier mapping
+      operationId: deleteSupplierMapping
+      parameters:
+        - name: institute_mapping_id
+          in: path
+          required: true
+          description: Institute mapping UUID
+          schema:
+            type: string
+            format: uuid
+        - name: supplier_mapping_id
+          in: path
+          required: true
+          description: Supplier mapping UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Supplier mapping deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "Supplier mapping deleted successfully"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ---------- Store Mappings ----------
+  /api/care_dvdms/institute-mapping/{institute_mapping_id}/stores/:
+    post:
+      tags:
+        - Store Mappings
+      summary: Add a store mapping
+      description: |
+        Add a store mapping to the institute mapping.
+        Maps a CARE store to a DVDMS store ID for indent/issue operations.
+        At most one store can be marked as default.
+      operationId: createStoreMapping
+      parameters:
+        - name: institute_mapping_id
+          in: path
+          required: true
+          description: Institute mapping UUID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreMappingCreate'
+            example:
+              store_id: "c2f8d3b5-ae90-4f7c-b401-8e3c9d6f1b25"
+              eaushadhi_store_id: "99901002"
+              eaushadhi_store_name: "CHC Pharmacy"
+              is_default: true
+      responses:
+        '201':
+          description: Store mapping created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreMapping'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Institute mapping not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflict - store already mapped or multiple defaults
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      tags:
+        - Store Mappings
+      summary: List store mappings
+      description: Get all store mappings for this institute mapping
+      operationId: listStoreMappings
+      parameters:
+        - name: institute_mapping_id
+          in: path
+          required: true
+          description: Institute mapping UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of store mappings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/StoreMapping'
+              example:
+                count: 2
+                results:
+                  - id: "uuid1"
+                    store_id: "uuid"
+                    eaushadhi_store_id: "99901002"
+                    eaushadhi_store_name: "CHC Pharmacy"
+                    is_default: true
+                    created_date: "2026-05-19 19:29:35.868682+05:30"
+                  - id: "uuid2"
+                    store_id: "uuid"
+                    eaushadhi_store_id: "99901003"
+                    eaushadhi_store_name: "OPD Pharmacy"
+                    is_default: false
+                    created_date: "2026-05-19 19:29:35.868682+05:30"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Institute mapping not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/care_dvdms/institute-mapping/{institute_mapping_id}/stores/{store_mapping_id}/:
+    delete:
+      tags:
+        - Store Mappings
+      summary: Remove store mapping
+      description: Soft-delete a store mapping
+      operationId: deleteStoreMapping
+      parameters:
+        - name: institute_mapping_id
+          in: path
+          required: true
+          description: Institute mapping UUID
+          schema:
+            type: string
+            format: uuid
+        - name: store_mapping_id
+          in: path
+          required: true
+          description: Store mapping UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Store mapping deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "Store mapping deleted successfully"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for authentication
+
+  schemas:
+    # Shared user object used in created_by / updated_by fields
+    UserSummary:
+      type: object
+      required:
+        - id
+        - username
+        - first_name
+        - last_name
+        - email
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        username:
+          type: string
+          example: "admin"
+        first_name:
+          type: string
+          example: "Admin"
+        last_name:
+          type: string
+          example: "User"
+        email:
+          type: string
+          format: email
+          example: "admin@example.com"
+
+    # Institute Mapping Create Schema
+    InstituteMappingCreate:
+      type: object
+      required:
+        - eaushadhi_institute_id
+        - eaushadhi_user_reference_id
+        - schema_version
+      properties:
+        eaushadhi_institute_id:
+          type: string
+          description: DVDMS/eAushadhi institute ID
+          example: "000931"
+        eaushadhi_user_reference_id:
+          type: string
+          description: |
+            DVDMS/eAushadhi user reference ID (seat ID).
+            This is the user ID used for authentication with the DVDMS API.
+          example: "14462"
+        schema_version:
+          type: string
+          description: Which API schema version applies to this facility's responses
+          example: "1.0"
+        meta:
+          type: object
+          nullable: true
+          description: Arbitrary metadata (optional)
+          example:
+            setup_notes: "Configured during Phase 1"
+            contact_person: "Dr. Kumar"
+
+    # Institute Mapping Update Schema
+    InstituteMappingUpdate:
+      type: object
+      description: |
+        All fields optional; only supplied fields are updated.
+        facility_external_id and eaushadhi_institute_id cannot be changed (use delete + create instead).
+      properties:
+        eaushadhi_user_reference_id:
+          type: string
+          description: Update the user reference ID
+          example: "14463"
+        schema_version:
+          type: string
+          description: Update the schema version
+          example: "2.0"
+        meta:
+          type: object
+          nullable: true
+          description: Update metadata
+          example:
+            last_sync: "2026-05-20T10:30:00Z"
+            notes: "Updated after migration"
+
+    # Institute Mapping Full Schema (Response)
+    InstituteMapping:
+      type: object
+      required:
+        - id
+        - facility_id
+        - eaushadhi_institute_id
+        - eaushadhi_user_reference_id
+        - schema_version
+        - created_by
+        - created_date
+        - modified_date
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: External ID (primary key exposed via API)
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        facility_id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: CARE facility external_id reference
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        eaushadhi_institute_id:
+          type: string
+          description: DVDMS/eAushadhi institute ID
+          example: "000931"
+        eaushadhi_user_reference_id:
+          type: string
+          description: DVDMS/eAushadhi user reference ID (seat ID)
+          example: "14462"
+        schema_version:
+          type: string
+          description: API schema version
+          example: "1.0"
+        meta:
+          type: object
+          nullable: true
+          description: Arbitrary metadata
+          example: null
+        created_by:
+          allOf:
+            - $ref: '#/components/schemas/UserSummary'
+          readOnly: true
+          description: User who created this mapping
+        updated_by:
+          allOf:
+            - $ref: '#/components/schemas/UserSummary'
+          nullable: true
+          readOnly: true
+          description: User who last updated this mapping (null if never updated)
+        created_date:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Timestamp when created
+          example: "2026-05-19 19:29:35.868682+05:30"
+        modified_date:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Timestamp when last modified
+          example: "2026-05-19 19:29:35.868682+05:30"
+
+    # ===================== Supplier Mapping =====================
+    SupplierMappingCreate:
+      type: object
+      required:
+        - supplier_id
+        - eaushadhi_warehouse_id
+        - eaushadhi_warehouse_name
+      properties:
+        supplier_id:
+          type: string
+          format: uuid
+          description: CARE supplier external_id (FK to organization with org_type='product_supplier')
+          example: "b1e7c2a4-9d8f-4e6b-a3c1-7f2d8e5b9c34"
+        eaushadhi_warehouse_id:
+          type: string
+          description: DVDMS warehouse/from_store ID
+          example: "99901000"
+        eaushadhi_warehouse_name:
+          type: string
+          description: DVDMS warehouse name (for matching inwards)
+          example: "Bokaro_DWH"
+        is_default:
+          type: boolean
+          default: false
+          description: |
+            Mark this supplier as default for unmapped warehouses.
+            At most one supplier per institute can be default.
+          example: true
+
+    SupplierMapping:
+      allOf:
+        - $ref: '#/components/schemas/SupplierMappingCreate'
+        - type: object
+          required:
+            - id
+            - institute_mapping_id
+            - created_by
+            - created_date
+            - modified_date
+          properties:
+            id:
+              type: string
+              format: uuid
+              readOnly: true
+              description: Supplier mapping external_id (PK)
+              example: "uuid"
+            institute_mapping_id:
+              type: string
+              format: uuid
+              readOnly: true
+              description: FK to institute_mapping
+              example: "uuid"
+            created_by:
+              allOf:
+                - $ref: '#/components/schemas/UserSummary'
+              readOnly: true
+            updated_by:
+              allOf:
+                - $ref: '#/components/schemas/UserSummary'
+              nullable: true
+              readOnly: true
+            created_date:
+              type: string
+              format: date-time
+              readOnly: true
+              example: "2026-05-19 19:29:35.868682+05:30"
+            modified_date:
+              type: string
+              format: date-time
+              readOnly: true
+              example: "2026-05-19 19:29:35.868682+05:30"
+
+    # ===================== Store Mapping =====================
+    StoreMappingCreate:
+      type: object
+      required:
+        - store_id
+        - eaushadhi_store_id
+        - eaushadhi_store_name
+      properties:
+        store_id:
+          type: string
+          format: uuid
+          description: CARE store external_id
+          example: "c2f8d3b5-ae90-4f7c-b401-8e3c9d6f1b25"
+        eaushadhi_store_id:
+          type: string
+          description: DVDMS store/to_store ID
+          example: "99901002"
+        eaushadhi_store_name:
+          type: string
+          description: DVDMS store name (for display)
+          example: "CHC Pharmacy"
+        is_default:
+          type: boolean
+          default: false
+          description: |
+            Mark this store as default for indent/issue operations.
+            At most one store per institute can be default.
+          example: true
+
+    StoreMapping:
+      allOf:
+        - $ref: '#/components/schemas/StoreMappingCreate'
+        - type: object
+          required:
+            - id
+            - institute_mapping_id
+            - created_by
+            - created_date
+            - modified_date
+          properties:
+            id:
+              type: string
+              format: uuid
+              readOnly: true
+              description: Store mapping external_id (PK)
+              example: "uuid"
+            institute_mapping_id:
+              type: string
+              format: uuid
+              readOnly: true
+              description: FK to institute_mapping
+              example: "uuid"
+            created_by:
+              allOf:
+                - $ref: '#/components/schemas/UserSummary'
+              readOnly: true
+            updated_by:
+              allOf:
+                - $ref: '#/components/schemas/UserSummary'
+              nullable: true
+              readOnly: true
+            created_date:
+              type: string
+              format: date-time
+              readOnly: true
+              example: "2026-05-19 19:29:35.868682+05:30"
+            modified_date:
+              type: string
+              format: date-time
+              readOnly: true
+              example: "2026-05-19 19:29:35.868682+05:30"
+
+    # ===================== DVDMS Lookup Schemas =====================
+    DvdmsWarehouse:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          description: DVDMS warehouse ID
+          example: 99901062
+        name:
+          type: string
+          description: DVDMS warehouse name
+          example: "Chas_Chc"
+
+    DvdmsStore:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          description: DVDMS store ID
+          example: 99901062
+        name:
+          type: string
+          description: DVDMS store name
+          example: "Chas_Chc"
+
+    DvdmsDrug:
+      type: object
+      required:
+        - hstnum_item_id
+        - hststr_item_name
+      properties:
+        hstnum_item_id:
+          type: integer
+          description: DVDMS item ID
+          example: 10002270
+        gnum_hospital_code:
+          type: integer
+          description: Hospital code
+          example: 998
+        hstnum_group_id:
+          type: integer
+          description: Group ID
+          example: 101047
+        hstnum_subgroup_id:
+          type: integer
+          description: Subgroup ID
+          example: 0
+        sstnum_item_cat_no:
+          type: string
+          description: Item category number
+          example: "10"
+        hststr_item_name:
+          type: string
+          description: Item name
+          example: "abc 500mg tablet(500mg ),Tablet"
+        hstnum_batchno_req:
+          type: integer
+          description: Batch number required flag (1=yes, 0=no)
+          example: 1
+        hstnum_expirydate_req:
+          type: integer
+          description: Expiry date required flag (1=yes, 0=no)
+          example: 1
+        gnum_inventory_unitid:
+          type: integer
+          description: Inventory unit ID
+          example: 630001
+        gdt_effective_frm:
+          type: string
+          description: Effective from date
+          example: "Feb 11, 2025 12:00:00 AM"
+        gnum_lstmod_seatid:
+          type: integer
+          description: Last modified seat ID
+          example: 0
+        gdt_entry_date:
+          type: string
+          description: Entry date
+          example: "Feb 11, 2025 11:31:54 AM"
+        gnum_seatid:
+          type: integer
+          description: Seat ID
+          example: 14462
+        gnum_isvalid:
+          type: integer
+          description: Is valid flag (1=valid, 0=invalid)
+          example: 1
+        hststr_cpa_code:
+          type: string
+          description: CPA code
+          example: "0"
+        hstnum_itembrand_id:
+          type: integer
+          description: Item brand ID
+          example: 10103406
+
+    DvdmsGroup:
+      type: object
+      required:
+        - hstnumGroupId
+        - hststrGroupName
+      properties:
+        gnumHospitalCode:
+          type: integer
+          description: Hospital code
+          example: 998
+        hstnumGroupId:
+          type: integer
+          description: Group ID
+          example: 101038
+        hststrGroupName:
+          type: string
+          description: Group name
+          example: "Anticonvulsants/Antiepileptics"
+        gstrRemarks:
+          type: string
+          description: Remarks
+          example: "As per GOI EDL 2011"
+        gdtEffectiveFrm:
+          type: string
+          description: Effective from date
+          example: "Apr 1, 2011 12:00:00 AM"
+        gdtEntryDate:
+          type: string
+          description: Entry date
+          example: "Apr 12, 2017 10:45:40 AM"
+        gnumSeatid:
+          type: integer
+          description: Seat ID
+          example: 10001
+        gnumIsvalid:
+          type: integer
+          description: Is valid flag (1=valid, 0=invalid)
+          example: 1
+        sstnumItemCatNo:
+          type: integer
+          description: Item category number
+          example: 10
+
+    DvdmsSubgroup:
+      type: object
+      required:
+        - hstnumSubgroupId
+        - hstnumGroupId
+        - hststrSubgroupName
+      properties:
+        gnumHospitalCode:
+          type: integer
+          description: Hospital code
+          example: 998
+        hstnumSubgroupId:
+          type: integer
+          description: Subgroup ID
+          example: 101075
+        hstnumGroupId:
+          type: integer
+          description: Parent group ID
+          example: 101011
+        hststrSubgroupName:
+          type: string
+          description: Subgroup name
+          example: "Anti Fungal Medicines"
+        gdtEffectiveFrm:
+          type: string
+          description: Effective from date
+          example: "Apr 1, 2011 12:00:00 AM"
+        gstrRemarks:
+          type: string
+          description: Remarks
+          example: "As per GOI EDL 2011"
+        gdtEntryDate:
+          type: string
+          description: Entry date
+          example: "Apr 12, 2017 11:10:21 AM"
+        gnumSeatid:
+          type: integer
+          description: Seat ID
+          example: 10001
+        gnumIsvalid:
+          type: integer
+          description: Is valid flag (1=valid, 0=invalid)
+          example: 1
+
+    DvdmsUnit:
+      type: object
+      required:
+        - gnumUnitId
+        - gstrUnitName
+      properties:
+        gnumUnitId:
+          type: integer
+          description: Unit ID
+          example: 630005
+        gstrUnitName:
+          type: string
+          description: Unit name
+          example: "ML"
+        gnumModuleId:
+          type: integer
+          description: Module ID
+          example: 63
+        gnumBaseunitId:
+          type: integer
+          description: Base unit ID (0 if this is the base unit)
+          example: 0
+        gdtEffectiveFrm:
+          type: string
+          description: Effective from date
+          example: "Jan 1, 0001"
+        gnumLstmodSeatid:
+          type: integer
+          description: Last modified seat ID
+          example: 0
+        gdtEntryDate:
+          type: string
+          description: Entry date
+          example: "Jan 3, 0001"
+        gnumSeatid:
+          type: integer
+          description: Seat ID
+          example: 10001
+        gnumIsvalid:
+          type: integer
+          description: Is valid flag (1=valid, 0=invalid)
+          example: 1
+        gnumUnitLevel:
+          type: integer
+          description: Unit level
+          example: 3
+        gnumHospitalCode:
+          type: integer
+          description: Hospital code
+          example: 998
+        gnumDecimalAllowed:
+          type: integer
+          description: Decimal allowed flag (1=yes, 0=no)
+          example: 0
+        gnumBaseUnitvalue:
+          type: number
+          format: float
+          description: Base unit value for conversion
+          example: 1.0
+
+    # Error Schema
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Human-readable error message
+          example: "Institute mapping already exists for this facility"
+        code:
+          type: string
+          description: Machine-readable error code
+          example: "MAPPING_EXISTS"
+        details:
+          type: object
+          nullable: true
+          description: Field-level validation errors
+          example:
+            eaushadhi_institute_id: ["This field is required"]
+
+  responses:
+    BadRequest:
+      description: Bad Request - Invalid input parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Invalid input parameters"
+            code: "INVALID_INPUT"
+            details:
+              eaushadhi_institute_id: ["This field is required"]
+
+    Unauthorized:
+      description: Unauthorized - Invalid or missing authentication token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Authentication credentials were not provided"
+            code: "UNAUTHORIZED"
+
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Resource not found"
+            code: "NOT_FOUND"
+
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Internal server error occurred"
+            code: "INTERNAL_ERROR"
