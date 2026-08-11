@@ -1115,6 +1115,123 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+    get:
+      tags:
+        - Record Orders
+      summary: List record orders
+      description: |
+        Retrieve a paginated list of record orders for a facility and destination.
+      operationId: listRecordOrders
+      parameters:
+        - name: facility_id
+          in: path
+          required: true
+          description: Facility UUID
+          schema:
+            type: string
+            format: uuid
+        - name: destination_id
+          in: path
+          required: true
+          description: Destination facility UUID
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          required: false
+          description: Number of results to return per page
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          required: false
+          description: The initial index from which to return the results
+          schema:
+            type: integer
+            default: 0
+        - name: order
+          in: query
+          required: false
+          description: Filter by order UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Record orders retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - count
+                  - results
+                properties:
+                  count:
+                    type: integer
+                    description: Total number of record orders
+                    example: 1
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RecordOrder'
+              example:
+                count: 1
+                results:
+                  - id: "uuid1"
+                    name: "eaushadhi"
+                    institute:
+                      id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                      eaushadhi_institute_id: "000931"
+                      eaushadhi_user_ref_id: "14462"
+                      eaushadhi_institute_name: "Ranchi DH"
+                    order:
+                      id: "4df37546-7b7b-4e5b-b135-9179838a6962"
+                      name: "eaushadhi"
+                      category: "central"
+                      intent: "order"
+                      priority: "routine"
+                      reason: "patient_care"
+                      status: "draft"
+                    institute_store:
+                      id: "c2f8d3b5-ae90-4f7c-b401-8e3c9d6f1b25"
+                      eaushadhi_store_id: "99901002"
+                      eaushadhi_store_name: "CHC Pharmacy"
+                      store:
+                        id: "060d0e05-ffdc-446e-b844-d22cd6bced04"
+                        name: "Counter 1"
+                        form: "ro"
+                    institute_supplier:
+                      id: "b1e7c2a4-9d8f-4e6b-a3c1-7f2d8e5b9c34"
+                      eaushadhi_warehouse_id: "99901000"
+                      eaushadhi_warehouse_name: "Bokaro_DWH"
+                      supplier:
+                        id: "5aa85d4e-3456-41fb-aee2-8076f07cb91b"
+                        name: "Medplus"
+                        org_type: "product_supplier"
+                    status: "draft"
+                    created_by:
+                      id: "uuid"
+                      username: "admin"
+                      first_name: "Admin"
+                      last_name: "User"
+                      email: "admin@example.com"
+                    updated_by: null
+                    created_date: "2026-05-19 19:29:35.868682+05:30"
+                    modified_date: "2026-05-19 19:29:35.868682+05:30"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Facility or destination not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   # ---------- Record Item Orders ----------
   /facility/{facility_id}/destination/{destination_id}/record-item-orders/:
     post:
@@ -1147,12 +1264,8 @@ paths:
             schema:
               $ref: '#/components/schemas/RecordItemOrderCreate'
             example:
-              item: "6d8be71d-8538-4dc3-993e-f8a987e0d5cd"
-              quantity: "1.00"
-              status: "active"
-              supply_request: "supply-requiresid"
-              order: "61808cc9-4c50-4eda-9803-0e914b23f342"
-              record_order: "sasasasasas"
+              record_order: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+              supply_request: "2e1cb879-8101-4160-b324-bc97e07c35f3"
               drug:
                 id: "10002270"
                 name: "abc 500mg tablet"
@@ -1160,6 +1273,7 @@ paths:
                 group_id: "101047"
                 sub_group_id: "0"
                 unit_id: "630001"
+                drug_category: "10"
       responses:
         '201':
           description: Record item order created successfully
@@ -1167,12 +1281,233 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RecordItemOrder'
+              example:
+                id: "uuid-item-order-1"
+                record_order:
+                  id: "uuid1"
+                  name: "eaushadhi"
+                  institute:
+                    id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                    eaushadhi_institute_id: "000931"
+                    eaushadhi_user_ref_id: "14462"
+                    eaushadhi_institute_name: "Ranchi DH"
+                  order:
+                    id: "4df37546-7b7b-4e5b-b135-9179838a6962"
+                    name: "eaushadhi"
+                    category: "central"
+                    status: "draft"
+                  institute_store:
+                    id: "c2f8d3b5-ae90-4f7c-b401-8e3c9d6f1b25"
+                    eaushadhi_store_id: "99901002"
+                    eaushadhi_store_name: "CHC Pharmacy"
+                    store:
+                      id: "060d0e05-ffdc-446e-b844-d22cd6bced04"
+                      name: "Counter 1"
+                      form: "ro"
+                  institute_supplier:
+                    id: "b1e7c2a4-9d8f-4e6b-a3c1-7f2d8e5b9c34"
+                    eaushadhi_warehouse_id: "99901000"
+                    eaushadhi_warehouse_name: "Bokaro_DWH"
+                    supplier:
+                      id: "5aa85d4e-3456-41fb-aee2-8076f07cb91b"
+                      name: "Medplus"
+                      org_type: "product_supplier"
+                  status: "draft"
+                  created_by:
+                    id: "uuid"
+                    username: "admin"
+                    first_name: "Admin"
+                    last_name: "User"
+                    email: "admin@example.com"
+                  created_date: "2026-05-19 19:29:35.868682+05:30"
+                  modified_date: "2026-05-19 19:29:35.868682+05:30"
+                supply_request:
+                  id: "2e1cb879-8101-4160-b324-bc97e07c35f3"
+                  item:
+                    id: "566db5e4-0533-4d7c-8deb-15a3d58c8d53"
+                    alternate_identifier: null
+                    status: "active"
+                  order:
+                    id: "a5537270-af4e-4c27-8906-e56569f599ce"
+                    status: "pending"
+                    name: "Test Order flow"
+                    category: "central"
+                    intent: "order"
+                    priority: "routine"
+                    reason: "patient_care"
+                  quantity: "16.000000"
+                  status: "active"
+                drug:
+                  id: "10002270"
+                  name: "abc 500mg tablet"
+                  brand_id: "10103406"
+                  group_id: "101047"
+                  sub_group_id: "0"
+                  unit_id: "630001"
+                  drug_category: "10"
+                created_by:
+                  id: "uuid"
+                  username: "admin"
+                  first_name: "Admin"
+                  last_name: "User"
+                  email: "admin@example.com"
+                updated_by: null
+                created_date: "2026-05-19 19:29:35.868682+05:30"
+                modified_date: "2026-05-19 19:29:35.868682+05:30"
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
           description: Facility or record order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      tags:
+        - Record Item Orders
+      summary: List record item orders
+      description: |
+        Retrieve a paginated list of record item orders for a facility and destination.
+      operationId: listRecordItemOrders
+      parameters:
+        - name: facility_id
+          in: path
+          required: true
+          description: Facility UUID
+          schema:
+            type: string
+            format: uuid
+        - name: destination_id
+          in: path
+          required: true
+          description: Destination facility UUID
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          required: false
+          description: Number of results to return per page
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          required: false
+          description: The initial index from which to return the results
+          schema:
+            type: integer
+            default: 0
+        - name: record_order
+          in: query
+          required: false
+          description: Filter by record order UUID
+          schema:
+            type: string
+            format: uuid
+        - name: order
+          in: query
+          required: false
+          description: Filter by order UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Record item orders retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - count
+                  - results
+                properties:
+                  count:
+                    type: integer
+                    description: Total number of record item orders
+                    example: 1
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RecordItemOrder'
+              example:
+                count: 1
+                results:
+                  - id: "uuid-item-order-1"
+                    record_order:
+                      id: "uuid1"
+                      name: "eaushadhi"
+                      institute:
+                        id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                        eaushadhi_institute_id: "000931"
+                        eaushadhi_user_ref_id: "14462"
+                        eaushadhi_institute_name: "Ranchi DH"
+                      order:
+                        id: "4df37546-7b7b-4e5b-b135-9179838a6962"
+                        name: "eaushadhi"
+                        category: "central"
+                        status: "draft"
+                      institute_store:
+                        id: "c2f8d3b5-ae90-4f7c-b401-8e3c9d6f1b25"
+                        eaushadhi_store_id: "99901002"
+                        eaushadhi_store_name: "CHC Pharmacy"
+                        store:
+                          id: "060d0e05-ffdc-446e-b844-d22cd6bced04"
+                          name: "Counter 1"
+                          form: "ro"
+                      institute_supplier:
+                        id: "b1e7c2a4-9d8f-4e6b-a3c1-7f2d8e5b9c34"
+                        eaushadhi_warehouse_id: "99901000"
+                        eaushadhi_warehouse_name: "Bokaro_DWH"
+                        supplier:
+                          id: "5aa85d4e-3456-41fb-aee2-8076f07cb91b"
+                          name: "Medplus"
+                          org_type: "product_supplier"
+                      status: "draft"
+                    supply_request:
+                      id: "2e1cb879-8101-4160-b324-bc97e07c35f3"
+                      item:
+                        id: "566db5e4-0533-4d7c-8deb-15a3d58c8d53"
+                        alternate_identifier: null
+                        status: "active"
+                      order:
+                        id: "a5537270-af4e-4c27-8906-e56569f599ce"
+                        status: "pending"
+                        name: "Test Order flow"
+                        category: "central"
+                        intent: "order"
+                        priority: "routine"
+                        reason: "patient_care"
+                      quantity: "16.000000"
+                      status: "active"
+                    drug:
+                      id: "10002270"
+                      name: "abc 500mg tablet"
+                      brand_id: "10103406"
+                      group_id: "101047"
+                      sub_group_id: "0"
+                      unit_id: "630001"
+                      drug_category: "10"
+                    institute_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                    created_by:
+                      id: "uuid"
+                      username: "admin"
+                      first_name: "Admin"
+                      last_name: "User"
+                      email: "admin@example.com"
+                    updated_by: null
+                    created_date: "2026-05-19 19:29:35.868682+05:30"
+                    modified_date: "2026-05-19 19:29:35.868682+05:30"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Facility or destination not found
           content:
             application/json:
               schema:
@@ -2053,6 +2388,50 @@ components:
               example: "2026-05-19 19:29:35.868682+05:30"
 
     # ===================== Record Item Order Schemas =====================
+    # Shared item object used in supply requests
+    ItemSummary:
+      type: object
+      required:
+        - id
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "566db5e4-0533-4d7c-8deb-15a3d58c8d53"
+        alternate_identifier:
+          type: string
+          nullable: true
+          example: null
+        status:
+          type: string
+          example: "active"
+
+    # Shared supply request object used in record item orders
+    SupplyRequestSummary:
+      type: object
+      required:
+        - id
+        - item
+        - order
+        - quantity
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "2e1cb879-8101-4160-b324-bc97e07c35f3"
+        item:
+          $ref: '#/components/schemas/ItemSummary'
+        order:
+          $ref: '#/components/schemas/OrderSummary'
+        quantity:
+          type: string
+          example: "16.000000"
+        status:
+          type: string
+          example: "active"
+
     DrugInfo:
       type: object
       required:
@@ -2083,44 +2462,28 @@ components:
           type: string
           description: DVDMS unit ID
           example: "630001"
+        drug_category:
+          type: string
+          description: Drug category
+          example: "10"
 
     RecordItemOrderCreate:
       type: object
       required:
-        - item
-        - quantity
-        - status
-        - order
         - record_order
+        - supply_request
         - drug
       properties:
-        item:
-          type: string
-          format: uuid
-          description: CARE item external_id
-          example: "6d8be71d-8538-4dc3-993e-f8a987e0d5cd"
-        quantity:
-          type: string
-          description: Quantity requested
-          example: "1.00"
-        status:
-          type: string
-          enum: [active, cancelled, completed]
-          description: Item order status
-          example: "active"
-        supply_request:
-          type: string
-          description: Supply request reference
-          example: "supply-requiresid"
-        order:
-          type: string
-          format: uuid
-          description: Reference to CARE order external_id
-          example: "61808cc9-4c50-4eda-9803-0e914b23f342"
         record_order:
           type: string
-          description: Reference to record order ID
-          example: "sasasasasas"
+          format: uuid
+          description: Reference to record order UUID
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        supply_request:
+          type: string
+          format: uuid
+          description: Supply request UUID
+          example: "2e1cb879-8101-4160-b324-bc97e07c35f3"
         drug:
           $ref: '#/components/schemas/DrugInfo'
 
@@ -2141,6 +2504,16 @@ components:
               readOnly: true
               description: Record item order external_id
               example: "uuid"
+            record_order:
+              allOf:
+                - $ref: '#/components/schemas/RecordOrder'
+              readOnly: true
+              description: Record order details (expanded in response)
+            supply_request:
+              allOf:
+                - $ref: '#/components/schemas/SupplyRequestSummary'
+              readOnly: true
+              description: Supply request details (expanded in response)
             institute_id:
               type: string
               format: uuid
