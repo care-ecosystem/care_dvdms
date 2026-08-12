@@ -1,5 +1,5 @@
 import datetime
-from pydantic import UUID4
+from pydantic import UUID4, Field
 
 from care.emr.resources.base import EMRResource
 
@@ -44,8 +44,8 @@ class DVDMSSupplierCreateSpec(EMRResource):
     __exclude__ = ["id", "institute", "created_by", "updated_by", "created_date", "modified_date", "deleted", "external_id", "history"]
 
     supplier: UUID4
-    eaushadhi_warehouse_id: str
-    eaushadhi_warehouse_name: str
+    eaushadhi_warehouse_id: str = Field(max_length=50)
+    eaushadhi_warehouse_name: str = Field(max_length=255)
     is_default: bool = False
 
 

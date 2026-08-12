@@ -27,6 +27,7 @@ class DVDMSSupplier(EMRBaseModel):
         constraints = [
             models.UniqueConstraint(
                 fields=["institute", "supplier"],
+                condition=models.Q(deleted=False),
                 name="uniq_institute_supplier",
             ),
             models.UniqueConstraint(

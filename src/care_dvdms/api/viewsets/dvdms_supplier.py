@@ -1,5 +1,7 @@
+from django.db import IntegrityError, transaction
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied, NotFound
+from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 
 from care.emr.api.viewsets.base import EMRBaseViewSet
@@ -24,6 +26,8 @@ class DVDMSSupplierViewSet(EMRBaseViewSet):
 
     database_model = DVDMSSupplier
     lookup_field = "external_id"
+    filter_backends = [OrderingFilter]
+    ordering_fields = ["created_date", "modified_date"]
 
     def get_institute(self):
         institute_id = self.kwargs.get("institute_id")
@@ -59,14 +63,11 @@ class DVDMSSupplierViewSet(EMRBaseViewSet):
 
     def list(self, request, *args, **kwargs):
         """GET /institute/{institute_id}/suppliers/ - List supplier mappings"""
-        queryset = self.get_queryset()
-        suppliers = list(queryset)
-
-        results = [DVDMSSupplierListSpec.serialize(s).to_json() for s in suppliers]
-        return Response({
-            "count": len(results),
-            "results": results,
-        }, status=status.HTTP_200_OK)
+        queryset = self.filter_queryset(self.get_queryset())
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(queryset, request)
+        results = [DVDMSSupplierListSpec.serialize(s).to_json() for s in page]
+        return paginator.get_paginated_response(results)
 
     def create(self, request, *args, **kwargs):
         """POST /institute/{institute_id}/suppliers/ - Create supplier mapping"""
@@ -75,7 +76,6 @@ class DVDMSSupplierViewSet(EMRBaseViewSet):
 
         spec = DVDMSSupplierCreateSpec(**request.data)
 
-        # Verify supplier exists
         supplier = get_object_or_404(
             Organization,
             external_id=spec.supplier,
@@ -83,7 +83,6 @@ class DVDMSSupplierViewSet(EMRBaseViewSet):
             deleted=False,
         )
 
-        # Check if supplier already mapped
         if DVDMSSupplier.objects.filter(
             institute=institute, supplier=supplier, deleted=False
         ).exists():
@@ -92,7 +91,6 @@ class DVDMSSupplierViewSet(EMRBaseViewSet):
                 status=status.HTTP_409_CONFLICT,
             )
 
-        # Check default constraint
         if spec.is_default:
             existing_default = DVDMSSupplier.objects.filter(
                 institute=institute, is_default=True, deleted=False
@@ -103,15 +101,22 @@ class DVDMSSupplierViewSet(EMRBaseViewSet):
                     status=status.HTTP_409_CONFLICT,
                 )
 
-        supplier_mapping = DVDMSSupplier.objects.create(
-            institute=institute,
-            supplier=supplier,
-            eaushadhi_warehouse_id=spec.eaushadhi_warehouse_id,
-            eaushadhi_warehouse_name=spec.eaushadhi_warehouse_name,
-            is_default=spec.is_default,
-            created_by=request.user,
-            updated_by=request.user,
-        )
+        try:
+            with transaction.atomic():
+                supplier_mapping = DVDMSSupplier.objects.create(
+                    institute=institute,
+                    supplier=supplier,
+                    eaushadhi_warehouse_id=spec.eaushadhi_warehouse_id,
+                    eaushadhi_warehouse_name=spec.eaushadhi_warehouse_name,
+                    is_default=spec.is_default,
+                    created_by=request.user,
+                    updated_by=request.user,
+                )
+        except IntegrityError:
+            return Response(
+                {"error": "This supplier is already mapped for this institute"},
+                status=status.HTTP_409_CONFLICT,
+            )
 
         supplier_mapping = DVDMSSupplier.objects.select_related(
             "institute", "supplier", "created_by", "updated_by"
