@@ -20,16 +20,18 @@ servers:
 tags:
   - name: Institutes
     description: Manage facility to DVDMS institutes
-  - name: DVDMS Lookups
-    description: Lookup data directly from DVDMS system (warehouses, stores, etc.)
   - name: Supplier Mappings
     description: Manage supplier (warehouse) mappings for institutes
   - name: Store Mappings
     description: Manage store mappings for institutes
+  - name: DVDMS Lookups
+    description: Lookup data directly from DVDMS system (warehouses, stores, etc.)
   - name: Record Orders
     description: Manage DVDMS record orders (indents/requisitions)
   - name: Record Item Orders
     description: Manage individual items in DVDMS record orders
+  - name: DVDMS Outwards Record
+    description: Manage outwards records for DVDMS indent creation and sync status
 
 security:
   - BearerAuth: []
@@ -242,6 +244,358 @@ paths:
               example:
                 error: "No institute found for this facility"
                 code: "MAPPING_NOT_FOUND"
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ---------- Supplier Mappings ----------
+  /facility/{facility_external_id}/institute/{institute_id}/suppliers/:
+    post:
+      tags:
+        - Supplier Mappings
+      summary: Add a supplier mapping
+      description: |
+        Add a supplier (warehouse) mapping to the institute.
+        Maps a CARE supplier to a DVDMS warehouse name for inward matching.
+        At most one supplier can be marked as default.
+      operationId: createSupplierMapping
+      parameters:
+        - name: institute_id
+          in: path
+          required: true
+          description: Institute UUID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupplierMappingCreate'
+            example:
+              supplier: "b1e7c2a4-9d8f-4e6b-a3c1-7f2d8e5b9c34"
+              eaushadhi_warehouse_id: "99901000"
+              eaushadhi_warehouse_name: "Bokaro_DWH"
+              is_default: true
+      responses:
+        '201':
+          description: Supplier mapping created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupplierMapping'
+              example:
+                id: "uuid1"
+                supplier:
+                  id: "b1e7c2a4-9d8f-4e6b-a3c1-7f2d8e5b9c34"
+                  name: "Medplus"
+                  org_type: "product_supplier"
+                eaushadhi_warehouse_id: "99901000"
+                eaushadhi_warehouse_name: "Bokaro_DWH"
+                is_default: true
+                institute_id: "uuid"
+                created_by:
+                  id: "uuid"
+                  username: "admin"
+                  first_name: "Admin"
+                  last_name: "User"
+                  email: "admin@example.com"
+                updated_by: null
+                created_date: "2026-05-19 19:29:35.868682+05:30"
+                modified_date: "2026-05-19 19:29:35.868682+05:30"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Institute not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflict - supplier already mapped or multiple defaults
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      tags:
+        - Supplier Mappings
+      summary: List supplier mappings
+      description: Get all supplier mappings for this institute
+      operationId: listSupplierMappings
+      parameters:
+        - name: institute_id
+          in: path
+          required: true
+          description: Institute UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of supplier mappings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SupplierMapping'
+              example:
+                count: 2
+                results:
+                  - id: "uuid1"
+                    supplier:
+                      id: "5aa85d4e-3456-41fb-aee2-8076f07cb91b"
+                      name: "Medplus"
+                      org_type: "product_supplier"
+                    eaushadhi_warehouse_id: "99901000"
+                    eaushadhi_warehouse_name: "Bokaro_DWH"
+                    is_default: true
+                    created_date: "2026-05-19 19:29:35.868682+05:30"
+                  - id: "uuid2"
+                    supplier:
+                      id: "b1e7c2a4-9d8f-4e6b-a3c1-7f2d8e5b9c34"
+                      name: "Apollo Pharmacy"
+                      org_type: "product_supplier"
+                    eaushadhi_warehouse_id: "99901001"
+                    eaushadhi_warehouse_name: "Ranchi_DWH"
+                    is_default: false
+                    created_date: "2026-05-19 19:29:35.868682+05:30"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Institute not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /facility/{facility_external_id}/institute/{institute_id}/suppliers/{supplier_mapping_id}/:
+    delete:
+      tags:
+        - Supplier Mappings
+      summary: Remove supplier mapping
+      description: Soft-delete a supplier mapping
+      operationId: deleteSupplierMapping
+      parameters:
+        - name: institute_id
+          in: path
+          required: true
+          description: Institute UUID
+          schema:
+            type: string
+            format: uuid
+        - name: supplier_mapping_id
+          in: path
+          required: true
+          description: Supplier mapping UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Supplier mapping deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "Supplier mapping deleted successfully"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ---------- Store Mappings ----------
+  /facility/{facility_external_id}/institute/{institute_id}/stores/:
+    post:
+      tags:
+        - Store Mappings
+      summary: Add a store mapping
+      description: |
+        Add a store mapping to the institute.
+        Maps a CARE store to a DVDMS store ID for indent/issue operations.
+        At most one store can be marked as default.
+      operationId: createStoreMapping
+      parameters:
+        - name: institute_id
+          in: path
+          required: true
+          description: Institute UUID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreMappingCreate'
+            example:
+              store: "c2f8d3b5-ae90-4f7c-b401-8e3c9d6f1b25"
+              eaushadhi_store_id: "99901002"
+              eaushadhi_store_name: "CHC Pharmacy"
+              is_default: true
+      responses:
+        '201':
+          description: Store mapping created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreMapping'
+              example:
+                id: "uuid1"
+                store:
+                  id: "c2f8d3b5-ae90-4f7c-b401-8e3c9d6f1b25"
+                  name: "Counter 1"
+                  form: "ro"
+                eaushadhi_store_id: "99901002"
+                eaushadhi_store_name: "CHC Pharmacy"
+                is_default: true
+                institute_id: "uuid"
+                created_by:
+                  id: "uuid"
+                  username: "admin"
+                  first_name: "Admin"
+                  last_name: "User"
+                  email: "admin@example.com"
+                updated_by: null
+                created_date: "2026-05-19 19:29:35.868682+05:30"
+                modified_date: "2026-05-19 19:29:35.868682+05:30"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Institute not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflict - store already mapped or multiple defaults
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      tags:
+        - Store Mappings
+      summary: List store mappings
+      description: Get all store mappings for this institute
+      operationId: listStoreMappings
+      parameters:
+        - name: institute_id
+          in: path
+          required: true
+          description: Institute UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of store mappings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/StoreMapping'
+              example:
+                count: 2
+                results:
+                  - id: "uuid1"
+                    store:
+                      id: "060d0e05-ffdc-446e-b844-d22cd6bced04"
+                      name: "Counter 1"
+                      form: "ro"
+                    eaushadhi_store_id: "99901002"
+                    eaushadhi_store_name: "CHC Pharmacy"
+                    is_default: true
+                    created_date: "2026-05-19 19:29:35.868682+05:30"
+                  - id: "uuid2"
+                    store:
+                      id: "c2f8d3b5-ae90-4f7c-b401-8e3c9d6f1b25"
+                      name: "Counter 2"
+                      form: "ro"
+                    eaushadhi_store_id: "99901003"
+                    eaushadhi_store_name: "OPD Pharmacy"
+                    is_default: false
+                    created_date: "2026-05-19 19:29:35.868682+05:30"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Institute not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /facility/{facility_external_id}/institute/{institute_id}/stores/{store_mapping_id}/:
+    delete:
+      tags:
+        - Store Mappings
+      summary: Remove store mapping
+      description: Soft-delete a store mapping
+      operationId: deleteStoreMapping
+      parameters:
+        - name: institute_id
+          in: path
+          required: true
+          description: Institute UUID
+          schema:
+            type: string
+            format: uuid
+        - name: store_mapping_id
+          in: path
+          required: true
+          description: Store mapping UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Store mapping deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "Store mapping deleted successfully"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
 
@@ -643,358 +997,6 @@ paths:
                 error: "Failed to fetch units from DVDMS"
                 code: "DVDMS_API_ERROR"
 
-  # ---------- Supplier Mappings ----------
-  /institute/{institute_id}/suppliers/:
-    post:
-      tags:
-        - Supplier Mappings
-      summary: Add a supplier mapping
-      description: |
-        Add a supplier (warehouse) mapping to the institute.
-        Maps a CARE supplier to a DVDMS warehouse name for inward matching.
-        At most one supplier can be marked as default.
-      operationId: createSupplierMapping
-      parameters:
-        - name: institute_id
-          in: path
-          required: true
-          description: Institute UUID
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SupplierMappingCreate'
-            example:
-              supplier: "b1e7c2a4-9d8f-4e6b-a3c1-7f2d8e5b9c34"
-              eaushadhi_warehouse_id: "99901000"
-              eaushadhi_warehouse_name: "Bokaro_DWH"
-              is_default: true
-      responses:
-        '201':
-          description: Supplier mapping created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SupplierMapping'
-              example:
-                id: "uuid1"
-                supplier:
-                  id: "b1e7c2a4-9d8f-4e6b-a3c1-7f2d8e5b9c34"
-                  name: "Medplus"
-                  org_type: "product_supplier"
-                eaushadhi_warehouse_id: "99901000"
-                eaushadhi_warehouse_name: "Bokaro_DWH"
-                is_default: true
-                institute_id: "uuid"
-                created_by:
-                  id: "uuid"
-                  username: "admin"
-                  first_name: "Admin"
-                  last_name: "User"
-                  email: "admin@example.com"
-                updated_by: null
-                created_date: "2026-05-19 19:29:35.868682+05:30"
-                modified_date: "2026-05-19 19:29:35.868682+05:30"
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          description: Institute not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '409':
-          description: Conflict - supplier already mapped or multiple defaults
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
-    get:
-      tags:
-        - Supplier Mappings
-      summary: List supplier mappings
-      description: Get all supplier mappings for this institute
-      operationId: listSupplierMappings
-      parameters:
-        - name: institute_id
-          in: path
-          required: true
-          description: Institute UUID
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '200':
-          description: List of supplier mappings
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  count:
-                    type: integer
-                  results:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/SupplierMapping'
-              example:
-                count: 2
-                results:
-                  - id: "uuid1"
-                    supplier:
-                      id: "5aa85d4e-3456-41fb-aee2-8076f07cb91b"
-                      name: "Medplus"
-                      org_type: "product_supplier"
-                    eaushadhi_warehouse_id: "99901000"
-                    eaushadhi_warehouse_name: "Bokaro_DWH"
-                    is_default: true
-                    created_date: "2026-05-19 19:29:35.868682+05:30"
-                  - id: "uuid2"
-                    supplier:
-                      id: "b1e7c2a4-9d8f-4e6b-a3c1-7f2d8e5b9c34"
-                      name: "Apollo Pharmacy"
-                      org_type: "product_supplier"
-                    eaushadhi_warehouse_id: "99901001"
-                    eaushadhi_warehouse_name: "Ranchi_DWH"
-                    is_default: false
-                    created_date: "2026-05-19 19:29:35.868682+05:30"
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          description: Institute not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
-  /institute/{institute_id}/suppliers/{supplier_mapping_id}/:
-    delete:
-      tags:
-        - Supplier Mappings
-      summary: Remove supplier mapping
-      description: Soft-delete a supplier mapping
-      operationId: deleteSupplierMapping
-      parameters:
-        - name: institute_id
-          in: path
-          required: true
-          description: Institute UUID
-          schema:
-            type: string
-            format: uuid
-        - name: supplier_mapping_id
-          in: path
-          required: true
-          description: Supplier mapping UUID
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '200':
-          description: Supplier mapping deleted
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-              example:
-                message: "Supplier mapping deleted successfully"
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
-  # ---------- Store Mappings ----------
-  /institute/{institute_id}/stores/:
-    post:
-      tags:
-        - Store Mappings
-      summary: Add a store mapping
-      description: |
-        Add a store mapping to the institute.
-        Maps a CARE store to a DVDMS store ID for indent/issue operations.
-        At most one store can be marked as default.
-      operationId: createStoreMapping
-      parameters:
-        - name: institute_id
-          in: path
-          required: true
-          description: Institute UUID
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/StoreMappingCreate'
-            example:
-              store: "c2f8d3b5-ae90-4f7c-b401-8e3c9d6f1b25"
-              eaushadhi_store_id: "99901002"
-              eaushadhi_store_name: "CHC Pharmacy"
-              is_default: true
-      responses:
-        '201':
-          description: Store mapping created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/StoreMapping'
-              example:
-                id: "uuid1"
-                store:
-                  id: "c2f8d3b5-ae90-4f7c-b401-8e3c9d6f1b25"
-                  name: "Counter 1"
-                  form: "ro"
-                eaushadhi_store_id: "99901002"
-                eaushadhi_store_name: "CHC Pharmacy"
-                is_default: true
-                institute_id: "uuid"
-                created_by:
-                  id: "uuid"
-                  username: "admin"
-                  first_name: "Admin"
-                  last_name: "User"
-                  email: "admin@example.com"
-                updated_by: null
-                created_date: "2026-05-19 19:29:35.868682+05:30"
-                modified_date: "2026-05-19 19:29:35.868682+05:30"
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          description: Institute not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '409':
-          description: Conflict - store already mapped or multiple defaults
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
-    get:
-      tags:
-        - Store Mappings
-      summary: List store mappings
-      description: Get all store mappings for this institute
-      operationId: listStoreMappings
-      parameters:
-        - name: institute_id
-          in: path
-          required: true
-          description: Institute UUID
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '200':
-          description: List of store mappings
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  count:
-                    type: integer
-                  results:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/StoreMapping'
-              example:
-                count: 2
-                results:
-                  - id: "uuid1"
-                    store:
-                      id: "060d0e05-ffdc-446e-b844-d22cd6bced04"
-                      name: "Counter 1"
-                      form: "ro"
-                    eaushadhi_store_id: "99901002"
-                    eaushadhi_store_name: "CHC Pharmacy"
-                    is_default: true
-                    created_date: "2026-05-19 19:29:35.868682+05:30"
-                  - id: "uuid2"
-                    store:
-                      id: "c2f8d3b5-ae90-4f7c-b401-8e3c9d6f1b25"
-                      name: "Counter 2"
-                      form: "ro"
-                    eaushadhi_store_id: "99901003"
-                    eaushadhi_store_name: "OPD Pharmacy"
-                    is_default: false
-                    created_date: "2026-05-19 19:29:35.868682+05:30"
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          description: Institute not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
-  /institute/{institute_id}/stores/{store_mapping_id}/:
-    delete:
-      tags:
-        - Store Mappings
-      summary: Remove store mapping
-      description: Soft-delete a store mapping
-      operationId: deleteStoreMapping
-      parameters:
-        - name: institute_id
-          in: path
-          required: true
-          description: Institute UUID
-          schema:
-            type: string
-            format: uuid
-        - name: store_mapping_id
-          in: path
-          required: true
-          description: Store mapping UUID
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '200':
-          description: Store mapping deleted
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-              example:
-                message: "Store mapping deleted successfully"
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
   # ---------- Record Orders ----------
   /facility/{facility_id}/destination/{destination_id}/record-orders/:
     post:
@@ -1158,6 +1160,20 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: status
+          in: query
+          required: false
+          description: Filter by status
+          schema:
+            type: string
+            enum: [draft, pending, approved, rejected, completed]
+        - name: ordering
+          in: query
+          required: false
+          description: "Order by field (e.g., -created_date, name). Prefix with '-' for descending order."
+          schema:
+            type: string
+            example: "-created_date"
       responses:
         '200':
           description: Record orders retrieved successfully
@@ -1225,6 +1241,309 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           description: Facility or destination not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /facility/{facility_id}/destination/{destination_id}/record-orders/{record_order_id}/:
+    patch:
+      tags:
+        - Record Orders
+      summary: Update record order
+      description: |
+        Update record order fields like status. All fields are optional.
+      operationId: updateRecordOrder
+      parameters:
+        - name: facility_id
+          in: path
+          required: true
+          description: Facility UUID
+          schema:
+            type: string
+            format: uuid
+        - name: destination_id
+          in: path
+          required: true
+          description: Destination facility UUID
+          schema:
+            type: string
+            format: uuid
+        - name: record_order_id
+          in: path
+          required: true
+          description: Record Order UUID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [draft, pending, approved, rejected, completed]
+                  description: Update order status
+                  example: "approved"
+            example:
+              status: "approved"
+      responses:
+        '200':
+          description: Record order updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordOrder'
+              example:
+                id: "uuid1"
+                name: "eaushadhi"
+                institute:
+                  id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                  eaushadhi_institute_id: "000931"
+                  eaushadhi_user_ref_id: "14462"
+                  eaushadhi_institute_name: "Ranchi DH"
+                order:
+                  id: "4df37546-7b7b-4e5b-b135-9179838a6962"
+                  name: "eaushadhi"
+                  category: "central"
+                  status: "draft"
+                institute_store:
+                  id: "c2f8d3b5-ae90-4f7c-b401-8e3c9d6f1b25"
+                  eaushadhi_store_id: "99901002"
+                  eaushadhi_store_name: "CHC Pharmacy"
+                  store:
+                    id: "060d0e05-ffdc-446e-b844-d22cd6bced04"
+                    name: "Counter 1"
+                    form: "ro"
+                institute_supplier:
+                  id: "b1e7c2a4-9d8f-4e6b-a3c1-7f2d8e5b9c34"
+                  eaushadhi_warehouse_id: "99901000"
+                  eaushadhi_warehouse_name: "Bokaro_DWH"
+                  supplier:
+                    id: "5aa85d4e-3456-41fb-aee2-8076f07cb91b"
+                    name: "Medplus"
+                    org_type: "product_supplier"
+                status: "approved"
+                created_by:
+                  id: "uuid"
+                  username: "admin"
+                  first_name: "Admin"
+                  last_name: "User"
+                  email: "admin@example.com"
+                updated_by:
+                  id: "uuid2"
+                  username: "manager"
+                  first_name: "Manager"
+                  last_name: "User"
+                  email: "manager@example.com"
+                created_date: "2026-05-19 19:29:35.868682+05:30"
+                modified_date: "2026-05-19 19:35:00.000000+05:30"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Record order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ---------- DVDMS Outwards Record ----------
+  /record-orders/{record_order_id}/outwards-record/:
+    get:
+      tags:
+        - DVDMS Outwards Record
+      summary: Get DVDMS outwards record for a record order
+      description: |
+        Retrieve the outwards record with sync status and details for a specific record order.
+      operationId: getOutwardsRecord
+      parameters:
+        - name: record_order_id
+          in: path
+          required: true
+          description: Record Order UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Outwards record retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DvdmsOutwardsRecord'
+              example:
+                id: "outwards-uuid-1"
+                record_order: "uuid1"
+                eaushadhi_indent_no: "IND-2026-001234"
+                status: "created"
+                eaushadhi_indent_status: "partially_issued"
+                created_by:
+                  id: "uuid"
+                  username: "admin"
+                  first_name: "Admin"
+                  last_name: "User"
+                  email: "admin@example.com"
+                updated_by: null
+                created_date: "2026-05-19 19:29:35.868682+05:30"
+                modified_date: "2026-05-21 09:05:00.000000+05:30"
+                sync_log_id: "sync-log-123"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Record order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /record-orders/{record_order_id}/outwards-record/fetch-inwards/:
+    post:
+      tags:
+        - DVDMS Outwards Record
+      summary: Fetch inwards/issues from DVDMS
+      description: |
+        Trigger fetching of inward/issue status from DVDMS API for a specific record order.
+        This endpoint calls the external DVDMS API to check for issues and their statuses,
+        and updates the outwards record with the latest issue information.
+      operationId: fetchInwards
+      parameters:
+        - name: record_order_id
+          in: path
+          required: true
+          description: Record Order UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Inwards/issues fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DvdmsOutwardsRecord'
+              example:
+                id: "outwards-uuid-1"
+                record_order: "uuid1"
+                eaushadhi_indent_no: "IND-2026-001234"
+                status: "created"
+                eaushadhi_indent_status: "partially_issued"
+                created_by:
+                  id: "uuid"
+                  username: "admin"
+                  first_name: "Admin"
+                  last_name: "User"
+                  email: "admin@example.com"
+                updated_by:
+                  id: "uuid"
+                  username: "admin"
+                  first_name: "Admin"
+                  last_name: "User"
+                  email: "admin@example.com"
+                created_date: "2026-05-19 19:29:35.868682+05:30"
+                modified_date: "2026-05-21 09:05:00.000000+05:30"
+                sync_log_id: "sync-log-123"
+        '400':
+          description: Bad request (e.g., outwards record not found)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Cannot fetch inwards: outwards record not found"
+                code: "OUTWARDS_RECORD_NOT_FOUND"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Record order or outwards record not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /record-orders/{record_order_id}/inwards-records/:
+    get:
+      tags:
+        - DVDMS Inwards Record
+      summary: Get inwards records for an outwards record
+      description: |
+        Retrieve paginated list of inwards/issue records associated with an outwards record.
+        These represent the issues created in DVDMS for the indent.
+      operationId: getInwardsRecords
+      parameters:
+        - name: record_order_id
+          in: path
+          required: true
+          description: Record Order UUID
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          description: Number of results to return per page
+          schema:
+            type: integer
+            default: 10
+            example: 10
+        - name: offset
+          in: query
+          description: Number of results to skip
+          schema:
+            type: integer
+            default: 0
+            example: 0
+      responses:
+        '200':
+          description: Inwards records retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - count
+                  - results
+                properties:
+                  count:
+                    type: integer
+                    description: Total number of inwards records
+                    example: 2
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DvdmsInwardsRecord'
+              example:
+                count: 2
+                results:
+                  - id: "issue-uuid-1"
+                    eaushadhi_issue_no: "ISS-2026-005678"
+                    created_at: "2026-05-20 10:30:00.000000+05:30"
+                    eaushadhi_issue_status: "received"
+                    outward_record: "outwards-uuid-1"
+                    eaushadhi_indent_no: "IND-2026-001234"
+                    sync_log_id: "sync-log-456"
+                  - id: "issue-uuid-2"
+                    eaushadhi_issue_no: "ISS-2026-005679"
+                    created_at: "2026-05-20 14:15:00.000000+05:30"
+                    eaushadhi_issue_status: "pending"
+                    outward_record: "outwards-uuid-1"
+                    eaushadhi_indent_no: "IND-2026-001234"
+                    sync_log_id: "sync-log-457"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Record order not found
           content:
             application/json:
               schema:
@@ -1417,6 +1736,13 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: ordering
+          in: query
+          required: false
+          description: "Order by field (e.g., -created_date, name). Prefix with '-' for descending order."
+          schema:
+            type: string
+            example: "-created_date"
       responses:
         '200':
           description: Record item orders retrieved successfully
@@ -1508,6 +1834,121 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           description: Facility or destination not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /facility/{facility_id}/destination/{destination_id}/record-item-orders/{record_item_order_id}/:
+    patch:
+      tags:
+        - Record Item Orders
+      summary: Update record item order
+      description: |
+        Update record item order fields including drug information. All fields are optional.
+      operationId: updateRecordItemOrder
+      parameters:
+        - name: facility_id
+          in: path
+          required: true
+          description: Facility UUID
+          schema:
+            type: string
+            format: uuid
+        - name: destination_id
+          in: path
+          required: true
+          description: Destination facility UUID
+          schema:
+            type: string
+            format: uuid
+        - name: record_item_order_id
+          in: path
+          required: true
+          description: Record Item Order UUID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                drug:
+                  $ref: '#/components/schemas/DrugInfo'
+                  description: Update drug information
+            example:
+              drug:
+                id: "10002270"
+                name: "abc 500mg tablet - updated"
+                brand_id: "10103406"
+                group_id: "101047"
+                sub_group_id: "0"
+                unit_id: "630001"
+                drug_category: "10"
+      responses:
+        '200':
+          description: Record item order updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordItemOrder'
+              example:
+                id: "uuid-item-order-1"
+                record_order:
+                  id: "uuid1"
+                  name: "eaushadhi"
+                  institute:
+                    id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                    eaushadhi_institute_id: "000931"
+                    eaushadhi_user_ref_id: "14462"
+                    eaushadhi_institute_name: "Ranchi DH"
+                  status: "draft"
+                supply_request:
+                  id: "2e1cb879-8101-4160-b324-bc97e07c35f3"
+                  item:
+                    id: "566db5e4-0533-4d7c-8deb-15a3d58c8d53"
+                    alternate_identifier: null
+                    status: "active"
+                  order:
+                    id: "a5537270-af4e-4c27-8906-e56569f599ce"
+                    status: "pending"
+                    name: "Test Order flow"
+                  quantity: "16.000000"
+                  status: "active"
+                drug:
+                  id: "10002270"
+                  name: "abc 500mg tablet - updated"
+                  brand_id: "10103406"
+                  group_id: "101047"
+                  sub_group_id: "0"
+                  unit_id: "630001"
+                  drug_category: "10"
+                institute_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                created_by:
+                  id: "uuid"
+                  username: "admin"
+                  first_name: "Admin"
+                  last_name: "User"
+                  email: "admin@example.com"
+                updated_by:
+                  id: "uuid2"
+                  username: "pharmacist"
+                  first_name: "Pharmacist"
+                  last_name: "User"
+                  email: "pharmacist@example.com"
+                created_date: "2026-05-19 19:29:35.868682+05:30"
+                modified_date: "2026-05-19 19:40:00.000000+05:30"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Record item order not found
           content:
             application/json:
               schema:
@@ -2386,6 +2827,193 @@ components:
               format: date-time
               readOnly: true
               example: "2026-05-19 19:29:35.868682+05:30"
+
+    # ===================== DVDMS Outwards Record Schemas =====================
+    DvdmsOutwardsRecord:
+      type: object
+      required:
+        - id
+        - record_order
+        - status
+        - created_date
+        - modified_date
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: Outwards record external_id
+          example: "outwards-uuid-1"
+        record_order:
+          type: string
+          format: uuid
+          description: Reference to record order UUID
+          example: "uuid1"
+        eaushadhi_indent_no:
+          type: string
+          nullable: true
+          description: eAushadhi/DVDMS indent number
+          example: "IND-2026-001234"
+        status:
+          type: string
+          enum: [created, submitted, cancelled]
+          description: |
+            Outwards record status:
+            - created: Indent created in DVDMS
+            - submitted: Indent submitted for processing
+            - cancelled: Indent cancelled
+          example: "created"
+        eaushadhi_indent_status:
+          type: string
+          nullable: true
+          enum: [draft, submitted, received, processing, processed, partially_issued, issued, cancelled]
+          description: |
+            Current indent status in eAushadhi/DVDMS system:
+            - draft: Indent created but not submitted
+            - submitted: Indent submitted to warehouse
+            - received: Warehouse acknowledged receipt
+            - processing: Warehouse is processing the indent
+            - processed: Indent fully processed
+            - partially_issued: Some items issued
+            - issued: All items issued
+            - cancelled: Indent was cancelled
+          example: "partially_issued"
+        sync_log_id:
+          type: string
+          nullable: true
+          description: Sync log identifier for tracking DVDMS sync operations
+          example: "sync-log-123"
+        created_by:
+          allOf:
+            - $ref: '#/components/schemas/UserSummary'
+          readOnly: true
+        updated_by:
+          allOf:
+            - $ref: '#/components/schemas/UserSummary'
+          nullable: true
+          readOnly: true
+        created_date:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2026-05-19 19:29:35.868682+05:30"
+        modified_date:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2026-05-21 09:05:00.000000+05:30"
+
+    # ===================== DVDMS Inwards Record Schemas =====================
+    DvdmsInwardsRecord:
+      type: object
+      required:
+        - id
+        - eaushadhi_issue_no
+        - created_at
+        - eaushadhi_issue_status
+        - outward_record
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: Inwards record external_id
+          example: "issue-uuid-1"
+        eaushadhi_issue_no:
+          type: string
+          description: eAushadhi/DVDMS issue number
+          example: "ISS-2026-005678"
+        created_at:
+          type: string
+          format: date-time
+          description: Inwards record creation timestamp
+          example: "2026-05-20 10:30:00.000000+05:30"
+        eaushadhi_issue_status:
+          type: string
+          enum: [draft, pending, received, partially_received, completed, cancelled]
+          description: |
+            Current issue status in eAushadhi/DVDMS system:
+            - draft: Issue created but not submitted
+            - pending: Issue submitted, awaiting receipt
+            - received: Issue received at destination
+            - partially_received: Some items received
+            - completed: All items received
+            - cancelled: Issue cancelled
+          example: "received"
+        outward_record:
+          type: string
+          format: uuid
+          description: Reference to outward record UUID
+          example: "outwards-uuid-1"
+        eaushadhi_indent_no:
+          type: string
+          nullable: true
+          description: eAushadhi/DVDMS indent number
+          example: "IND-2026-001234"
+        sync_log_id:
+          type: string
+          nullable: true
+          description: Sync log identifier for tracking DVDMS sync operations
+          example: "sync-log-456"
+
+    # ===================== DVDMS Indent Status History Schemas =====================
+    DvdmsIndentStatusHistory:
+      type: object
+      required:
+        - id
+        - outwards_record
+        - indent_status
+        - checked_at
+        - created_date
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: Status history entry external_id
+          example: "status-history-uuid-1"
+        outwards_record:
+          type: string
+          format: uuid
+          description: Reference to outwards record UUID
+          example: "outwards-uuid-1"
+        indent_status:
+          type: string
+          enum: [draft, submitted, received, processing, processed, cancelled]
+          description: |
+            Indent status at this point in time:
+            - draft: Indent created but not submitted
+            - submitted: Indent submitted to warehouse
+            - received: Warehouse acknowledged receipt
+            - processing: Warehouse is processing the indent
+            - processed: Indent fully processed and items dispatched
+            - cancelled: Indent was cancelled
+          example: "received"
+        status_details:
+          type: object
+          nullable: true
+          description: Raw response from DVDMS status check API
+          example:
+            indent_id: "IND-2026-001234"
+            current_status: "received"
+            warehouse_name: "Bokaro DWH"
+            received_date: "2026-05-19 19:45:00"
+            received_by: "Warehouse Manager"
+        checked_at:
+          type: string
+          format: date-time
+          description: Timestamp when status was checked from DVDMS
+          example: "2026-05-19 19:50:00.000000+05:30"
+        created_by:
+          allOf:
+            - $ref: '#/components/schemas/UserSummary'
+          readOnly: true
+          description: User who triggered the status check
+        created_date:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2026-05-19 19:50:00.000000+05:30"
 
     # ===================== Record Item Order Schemas =====================
     # Shared item object used in supply requests
