@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 # Example:
 # @shared_task
 # def process_note(note_id: int) -> None:
-#     from care_myplugin.models.note import Note
+#     from care_dvdms.models.note import Note
 #     try:
 #         note = Note.objects.get(pk=note_id)
 #         logger.info("Processing note: %s", note.title)
