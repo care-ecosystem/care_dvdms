@@ -9,7 +9,7 @@ Table dvdms_institute {
   external_id UUID [unique, not null, note: 'Exposed via API as id']
   facility_id INTEGER [not null, unique, note: 'FK to care_facility.id - one per facility']
 
-  eaushadhi_institute_id VARCHAR(50) [not null, note: 'DVDMS institute identifier']
+  eaushadhi_institute_id VARCHAR(50) [not null, unique, note: 'DVDMS institute identifier']
   eaushadhi_institute_name VARCHAR(255) [not null, note: 'Human-readable institute name']
   eaushadhi_user_ref_id VARCHAR(50) [not null, note: 'DVDMS user seat ID for API auth']
   schema_version VARCHAR(10) [not null, default: '1.0', note: 'API schema version']
@@ -26,7 +26,6 @@ Table dvdms_institute {
 
   indexes {
     facility_id
-    eaushadhi_institute_id
     deleted
   }
 }
@@ -64,7 +63,8 @@ Table dvdms_supplier {
     supplier_id
     eaushadhi_warehouse_id
     deleted
-    (institute_id, is_default) [unique, note:'one default per institute where deleted=false']
+    (institute_id, supplier_id) [unique, note: 'each supplier mapped once per institute']
+    (institute_id, is_default) [note:'IMPLEMENTATION: PostgreSQL partial unique index WHERE is_default=true AND deleted=false. DBML cannot express conditional constraints; this diagram placeholder must not be treated as an unconditional unique constraint.']
   }
 }
 
@@ -102,7 +102,8 @@ Table dvdms_store {
     location_id
     eaushadhi_store_id
     deleted
-    (institute_id, is_default) [unique, note: 'one default per institute where deleted=false']
+    (institute_id, location_id) [unique, note: 'each location mapped once per institute']
+    (institute_id, is_default) [note: 'IMPLEMENTATION: PostgreSQL partial unique index WHERE is_default=true AND deleted=false. DBML cannot express conditional constraints; this diagram placeholder must not be treated as an unconditional unique constraint.']
   }
 }
 
