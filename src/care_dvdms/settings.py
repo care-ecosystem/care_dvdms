@@ -6,7 +6,7 @@ from django.core.signals import setting_changed
 from django.dispatch import receiver
 from rest_framework.settings import perform_import
 
-from care_myplugin.apps import PLUGIN_NAME
+from care_dvdms.apps import PLUGIN_NAME
 
 env = environ.Env()
 
@@ -17,8 +17,8 @@ class PluginSettings:
     in Django settings, then falls back to environment variables, then defaults.
 
     Usage:
-        from care_myplugin.settings import plugin_settings
-        api_key = plugin_settings.MYPLUGIN_API_KEY
+        from care_dvdms.settings import plugin_settings
+        api_key = plugin_settings.CARE_DVDMS_API_KEY
     """
 
     def __init__(
@@ -88,8 +88,8 @@ def _reload_plugin_settings(*, setting, **kwargs):
 REQUIRED_SETTINGS: set[str] = set()
 
 DEFAULTS: dict[str, Any] = {
-    # "MYPLUGIN_API_KEY": "",
-    # "MYPLUGIN_API_ENDPOINT": "",
+    # "CARE_DVDMS_API_KEY": "",
+    # "CARE_DVDMS_API_ENDPOINT": "",
 }
 
 plugin_settings = PluginSettings(

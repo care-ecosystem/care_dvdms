@@ -24,14 +24,14 @@ A starter template for building CARE backend plugins following the `EMRBaseViewS
 Click **Use this template** on GitHub to create your repo.
 
 ### 2. Rename the plugin
-Search and replace `care_myplugin` → `care_yourplugin` across all files.
+Search and replace `care_dvdms` → `care_yourplugin` across all files.
 
 ### 3. Register with CARE
 Copy `plug_config_example.py` snippet into `care/plug_config.py`.
 
 ### 4. Run migrations
 ```bash
-python manage.py makemigrations care_myplugin
+python manage.py makemigrations care_dvdms
 python manage.py migrate
 ```
 
@@ -51,14 +51,14 @@ This template demonstrates the full plugin pattern:
 
 ## API Endpoints
 
-Once registered, your plugin's URLs are mounted at `/api/care_myplugin/`.
+Once registered, your plugin's URLs are mounted at `/api/care_dvdms/`.
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/care_myplugin/notes/` | List notes (requires `facility_id`) |
-| POST | `/api/care_myplugin/notes/` | Create a note |
-| GET | `/api/care_myplugin/notes/{id}/` | Retrieve a note |
-| PATCH | `/api/care_myplugin/notes/{id}/` | Update a note |
+| GET | `/api/care_dvdms/notes/` | List notes (requires `facility_id`) |
+| POST | `/api/care_dvdms/notes/` | Create a note |
+| GET | `/api/care_dvdms/notes/{id}/` | Retrieve a note |
+| PATCH | `/api/care_dvdms/notes/{id}/` | Update a note |
 
 ## GitHub Actions
 

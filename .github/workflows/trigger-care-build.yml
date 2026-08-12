@@ -14,13 +14,13 @@ jobs:
         with:
           token: ${{ secrets.CARE_REPO_DISPATCH_TOKEN }}
           repository: care-ecosystem/care  # TODO: update to your care fork/org
-          event-type: myplugin-updated     # TODO: rename event type
-          client-payload: '{"plugin": "care_myplugin", "ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
+          event-type: dvdms-updated     # TODO: rename event type
+          client-payload: '{"plugin": "care_dvdms", "ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
 
       - name: Verify dispatch sent
         run: |
           echo "Dispatch event sent to care-ecosystem/care"
-          echo "Event type: myplugin-updated"
+          echo "Event type: dvdms-updated"
           echo "Triggered from: ${{ github.ref }}"
           echo "Commit SHA: ${{ github.sha }}"
           echo "Check: https://github.com/care-ecosystem/care/actions"
