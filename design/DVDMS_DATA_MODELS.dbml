@@ -1,0 +1,330 @@
+// DVDMS Integration Data Models - CARE DVDMS Plugin
+// Foreign keys use integer id; external_id UUID for API exposure
+
+// ============================================================================
+// INSTITUTE MAPPING - Facility to DVDMS Institute (1:1 relationship)
+// ============================================================================
+Table dvdms_institute {
+  id INTEGER [pk, increment]
+  external_id UUID [unique, not null, note: 'Exposed via API as id']
+  facility_id INTEGER [not null, unique, note: 'FK to care_facility.id - one per facility']
+
+  eaushadhi_institute_id VARCHAR(50) [not null, note: 'DVDMS institute identifier']
+  eaushadhi_institute_name VARCHAR(255) [not null, note: 'Human-readable institute name']
+  eaushadhi_user_ref_id VARCHAR(50) [not null, note: 'DVDMS user seat ID for API auth']
+  schema_version VARCHAR(10) [not null, default: '1.0', note: 'API schema version']
+
+  created_date TIMESTAMP [not null, note: "indexed"]
+  modified_date TIMESTAMP [not null, note: "indexed"]
+  deleted BOOLEAN [default: false, note: "indexed"]
+
+  created_by_id INTEGER [null, note: 'FK to care_user.id - who created']
+  updated_by_id INTEGER [null, note: 'FK to care_user.id - who last updated']
+
+  history JSON [default: '{}', note: 'Change tracking history']
+  meta JSON [default: 'null', null, note: 'Arbitrary metadata']
+
+  indexes {
+    facility_id
+    eaushadhi_institute_id
+    deleted
+  }
+}
+
+Ref institute_facility: dvdms_institute.facility_id ?> care_facility.id
+Ref institute_created_by: dvdms_institute.created_by_id ?> care_user.id
+Ref institute_updated_by: dvdms_institute.updated_by_id ?> care_user.id
+
+// ============================================================================
+// SUPPLIER MAPPING - CARE Supplier to DVDMS Warehouse (N:1 relationship)
+// ============================================================================
+Table dvdms_supplier {
+  id INTEGER [pk, increment]
+  external_id UUID [unique, not null, note: 'Exposed via API as id']
+  institute_id INTEGER [not null, note: 'FK to dvdms_institute.id']
+  supplier_id INTEGER [not null, note: 'FK to care_organization.id - type=product_supplier']
+
+  eaushadhi_warehouse_id VARCHAR(50) [not null, note: 'DVDMS warehouse from_store ID']
+  eaushadhi_warehouse_name VARCHAR(255) [not null, note: 'DVDMS warehouse name']
+
+  is_default BOOLEAN [default: false, note: 'Default supplier for unmapped warehouses (unique per institute)']
+
+  created_date TIMESTAMP [not null, note: "indexed"]
+  modified_date TIMESTAMP [not null, note: "indexed"]
+  deleted BOOLEAN [default: false, note: "indexed"]
+
+  created_by_id INTEGER [null]
+  updated_by_id INTEGER [null]
+
+  history JSON [default: '{}']
+  meta JSON [default: 'null', null]
+
+  indexes {
+    institute_id
+    supplier_id
+    eaushadhi_warehouse_id
+    deleted
+    (institute_id, is_default) [unique, note:'one default per institute where deleted=false']
+  }
+}
+
+Ref supplier_institute: dvdms_supplier.institute_id ?> dvdms_institute.id
+Ref supplier_org: dvdms_supplier.supplier_id ?> care_organization.id
+Ref supplier_created_by: dvdms_supplier.created_by_id ?> care_user.id
+Ref supplier_updated_by: dvdms_supplier.updated_by_id ?> care_user.id
+
+// ============================================================================
+// STORE MAPPING - CARE Store to DVDMS Store (N:1 relationship)
+// ============================================================================
+Table dvdms_store {
+  id INTEGER [pk, increment]
+  external_id UUID [unique, not null, note: 'Exposed via API as id']
+  institute_id INTEGER [not null, note: 'FK to dvdms_institute.id']
+  location_id INTEGER [not null, note: 'FK to care_location.id - CARE facility location (counter/pharmacy)']
+
+  eaushadhi_store_id VARCHAR(50) [not null, note: 'DVDMS store to_store ID']
+  eaushadhi_store_name VARCHAR(255) [not null, note: 'DVDMS store name']
+
+  is_default BOOLEAN [default: false, note: 'Default store for indent/issue operations (unique per institute)']
+
+  created_date TIMESTAMP [not null, note: "indexed"]
+  modified_date TIMESTAMP [not null, note: "indexed"]
+  deleted BOOLEAN [default: false, note: "indexed"]
+
+  created_by_id INTEGER [null]
+  updated_by_id INTEGER [null]
+
+  history JSON [default: '{}']
+  meta JSON [default: 'null', null]
+
+  indexes {
+    institute_id
+    location_id
+    eaushadhi_store_id
+    deleted
+    (institute_id, is_default) [unique, note: 'one default per institute where deleted=false']
+  }
+}
+
+Ref store_institute: dvdms_store.institute_id ?> dvdms_institute.id
+Ref store_location: dvdms_store.location_id ?> care_location.id
+Ref store_created_by: dvdms_store.created_by_id ?> care_user.id
+Ref store_updated_by: dvdms_store.updated_by_id ?> care_user.id
+
+// ============================================================================
+// RECORD ORDER - DVDMS Indent/Requisition Order [COMMENTED OUT]
+// Maps to CARE orders and DVDMS stores/suppliers for sync
+// ============================================================================
+// Table dvdms_record_order {
+//   id INTEGER [pk, increment]
+//   external_id UUID [unique, not null, note: 'Exposed via API as id']
+//
+//   institute_id INTEGER [not null, note: 'FK to dvdms_institute.id']
+//   order_id INTEGER [not null, note: 'FK to care_order.id - the CARE order being synced']
+//   institute_store_id INTEGER [not null, note: 'FK to dvdms_store.id - destination store']
+//   institute_supplier_id INTEGER [not null, note: 'FK to dvdms_supplier.id - source warehouse']
+//
+//   name VARCHAR(255) [not null, note: 'Order name (e.g., "eaushadhi")']
+//
+//   status VARCHAR(50) [not null,
+//     note: 'Order status: draft, pending, approved, rejected, completed']
+//
+//   created_date TIMESTAMP [not null, note: "indexed"]
+//   modified_date TIMESTAMP [not null, note: "indexed"]
+//   deleted BOOLEAN [default: false, note: "indexed"]
+//
+//   created_by_id INTEGER [null]
+//   updated_by_id INTEGER [null]
+//
+//   history JSON [default: '{}']
+//   meta JSON [default: 'null', null]
+//
+//   indexes {
+//     institute_id
+//     order_id
+//     institute_store_id
+//     institute_supplier_id
+//     status
+//     deleted
+//     (institute_id, order_id) [unique, note: 'one record order per order per institute where deleted=false']
+//   }
+// }
+
+// Ref record_order_institute: dvdms_record_order.institute_id ?> dvdms_institute.id
+// Ref record_order_care_order: dvdms_record_order.order_id ?> care_order.id
+// Ref record_order_store: dvdms_record_order.institute_store_id ?> dvdms_store.id
+// Ref record_order_supplier: dvdms_record_order.institute_supplier_id ?> dvdms_supplier.id
+// Ref record_order_created_by: dvdms_record_order.created_by_id ?> care_user.id
+// Ref record_order_updated_by: dvdms_record_order.updated_by_id ?> care_user.id
+
+// ============================================================================
+// RECORD ITEM ORDER - Line Items in DVDMS Orders [COMMENTED OUT]
+// Maps CARE supply requests to DVDMS drugs
+// ============================================================================
+// Table dvdms_record_item_order {
+//   id INTEGER [pk, increment]
+//   external_id UUID [unique, not null, note: 'Exposed via API as id']
+//
+//   institute_id INTEGER [not null, note: 'FK to dvdms_institute.id - denormalized for fast lookup']
+//   record_order_id INTEGER [not null, note: 'FK to dvdms_record_order.id - parent order']
+//   supply_request_id INTEGER [not null, note: 'FK to care_supply_request.id - CARE supply request']
+//
+//   drug JSON [not null, note: 'Drug details: {id, name, brand_id, group_id, sub_group_id, unit_id, drug_category}']
+//
+//   created_date TIMESTAMP [not null, note: "indexed"]
+//   modified_date TIMESTAMP [not null, note: "indexed"]
+//   deleted BOOLEAN [default: false, note: "indexed"]
+//
+//   created_by_id INTEGER [null]
+//   updated_by_id INTEGER [null]
+//
+//   history JSON [default: '{}']
+//   meta JSON [default: 'null', null]
+//
+//   indexes {
+//     institute_id
+//     record_order_id
+//     supply_request_id
+//     deleted
+//     (record_order_id, supply_request_id) [unique, note: 'one item order per supply request per order where deleted=false']
+//   }
+// }
+
+// Ref item_order_institute: dvdms_record_item_order.institute_id ?> dvdms_institute.id
+// Ref item_order_record_order: dvdms_record_item_order.record_order_id ?> dvdms_record_order.id
+// Ref item_order_supply_request: dvdms_record_item_order.supply_request_id ?> care_supply_request.id
+// Ref item_order_created_by: dvdms_record_item_order.created_by_id ?> care_user.id
+// Ref item_order_updated_by: dvdms_record_item_order.updated_by_id ?> care_user.id
+
+// ============================================================================
+// DVDMS LOOKUP CACHE (Optional - for performance) [COMMENTED OUT]
+// Caches DVDMS API responses to avoid repeated lookups
+// ============================================================================
+// Table dvdms_lookup_cache {
+//   id INTEGER [pk, increment]
+//   external_id UUID [unique, not null]
+//   institute_id INTEGER [not null, note: 'FK to dvdms_institute.id - cache scoped to institute']
+//
+//   cache_type VARCHAR(50) [not null, note: 'Type: warehouse, store, drug, group, subgroup, unit']
+//   cache_key VARCHAR(500) [not null, note: 'Unique key for this cache entry (e.g., "warehouses" or "drugs?groupid=101047")']
+//
+//   data JSON [not null, note: 'Array of items from DVDMS API response']
+//
+//   fetched_at TIMESTAMP [not null]
+//   expires_at TIMESTAMP [not null, note: 'Cache TTL - typically 24 hours']
+//   fetch_status VARCHAR(50) [not null, note: 'Status: success, failed']
+//   fetch_error TEXT [null, note: 'Error message if fetch_status=failed']
+//
+//   created_date TIMESTAMP [not null, note: "indexed"]
+//   modified_date TIMESTAMP [not null, note: "indexed"]
+//   deleted BOOLEAN [default: false, note: "indexed"]
+//
+//   indexes {
+//     institute_id
+//     cache_type
+//     expires_at
+//     deleted
+//     (institute_id, cache_type, cache_key) [unique, note: 'one cache entry per (institute, type, key) where deleted=false']
+//   }
+// }
+
+// Ref lookup_cache_institute: dvdms_lookup_cache.institute_id ?> dvdms_institute.id
+
+// ============================================================================
+// DVDMS API FETCH LOG - Audit trail for API calls [COMMENTED OUT]
+// Tracks all API interactions with DVDMS for debugging and monitoring
+// ============================================================================
+// Table dvdms_api_fetch_log {
+//   id INTEGER [pk, increment]
+//   external_id UUID [unique, not null]
+//   institute_id INTEGER [not null, note: 'FK to dvdms_institute.id']
+//
+//   endpoint VARCHAR(255) [not null, note: 'DVDMS API endpoint called (e.g., "warehouses", "stores", "drugs")']
+//   method VARCHAR(10) [not null, note: 'HTTP method: GET, POST, etc.']
+//   request_payload JSON [null, note: 'Request parameters/body sent to DVDMS']
+//
+//   status_code INTEGER [null, note: 'HTTP response status code']
+//   response_payload JSON [null, note: 'Full response from DVDMS API']
+//
+//   triggered_by VARCHAR(50) [not null, note: 'Who triggered: USER, CRON, RETRY']
+//   fetch_status VARCHAR(50) [not null, note: 'Status: PENDING, SUCCESS, FAILURE']
+//   error_message TEXT [null, note: 'Error details if fetch failed']
+//
+//   duration_ms INTEGER [null, note: 'API call duration in milliseconds']
+//
+//   created_date TIMESTAMP [not null, note: "indexed"]
+//   modified_date TIMESTAMP [not null, note: "indexed"]
+//   deleted BOOLEAN [default: false, note: "indexed"]
+//
+//   created_by_id INTEGER [null, note: 'FK to care_user.id - user who triggered the fetch']
+//   updated_by_id INTEGER [null]
+//
+//   history JSON [default: '{}']
+//   meta JSON [default: 'null', null]
+//
+//   indexes {
+//     institute_id
+//     endpoint
+//     fetch_status
+//     created_date
+//     deleted
+//   }
+// }
+
+// Ref api_log_institute: dvdms_api_fetch_log.institute_id ?> dvdms_institute.id
+// Ref api_log_created_by: dvdms_api_fetch_log.created_by_id ?> care_user.id
+// Ref api_log_updated_by: dvdms_api_fetch_log.updated_by_id ?> care_user.id
+
+// ============================================================================
+// CARE MODELS - External References
+// ============================================================================
+
+Table care_user {
+  id INTEGER [pk, increment]
+  external_id UUID [unique, not null]
+}
+
+Table care_facility {
+  id INTEGER [pk, increment]
+  external_id UUID [unique, not null]
+}
+
+Table care_location {
+  id INTEGER [pk, increment]
+  external_id UUID [unique, not null]
+  facility_id INTEGER [not null, note: "FK to care_facility.id"]
+  name VARCHAR(255) [not null]
+  form VARCHAR(255) [not null, note: "e.g., ro, counter, pharmacy"]
+}
+
+Ref location_facility: care_location.facility_id ?> care_facility.id
+
+Table care_organization {
+  id INTEGER [pk, increment]
+  external_id UUID [unique, not null]
+}
+
+// CARE models below are not directly used by active DVDMS models (commented out)
+
+// Table care_order {
+//   id INTEGER [pk, increment]
+//   external_id UUID [unique, not null]
+//
+//   destination_id INTEGER [null, note: "FK to care_facility"]
+//   origin_id INTEGER [null, note: "FK to care_facility"]
+//   supplier_id INTEGER [null, note: "FK to care_organization"]
+// }
+//
+// Ref order_destination: care_order.destination_id ?> care_facility.id
+// Ref order_origin: care_order.origin_id ?> care_facility.id
+// Ref order_supplier: care_order.supplier_id ?> care_organization.id
+
+// Table care_supply_request {
+//   id INTEGER [pk, increment]
+//   external_id UUID [unique, not null]
+//
+//   order_id INTEGER [not null, note: "FK to care_order"]
+//   item_id INTEGER [not null, note: "FK to care_item (TBD)"]
+// }
+//
+// Ref supply_request_order: care_supply_request.order_id ?> care_order.id
