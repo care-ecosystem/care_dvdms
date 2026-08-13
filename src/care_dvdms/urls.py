@@ -57,4 +57,9 @@ urlpatterns = [
         DVDMSLookupViewSet.as_view({"get": "units"}),
         name="dvdms-lookup-units",
     ),
+    re_path(
+        r"^institute/(?P<institute_id>[^/.]+)/lookup/drugs/$",
+        DVDMSLookupViewSet.as_view({"get": "drugs"}),
+        name="dvdms-lookup-drugs",
+    ),
 ]
