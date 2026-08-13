@@ -1,11 +1,11 @@
-from rest_framework import status
-from rest_framework.exceptions import PermissionDenied, NotFound
-from rest_framework.response import Response
-
 from care.emr.api.viewsets.base import EMRBaseViewSet
 from care.facility.models import Facility
 from care.security.authorization.base import AuthorizationController
 from care.utils.shortcuts import get_object_or_404
+from django.db import IntegrityError, transaction
+from rest_framework import status
+from rest_framework.exceptions import NotFound, PermissionDenied
+from rest_framework.response import Response
 
 from care_dvdms.api.specs.dvdms_institute import (
     DVDMSInstituteCreateSpec,
@@ -35,28 +35,18 @@ class DVDMSInstituteViewSet(EMRBaseViewSet):
         return facility
 
     def _authorize_facility(self, facility):
-        if not AuthorizationController.call(
-            "can_use_dvdms_integration", self.request.user, facility
-        ):
-            raise PermissionDenied(
-                "You are not authorized to use DVDMS plugin for this facility"
-            )
+        if not AuthorizationController.call("can_use_dvdms_integration", self.request.user, facility):
+            raise PermissionDenied("You are not authorized to use DVDMS plugin for this facility")
 
     def _authorize_manage_facility(self, facility):
-        if not AuthorizationController.call(
-            "can_manage_dvdms_integration", self.request.user, facility
-        ):
-            raise PermissionDenied(
-                "You are not authorized to manage DVDMS plugin for this facility"
-            )
+        if not AuthorizationController.call("can_manage_dvdms_integration", self.request.user, facility):
+            raise PermissionDenied("You are not authorized to manage DVDMS plugin for this facility")
 
     def get_queryset(self):
         facility = self.get_facility()
         self._authorize_facility(facility)
-        return (
-            DVDMSInstitute.objects
-            .filter(facility=facility, deleted=False)
-            .select_related("facility", "created_by", "updated_by")
+        return DVDMSInstitute.objects.filter(facility=facility, deleted=False).select_related(
+            "facility", "created_by", "updated_by"
         )
 
     def list(self, request, *args, **kwargs):
@@ -86,20 +76,31 @@ class DVDMSInstituteViewSet(EMRBaseViewSet):
 
         spec = DVDMSInstituteCreateSpec(**request.data)
 
-        institute = DVDMSInstitute.objects.create(
-            facility=facility,
-            eaushadhi_institute_id=spec.eaushadhi_institute_id,
-            eaushadhi_institute_name=spec.eaushadhi_institute_name,
-            eaushadhi_user_ref_id=spec.eaushadhi_user_ref_id,
-            schema_version=spec.schema_version,
-            meta=spec.meta or {},
-            created_by=request.user,
-            updated_by=request.user,
-        )
+        if DVDMSInstitute.objects.filter(eaushadhi_institute_id=spec.eaushadhi_institute_id).exists():
+            return Response(
+                {"error": "eaushadhi_institute_id is already in use by another facility"},
+                status=status.HTTP_409_CONFLICT,
+            )
 
-        institute = DVDMSInstitute.objects.select_related(
-            "facility", "created_by", "updated_by"
-        ).get(pk=institute.pk)
+        try:
+            with transaction.atomic():
+                institute = DVDMSInstitute.objects.create(
+                    facility=facility,
+                    eaushadhi_institute_id=spec.eaushadhi_institute_id,
+                    eaushadhi_institute_name=spec.eaushadhi_institute_name,
+                    eaushadhi_user_ref_id=spec.eaushadhi_user_ref_id,
+                    schema_version=spec.schema_version,
+                    meta=spec.meta or {},
+                    created_by=request.user,
+                    updated_by=request.user,
+                )
+        except IntegrityError:
+            return Response(
+                {"error": "DVDMS institute mapping already exists for this facility"},
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        institute = DVDMSInstitute.objects.select_related("facility", "created_by", "updated_by").get(pk=institute.pk)
 
         result = DVDMSInstituteListSpec.serialize(institute)
         return Response(result.to_json(), status=status.HTTP_201_CREATED)
@@ -122,6 +123,15 @@ class DVDMSInstituteViewSet(EMRBaseViewSet):
         updated = False
 
         if spec.eaushadhi_institute_id is not None:
+            if (
+                DVDMSInstitute.objects.filter(eaushadhi_institute_id=spec.eaushadhi_institute_id)
+                .exclude(pk=instance.pk)
+                .exists()
+            ):
+                return Response(
+                    {"error": "eaushadhi_institute_id is already in use by another facility"},
+                    status=status.HTTP_409_CONFLICT,
+                )
             instance.eaushadhi_institute_id = spec.eaushadhi_institute_id
             updated = True
 
@@ -143,11 +153,16 @@ class DVDMSInstituteViewSet(EMRBaseViewSet):
 
         if updated:
             instance.updated_by = request.user
-            instance.save()
+            try:
+                with transaction.atomic():
+                    instance.save()
+            except IntegrityError:
+                return Response(
+                    {"error": "eaushadhi_institute_id is already in use by another facility"},
+                    status=status.HTTP_409_CONFLICT,
+                )
 
-        instance = DVDMSInstitute.objects.select_related(
-            "facility", "created_by", "updated_by"
-        ).get(pk=instance.pk)
+        instance = DVDMSInstitute.objects.select_related("facility", "created_by", "updated_by").get(pk=instance.pk)
 
         result = DVDMSInstituteListSpec.serialize(instance)
         return Response(result.to_json(), status=status.HTTP_200_OK)
