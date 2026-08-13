@@ -81,7 +81,9 @@ class DVDMSLookupViewSet(ViewSet):
                 )
             cache.set(DVDMS_UNITS_CACHE_KEY, units, settings.DVDMS_LOOKUP_CACHE_TTL)
 
-        return Response(units)
+        results = [unit for unit in units if str(unit.get("gnumSeatid")) == institute.eaushadhi_user_ref_id]
+
+        return Response(results)
 
     def subgroups(self, request, *args, **kwargs):
         group_id = request.query_params.get("group_id")
