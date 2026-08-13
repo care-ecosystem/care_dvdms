@@ -8,9 +8,8 @@ care_dvdms_plugin = Plug(
     package_name="/app/care_dvdms",       # local dev path; use git+https://... in production
     version="",                               # keep empty for local dev; "@main" for production
     configs={
-        # TODO: add your plugin settings here
-        # "CARE_DVDMS_API_KEY": "your-api-key",
-        # "CARE_DVDMS_API_ENDPOINT": "https://api.example.com",
+        "DVDMS_API_ENDPOINT": "https://api.example.com",
+        "DVDMS_AUTH_TOKEN": "your-auth-token",
     },
 )
 
