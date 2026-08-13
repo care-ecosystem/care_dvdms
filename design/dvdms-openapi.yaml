@@ -1819,8 +1819,13 @@ paths:
               $ref: '#/components/schemas/ProductMappingCreate'
             example:
               eaushadhi_drug_details:
-                drug_id: "D00251"
-                drug_name: "Ofloxacin Tablet IP 400 mg 1x1"
+                id: "10002270"
+                name: "Paracetamol 500mg tablet"
+                brand_id: "10103406"
+                group_id: "101047"
+                sub_group_id: "0"
+                unit_id: "630001"
+                drug_category: "10"
               product_knowledge_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
       responses:
         '201':
@@ -1832,8 +1837,13 @@ paths:
               example:
                 id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
                 eaushadhi_drug_details:
-                  drug_id: "D00251"
-                  drug_name: "Ofloxacin Tablet IP 400 mg 1x1"
+                  id: "10002270"
+                  name: "Paracetamol 500mg tablet"
+                  brand_id: "10103406"
+                  group_id: "101047"
+                  sub_group_id: "0"
+                  unit_id: "630001"
+                  drug_category: "10"
                 product_knowledge_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
                 usage_count: 0
                 created_by:
@@ -1932,8 +1942,13 @@ paths:
                 results:
                   - id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
                     eaushadhi_drug_details:
-                      drug_id: "D00251"
-                      drug_name: "Ofloxacin Tablet IP 400 mg 1x1"
+                      id: "10002270"
+                      name: "Paracetamol 500mg tablet"
+                      brand_id: "10103406"
+                      group_id: "101047"
+                      sub_group_id: "0"
+                      unit_id: "630001"
+                      drug_category: "10"
                     product_knowledge_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
                     usage_count: 15
                     created_by:
@@ -1947,8 +1962,13 @@ paths:
                     modified_date: "2026-08-13T08:55:23.802Z"
                   - id: "4fa85f64-5717-4562-b3fc-2c963f66afa7"
                     eaushadhi_drug_details:
-                      drug_id: "D00252"
-                      drug_name: "Paracetamol Tablet IP 500 mg 10x10"
+                      id: "10002271"
+                      name: "Amoxicillin 250mg capsule"
+                      brand_id: "10103407"
+                      group_id: "101048"
+                      sub_group_id: "0"
+                      unit_id: "630001"
+                      drug_category: "10"
                     product_knowledge_id: "4fa85f64-5717-4562-b3fc-2c963f66afa7"
                     usage_count: 0
                     created_by:
@@ -1996,8 +2016,13 @@ paths:
               $ref: '#/components/schemas/ProductMappingUpdate'
             example:
               eaushadhi_drug_details:
-                drug_id: "D00251"
-                drug_name: "Ofloxacin Tablet IP 400 mg 1x1 (Updated)"
+                id: "10002270"
+                name: "Paracetamol 500mg tablet (Updated)"
+                brand_id: "10103406"
+                group_id: "101047"
+                sub_group_id: "0"
+                unit_id: "630001"
+                drug_category: "10"
               product_knowledge_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
       responses:
         '200':
@@ -2009,8 +2034,13 @@ paths:
               example:
                 id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
                 eaushadhi_drug_details:
-                  drug_id: "D00251"
-                  drug_name: "Ofloxacin Tablet IP 400 mg 1x1 (Updated)"
+                  id: "10002270"
+                  name: "Paracetamol 500mg tablet (Updated)"
+                  brand_id: "10103406"
+                  group_id: "101047"
+                  sub_group_id: "0"
+                  unit_id: "630001"
+                  drug_category: "10"
                 product_knowledge_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
                 usage_count: 15
                 created_by:
@@ -2033,6 +2063,146 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           description: Product mapping not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /institute/{institute_id}/record_order/{record_order_id}/product_mappings/:
+    get:
+      tags:
+        - Product Mapping
+      summary: Get product mappings for record order items
+      description: |
+        Retrieve supply request items (RecordItemOrders) for a record order along with their
+        corresponding product mappings if available. This is useful for mapping DVDMS drugs
+        to CARE products at the order level.
+      operationId: getRecordOrderProductMappings
+      parameters:
+        - name: institute_id
+          in: path
+          required: true
+          description: Institute UUID
+          schema:
+            type: string
+            format: uuid
+        - name: record_order_id
+          in: path
+          required: true
+          description: Record Order UUID
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          required: false
+          description: Number of results to return per page
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          required: false
+          description: The initial index from which to return the results
+          schema:
+            type: integer
+            default: 0
+        - name: ordering
+          in: query
+          required: false
+          description: "Order by field (e.g., -created_date, drug_name). Prefix with '-' for descending order."
+          schema:
+            type: string
+            example: "-created_date"
+      responses:
+        '200':
+          description: Record order items with product mappings retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - count
+                  - results
+                properties:
+                  count:
+                    type: integer
+                    description: Total number of items
+                    example: 2
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        supply_request:
+                          type: object
+                          description: The supply request summary
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                            item:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  format: uuid
+                                status:
+                                  type: string
+                            quantity:
+                              type: string
+                            status:
+                              type: string
+                        product_mapping:
+                          allOf:
+                            - $ref: '#/components/schemas/ProductMapping'
+                          nullable: true
+                          description: The product mapping for this drug, if available
+              example:
+                count: 2
+                results:
+                  - supply_request:
+                      id: "2e1cb879-8101-4160-b324-bc97e07c35f3"
+                      item:
+                        id: "566db5e4-0533-4d7c-8deb-15a3d58c8d53"
+                        status: "active"
+                      quantity: "100.000000"
+                      status: "active"
+                    product_mapping:
+                      id: "mapping-uuid-1"
+                      eaushadhi_drug_details:
+                        id: "10002270"
+                        name: "Paracetamol 500mg tablet"
+                        brand_id: "10103406"
+                        group_id: "101047"
+                        sub_group_id: "0"
+                        unit_id: "630001"
+                        drug_category: "10"
+                      product_knowledge_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                      usage_count: 5
+                      created_by:
+                        id: "uuid"
+                        username: "admin"
+                        first_name: "Admin"
+                        last_name: "User"
+                        email: "admin@example.com"
+                      updated_by: null
+                      created_date: "2026-08-13T08:55:23.802Z"
+                      modified_date: "2026-08-13T08:55:23.802Z"
+                  - supply_request:
+                      id: "3f2dc98a-9212-5271-c435-cd08f18d46g4"
+                      item:
+                        id: "677ec6f5-1644-5e8d-9efc-26b4e69d9e64"
+                        status: "active"
+                      quantity: "50.000000"
+                      status: "active"
+                    product_mapping: null
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Record order not found
           content:
             application/json:
               schema:
@@ -4497,17 +4667,37 @@ components:
     EaushadhiDrugDetails:
       type: object
       required:
-        - drug_id
-        - drug_name
+        - id
+        - name
       properties:
-        drug_id:
+        id:
           type: string
           description: eAushadhi/DVDMS drug ID
-          example: "D00251"
-        drug_name:
+          example: "10002270"
+        name:
           type: string
           description: eAushadhi/DVDMS drug name
-          example: "Ofloxacin Tablet IP 400 mg 1x1"
+          example: "Paracetamol 500mg tablet"
+        brand_id:
+          type: string
+          description: Brand ID
+          example: "10103406"
+        group_id:
+          type: string
+          description: Drug group ID
+          example: "101047"
+        sub_group_id:
+          type: string
+          description: Drug sub-group ID
+          example: "0"
+        unit_id:
+          type: string
+          description: Unit ID
+          example: "630001"
+        drug_category:
+          type: string
+          description: Drug category
+          example: "10"
 
     ProductMappingCreate:
       type: object
