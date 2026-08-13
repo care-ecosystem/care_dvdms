@@ -95,6 +95,7 @@ DEFAULTS: dict[str, Any] = {
     "DVDMS_AUTH_TOKEN_TYPE": "Basic",
     "DVDMS_API_CONNECT_TIMEOUT": 10,
     "DVDMS_API_READ_TIMEOUT": 30,
+    "DVDMS_LOOKUP_CACHE_TTL": 86400,
 }
 
 plugin_settings = PluginSettings(

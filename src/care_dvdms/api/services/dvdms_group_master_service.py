@@ -24,4 +24,10 @@ class DVDMSGroupMasterService:
         response = requests.get(url, headers=headers, timeout=timeout)
         response.raise_for_status()
 
-        return response.json()
+        body = response.json()
+        if body.get("status") != 1:
+            raise requests.exceptions.RequestException(
+                body.get("message", "DVDMS group fetch failed")
+            )
+
+        return body.get("data", [])
