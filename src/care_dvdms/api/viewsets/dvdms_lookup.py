@@ -9,15 +9,16 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
-from care_dvdms.api.services.dvdms_group_master_service import DVDMSGroupMasterService
-from care_dvdms.api.services.dvdms_subgroup_master_service import DVDMSSubGroupMasterService
+from care_dvdms.api.services.constants import (
+    DVDMS_GROUPS_CACHE_KEY,
+    DVDMS_SUBGROUPS_CACHE_KEY,
+    DVDMS_UNITS_CACHE_KEY,
+)
+from care_dvdms.api.services.dvdms_master_data_services import fetch_groups, fetch_subgroups, fetch_units
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
 from care_dvdms.settings import plugin_settings as settings
 
 logger = logging.getLogger(__name__)
-
-GROUPS_CACHE_KEY = "dvdms:lookup:groups"
-SUBGROUPS_CACHE_KEY = "dvdms:lookup:subgroups"
 
 
 class DVDMSLookupViewSet(ViewSet):
@@ -35,10 +36,10 @@ class DVDMSLookupViewSet(ViewSet):
         institute = self.get_institute()
         self.check_permissions_for_institute(request, institute)
 
-        groups = cache.get(GROUPS_CACHE_KEY)
+        groups = cache.get(DVDMS_GROUPS_CACHE_KEY)
         if groups is None:
             try:
-                groups = DVDMSGroupMasterService.fetch_groups()
+                groups = fetch_groups()
             except requests.exceptions.RequestException:
                 return Response(
                     {"error": "Failed to fetch groups from DVDMS", "code": "DVDMS_API_ERROR"},
@@ -49,7 +50,7 @@ class DVDMSLookupViewSet(ViewSet):
                     {"error": "Internal server error occurred", "code": "INTERNAL_ERROR"},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
-            cache.set(GROUPS_CACHE_KEY, groups, settings.DVDMS_LOOKUP_CACHE_TTL)
+            cache.set(DVDMS_GROUPS_CACHE_KEY, groups, settings.DVDMS_LOOKUP_CACHE_TTL)
 
         results = [
             group
@@ -58,7 +59,36 @@ class DVDMSLookupViewSet(ViewSet):
             and str(group.get("gnumSeatid")) == institute.eaushadhi_user_ref_id
         ]
 
-        return Response({"count": len(results), "results": results})
+        return Response(results)
+
+    def units(self, request, *args, **kwargs):
+        institute = self.get_institute()
+        self.check_permissions_for_institute(request, institute)
+
+        units = cache.get(DVDMS_UNITS_CACHE_KEY)
+        if units is None:
+            try:
+                units = fetch_units()
+            except requests.exceptions.RequestException:
+                return Response(
+                    {"error": "Failed to fetch units from DVDMS", "code": "DVDMS_API_ERROR"},
+                    status=status.HTTP_502_BAD_GATEWAY,
+                )
+            except Exception:
+                return Response(
+                    {"error": "Internal server error occurred", "code": "INTERNAL_ERROR"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+            cache.set(DVDMS_UNITS_CACHE_KEY, units, settings.DVDMS_LOOKUP_CACHE_TTL)
+
+        results = [
+            unit
+            for unit in units
+            if str(unit.get("gnumHospitalCode")) == institute.eaushadhi_institute_id
+            and str(unit.get("gnumSeatid")) == institute.eaushadhi_user_ref_id
+        ]
+
+        return Response(results)
 
     def subgroups(self, request, *args, **kwargs):
         group_id = request.query_params.get("group_id")
@@ -71,10 +101,10 @@ class DVDMSLookupViewSet(ViewSet):
         institute = self.get_institute()
         self.check_permissions_for_institute(request, institute)
 
-        subgroups = cache.get(SUBGROUPS_CACHE_KEY)
+        subgroups = cache.get(DVDMS_SUBGROUPS_CACHE_KEY)
         if subgroups is None:
             try:
-                subgroups = DVDMSSubGroupMasterService.fetch_subgroups()
+                subgroups = fetch_subgroups()
             except requests.exceptions.RequestException:
                 return Response(
                     {"error": "Failed to fetch subgroups from DVDMS", "code": "DVDMS_API_ERROR"},
@@ -85,7 +115,7 @@ class DVDMSLookupViewSet(ViewSet):
                     {"error": "Internal server error occurred", "code": "INTERNAL_ERROR"},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
-            cache.set(SUBGROUPS_CACHE_KEY, subgroups, settings.DVDMS_LOOKUP_CACHE_TTL)
+            cache.set(DVDMS_SUBGROUPS_CACHE_KEY, subgroups, settings.DVDMS_LOOKUP_CACHE_TTL)
 
         results = [
             subgroup
@@ -95,4 +125,4 @@ class DVDMSLookupViewSet(ViewSet):
             and str(subgroup.get("hstnumGroupId")) == str(group_id)
         ]
 
-        return Response({"count": len(results), "results": results})
+        return Response(results)
