@@ -10,11 +10,18 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
 from care_dvdms.api.services.constants import (
+    DVDMS_DRUG_ITEM_CAT_NO,
+    DVDMS_DRUGS_CACHE_KEY,
     DVDMS_GROUPS_CACHE_KEY,
     DVDMS_SUBGROUPS_CACHE_KEY,
     DVDMS_UNITS_CACHE_KEY,
 )
-from care_dvdms.api.services.dvdms_master_data_services import fetch_groups, fetch_subgroups, fetch_units
+from care_dvdms.api.services.dvdms_master_data_services import (
+    fetch_drugs,
+    fetch_groups,
+    fetch_subgroups,
+    fetch_units,
+)
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
 from care_dvdms.settings import plugin_settings as settings
 
@@ -86,6 +93,52 @@ class DVDMSLookupViewSet(ViewSet):
             for unit in units
             if str(unit.get("gnumHospitalCode")) == institute.eaushadhi_institute_id
             and str(unit.get("gnumSeatid")) == institute.eaushadhi_user_ref_id
+        ]
+
+        return Response(results)
+
+    def drugs(self, request, *args, **kwargs):
+        hstnum_group_id = request.query_params.get("hstnum_group_id")
+        hstnum_subgroup_id = request.query_params.get("hstnum_subgroup_id")
+        if not hstnum_group_id or not hstnum_subgroup_id:
+            return Response(
+                {
+                    "error": "hstnum_group_id and hstnum_subgroup_id query parameters are required",
+                    "code": "MISSING_PARAMETER",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        item_name = request.query_params.get("hststr_item_name")
+
+        institute = self.get_institute()
+        self.check_permissions_for_institute(request, institute)
+
+        drugs = cache.get(DVDMS_DRUGS_CACHE_KEY)
+        if drugs is None:
+            try:
+                drugs = fetch_drugs()
+            except requests.exceptions.RequestException:
+                return Response(
+                    {"error": "Failed to fetch drugs from DVDMS", "code": "DVDMS_API_ERROR"},
+                    status=status.HTTP_502_BAD_GATEWAY,
+                )
+            except Exception:
+                return Response(
+                    {"error": "Internal server error occurred", "code": "INTERNAL_ERROR"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+            cache.set(DVDMS_DRUGS_CACHE_KEY, drugs, settings.DVDMS_LOOKUP_CACHE_TTL)
+
+        results = [
+            drug
+            for drug in drugs
+            if str(drug.get("gnum_hospital_code")) == institute.eaushadhi_institute_id
+            and str(drug.get("gnum_seatid")) == institute.eaushadhi_user_ref_id
+            and str(drug.get("sstnum_item_cat_no")) == DVDMS_DRUG_ITEM_CAT_NO
+            and str(drug.get("hstnum_group_id")) == hstnum_group_id
+            and str(drug.get("hstnum_subgroup_id")) == hstnum_subgroup_id
+            and (not item_name or item_name.lower() in str(drug.get("hststr_item_name", "")).lower())
         ]
 
         return Response(results)
