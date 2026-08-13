@@ -2,7 +2,7 @@ from django.shortcuts import HttpResponse
 from django.urls import path, re_path
 
 from care_dvdms.api.viewsets.dvdms_institute import DVDMSInstituteViewSet
-from care_dvdms.api.viewsets.dvdms_lookup import DVDMSGroupLookupViewSet
+from care_dvdms.api.viewsets.dvdms_lookup import DVDMSLookupViewSet
 from care_dvdms.api.viewsets.dvdms_supplier import DVDMSSupplierViewSet
 
 
@@ -38,7 +38,12 @@ urlpatterns = [
     ),
     re_path(
         r"^institute/(?P<institute_id>[^/.]+)/lookup/groups/$",
-        DVDMSGroupLookupViewSet.as_view({"get": "list"}),
+        DVDMSLookupViewSet.as_view({"get": "groups"}),
         name="dvdms-lookup-groups",
+    ),
+    re_path(
+        r"^institute/(?P<institute_id>[^/.]+)/lookup/subgroups/$",
+        DVDMSLookupViewSet.as_view({"get": "subgroups"}),
+        name="dvdms-lookup-subgroups",
     ),
 ]
