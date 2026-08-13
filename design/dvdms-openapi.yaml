@@ -89,8 +89,8 @@ paths:
                   last_name: "User"
                   email: "admin@example.com"
                 updated_by: null
-                created_date: "2026-05-19 19:29:35.868682+05:30"
-                modified_date: "2026-05-19 19:29:35.868682+05:30"
+                created_date: "2026-08-13T08:55:23.802Z"
+                modified_date: "2026-08-13T08:55:23.802Z"
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -145,8 +145,8 @@ paths:
                   last_name: "User"
                   email: "admin@example.com"
                 updated_by: null
-                created_date: "2026-05-19 19:29:35.868682+05:30"
-                modified_date: "2026-05-19 19:29:35.868682+05:30"
+                created_date: "2026-08-13T08:55:23.802Z"
+                modified_date: "2026-08-13T08:55:23.802Z"
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -198,7 +198,7 @@ paths:
                   eaushadhi_user_ref_id: "14464"
                   schema_version: "2.0"
                   meta:
-                    last_sync: "2026-05-20T10:30:00Z"
+                    last_sync: "2026-08-13T08:55:23.802Z"
                     notes: "Updated after migration"
       responses:
         '200':
@@ -215,7 +215,7 @@ paths:
                 eaushadhi_institute_name: "Ranchi DH"
                 schema_version: "2.0"
                 meta:
-                  last_sync: "2026-05-20T10:30:00Z"
+                  last_sync: "2026-08-13T08:55:23.802Z"
                   notes: "Updated after migration"
                 created_by:
                   id: "uuid"
@@ -229,8 +229,8 @@ paths:
                   first_name: "Update"
                   last_name: "User"
                   email: "updater@example.com"
-                created_date: "2026-05-19 19:29:35.868682+05:30"
-                modified_date: "2026-05-20 10:35:22.123456+05:30"
+                created_date: "2026-08-13T08:55:23.802Z"
+                modified_date: "2026-08-13T09:00:15.123Z"
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -308,8 +308,8 @@ paths:
                   last_name: "User"
                   email: "admin@example.com"
                 updated_by: null
-                created_date: "2026-05-19 19:29:35.868682+05:30"
-                modified_date: "2026-05-19 19:29:35.868682+05:30"
+                created_date: "2026-08-13T08:55:23.802Z"
+                modified_date: "2026-08-13T08:55:23.802Z"
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -350,6 +350,27 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: limit
+          in: query
+          required: false
+          description: Number of results to return per page
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          required: false
+          description: The initial index from which to return the results
+          schema:
+            type: integer
+            default: 0
+        - name: ordering
+          in: query
+          required: false
+          description: "Order by field (e.g., -created_date, supplier). Prefix with '-' for descending order."
+          schema:
+            type: string
+            example: "-created_date"
       responses:
         '200':
           description: List of supplier mappings
@@ -375,7 +396,7 @@ paths:
                     eaushadhi_warehouse_id: "99901000"
                     eaushadhi_warehouse_name: "Bokaro_DWH"
                     is_default: true
-                    created_date: "2026-05-19 19:29:35.868682+05:30"
+                    created_date: "2026-08-13T08:55:23.802Z"
                   - id: "uuid2"
                     supplier:
                       id: "b1e7c2a4-9d8f-4e6b-a3c1-7f2d8e5b9c34"
@@ -384,7 +405,7 @@ paths:
                     eaushadhi_warehouse_id: "99901001"
                     eaushadhi_warehouse_name: "Ranchi_DWH"
                     is_default: false
-                    created_date: "2026-05-19 19:29:35.868682+05:30"
+                    created_date: "2026-08-13T08:55:23.802Z"
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -505,8 +526,8 @@ paths:
                   last_name: "User"
                   email: "admin@example.com"
                 updated_by: null
-                created_date: "2026-05-19 19:29:35.868682+05:30"
-                modified_date: "2026-05-19 19:29:35.868682+05:30"
+                created_date: "2026-08-13T08:55:23.802Z"
+                modified_date: "2026-08-13T08:55:23.802Z"
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -547,6 +568,27 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: limit
+          in: query
+          required: false
+          description: Number of results to return per page
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          required: false
+          description: The initial index from which to return the results
+          schema:
+            type: integer
+            default: 0
+        - name: ordering
+          in: query
+          required: false
+          description: "Order by field (e.g., -created_date, store). Prefix with '-' for descending order."
+          schema:
+            type: string
+            example: "-created_date"
       responses:
         '200':
           description: List of store mappings
@@ -572,7 +614,7 @@ paths:
                     eaushadhi_store_id: "99901002"
                     eaushadhi_store_name: "CHC Pharmacy"
                     is_default: true
-                    created_date: "2026-05-19 19:29:35.868682+05:30"
+                    created_date: "2026-08-13T08:55:23.802Z"
                   - id: "uuid2"
                     store:
                       id: "c2f8d3b5-ae90-4f7c-b401-8e3c9d6f1b25"
@@ -581,7 +623,7 @@ paths:
                     eaushadhi_store_id: "99901003"
                     eaushadhi_store_name: "OPD Pharmacy"
                     is_default: false
-                    created_date: "2026-05-19 19:29:35.868682+05:30"
+                    created_date: "2026-08-13T08:55:23.802Z"
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -1105,8 +1147,8 @@ paths:
                     last_name: ""
                     email: "admin@example.com"
                   updated_by: null
-                  created_date: "2026-08-11T10:05:48.155327Z"
-                  modified_date: "2026-08-11T10:05:48.155343Z"
+                  created_date: "2026-08-13T08:55:23.802Z"
+                  modified_date: "2026-08-13T08:55:23.802Z"
                 institute_store:
                   id: "c2f8d3b5-ae90-4f7c-b401-8e3c9d6f1b25"
                   eaushadhi_store_id: "99901002"
@@ -1131,8 +1173,8 @@ paths:
                   last_name: "User"
                   email: "admin@example.com"
                 updated_by: null
-                created_date: "2026-05-19 19:29:35.868682+05:30"
-                modified_date: "2026-05-19 19:29:35.868682+05:30"
+                created_date: "2026-08-13T08:55:23.802Z"
+                modified_date: "2026-08-13T08:55:23.802Z"
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -1252,8 +1294,8 @@ paths:
                       last_name: "User"
                       email: "admin@example.com"
                     updated_by: null
-                    created_date: "2026-05-19 19:29:35.868682+05:30"
-                    modified_date: "2026-05-19 19:29:35.868682+05:30"
+                    created_date: "2026-08-13T08:55:23.802Z"
+                    modified_date: "2026-08-13T08:55:23.802Z"
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -1346,8 +1388,8 @@ paths:
                   first_name: "Manager"
                   last_name: "User"
                   email: "manager@example.com"
-                created_date: "2026-05-19 19:29:35.868682+05:30"
-                modified_date: "2026-05-19 19:35:00.000000+05:30"
+                created_date: "2026-08-13T08:55:23.802Z"
+                modified_date: "2026-08-13T09:05:00.000Z"
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -1366,9 +1408,9 @@ paths:
     get:
       tags:
         - DVDMS Outwards Record
-      summary: Get DVDMS outwards record for a record order
+      summary: Get DVDMS outwards records for a record order
       description: |
-        Retrieve the outwards record with sync status and details for a specific record order.
+        Retrieve the outwards records with sync status and details for a specific record order. Returns a paginated list.
       operationId: getOutwardsRecord
       parameters:
         - name: institute_id
@@ -1385,28 +1427,63 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: limit
+          in: query
+          required: false
+          description: Number of results to return per page
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          required: false
+          description: The initial index from which to return the results
+          schema:
+            type: integer
+            default: 0
+        - name: ordering
+          in: query
+          required: false
+          description: "Order by field (e.g., -created_date, eaushadhi_indent_no). Prefix with '-' for descending order."
+          schema:
+            type: string
+            example: "-created_date"
       responses:
         '200':
-          description: Outwards record retrieved successfully
+          description: Outwards records retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DvdmsOutwardsRecord'
+                type: object
+                required:
+                  - count
+                  - results
+                properties:
+                  count:
+                    type: integer
+                    description: Total number of outwards records
+                    example: 1
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DvdmsOutwardsRecord'
               example:
-                id: "outwards-uuid-1"
-                eaushadhi_indent_no: "IND-2026-001234"
-                status: "created"
-                eaushadhi_indent_status: "partially_issued"
-                created_by:
-                  id: "uuid"
-                  username: "admin"
-                  first_name: "Admin"
-                  last_name: "User"
-                  email: "admin@example.com"
-                updated_by: null
-                created_date: "2026-05-19 19:29:35.868682+05:30"
-                modified_date: "2026-05-21 09:05:00.000000+05:30"
-                sync_log_id: "sync-log-123"
+                count: 1
+                results:
+                  - id: "outwards-uuid-1"
+                    eaushadhi_indent_no: "IND-2026-001234"
+                    status: "created"
+                    eaushadhi_indent_status: "partially_issued"
+                    created_by:
+                      id: "uuid"
+                      username: "admin"
+                      first_name: "Admin"
+                      last_name: "User"
+                      email: "admin@example.com"
+                    updated_by: null
+                    created_date: "2026-08-13T08:55:23.802Z"
+                    modified_date: "2026-08-13T09:10:00.000Z"
+                    sync_log_id: "sync-log-123"
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -1467,8 +1544,8 @@ paths:
                   first_name: "Admin"
                   last_name: "User"
                   email: "admin@example.com"
-                created_date: "2026-05-19 19:29:35.868682+05:30"
-                modified_date: "2026-05-21 09:05:00.000000+05:30"
+                created_date: "2026-08-13T08:55:23.802Z"
+                modified_date: "2026-08-13T09:10:00.000Z"
                 sync_log_id: "sync-log-123"
         '400':
           description: Bad request (e.g., outwards record not found)
@@ -1526,7 +1603,7 @@ paths:
               example:
                 id: "issue-uuid-1"
                 eaushadhi_issue_no: "ISS-2026-005678"
-                created_at: "2026-05-20 10:30:00.000000+05:30"
+                created_at: "2026-08-13T08:55:23.802Z"
                 eaushadhi_issue_status: "draft"
                 outward_record: "outwards-uuid-1"
                 eaushadhi_indent_no: "IND-2026-001234"
@@ -1568,6 +1645,13 @@ paths:
             type: integer
             default: 0
             example: 0
+        - name: ordering
+          in: query
+          required: false
+          description: "Order by field (e.g., -created_at, eaushadhi_issue_no). Prefix with '-' for descending order."
+          schema:
+            type: string
+            example: "-created_at"
       responses:
         '200':
           description: Inwards records retrieved successfully
@@ -1592,14 +1676,14 @@ paths:
                 results:
                   - id: "issue-uuid-1"
                     eaushadhi_issue_no: "ISS-2026-005678"
-                    created_at: "2026-05-20 10:30:00.000000+05:30"
+                    created_at: "2026-08-13T08:55:23.802Z"
                     eaushadhi_issue_status: "received"
                     outward_record: "outwards-uuid-1"
                     eaushadhi_indent_no: "IND-2026-001234"
                     sync_log_id: "sync-log-456"
                   - id: "issue-uuid-2"
                     eaushadhi_issue_no: "ISS-2026-005679"
-                    created_at: "2026-05-20 14:15:00.000000+05:30"
+                    created_at: "2026-08-13T09:15:00.000Z"
                     eaushadhi_issue_status: "pending"
                     outward_record: "outwards-uuid-1"
                     eaushadhi_indent_no: "IND-2026-001234"
@@ -1657,7 +1741,7 @@ paths:
               example:
                 id: "issue-uuid-1"
                 eaushadhi_issue_no: "ISS-2026-005678"
-                created_at: "2026-05-20 10:30:00.000000+05:30"
+                created_at: "2026-08-13T08:55:23.802Z"
                 eaushadhi_issue_status: "received"
                 outward_record: "outwards-uuid-1"
                 eaushadhi_indent_no: "IND-2026-001234"
@@ -1679,8 +1763,8 @@ paths:
                       last_name: "User"
                       email: "admin@example.com"
                     updated_by: null
-                    created_date: "2026-05-20 11:00:00.000000+05:30"
-                    modified_date: "2026-05-20 11:30:00.000000+05:30"
+                    created_date: "2026-08-13T08:56:00.000Z"
+                    modified_date: "2026-08-13T08:57:00.000Z"
                   - id: "inward-item-uuid-2"
                     record_order_item: "record-item-order-uuid-2"
                     drug_id: "10002271"
@@ -1697,8 +1781,8 @@ paths:
                       last_name: "User"
                       email: "admin@example.com"
                     updated_by: null
-                    created_date: "2026-05-20 11:15:00.000000+05:30"
-                    modified_date: "2026-05-20 11:45:00.000000+05:30"
+                    created_date: "2026-08-13T08:58:00.000Z"
+                    modified_date: "2026-08-13T08:59:00.000Z"
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -1759,8 +1843,8 @@ paths:
                   last_name: "User"
                   email: "admin@example.com"
                 updated_by: null
-                created_date: "2026-05-19 19:29:35.868682+05:30"
-                modified_date: "2026-05-19 19:29:35.868682+05:30"
+                created_date: "2026-08-13T08:55:23.802Z"
+                modified_date: "2026-08-13T08:55:23.802Z"
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -1817,6 +1901,13 @@ paths:
             type: integer
             default: 0
             example: 0
+        - name: ordering
+          in: query
+          required: false
+          description: "Order by field (e.g., -created_date, usage_count). Prefix with '-' for descending order."
+          schema:
+            type: string
+            example: "-created_date"
       responses:
         '200':
           description: Product mappings retrieved successfully
@@ -1852,8 +1943,8 @@ paths:
                       last_name: "User"
                       email: "admin@example.com"
                     updated_by: null
-                    created_date: "2026-05-19 19:29:35.868682+05:30"
-                    modified_date: "2026-05-19 19:29:35.868682+05:30"
+                    created_date: "2026-08-13T08:55:23.802Z"
+                    modified_date: "2026-08-13T08:55:23.802Z"
                   - id: "4fa85f64-5717-4562-b3fc-2c963f66afa7"
                     eaushadhi_drug_details:
                       drug_id: "D00252"
@@ -1867,8 +1958,8 @@ paths:
                       last_name: "User"
                       email: "admin@example.com"
                     updated_by: null
-                    created_date: "2026-05-20 10:00:00.000000+05:30"
-                    modified_date: "2026-05-20 10:00:00.000000+05:30"
+                    created_date: "2026-08-13T09:01:00.000Z"
+                    modified_date: "2026-08-13T09:01:00.000Z"
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -1934,8 +2025,8 @@ paths:
                   first_name: "Admin"
                   last_name: "User"
                   email: "admin@example.com"
-                created_date: "2026-05-19 19:29:35.868682+05:30"
-                modified_date: "2026-05-19 20:30:00.000000+05:30"
+                created_date: "2026-08-13T08:55:23.802Z"
+                modified_date: "2026-08-13T09:02:00.000Z"
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -1957,7 +2048,7 @@ paths:
       summary: Create a record delivery
       description: |
         Link an inward_record to a CARE delivery_order. Each delivery_order belongs
-        to exactly one inward_record (UNIQUE on delivery_order_id), but an inward_record
+        to exactly one inward_record (UNIQUE on delivery_order), but an inward_record
         may have multiple record_deliveries over time (partial imports, supplier splits).
       operationId: createRecordDelivery
       parameters:
@@ -1982,8 +2073,9 @@ paths:
             schema:
               $ref: '#/components/schemas/RecordDeliveryCreate'
             example:
-              facility_id: "f1a2b3c4-d5e6-7890-abcd-ef1234567890"
-              delivery_order_id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
+              delivery_order: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
+              record_order: "4df37546-7b7b-4e5b-b135-9179838a6962"
+              status: "draft"
       responses:
         '201':
           description: Record delivery created
@@ -1993,8 +2085,22 @@ paths:
                 $ref: '#/components/schemas/RecordDelivery'
               example:
                 id: "11223344-5566-7788-99aa-bbccddeeff00"
-                facility_id: "f1a2b3c4-d5e6-7890-abcd-ef1234567890"
-                delivery_order_id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
+                delivery_order:
+                  id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
+                  name: "Delivery Order #001"
+                  destination: "Main Store"
+                  supplier: "Central Warehouse"
+                record_order:
+                  id: "4df37546-7b7b-4e5b-b135-9179838a6962"
+                  name: "eaushadhi"
+                  category: "central"
+                  intent: "order"
+                  priority: "routine"
+                  reason: "patient_care"
+                  status: "draft"
+                  created_date: "2026-08-13T08:55:23.802Z"
+                  modified_date: "2026-08-13T08:55:23.802Z"
+                status: "draft"
                 created_by:
                   id: "uuid"
                   username: "admin"
@@ -2002,8 +2108,8 @@ paths:
                   last_name: "User"
                   email: "admin@example.com"
                 updated_by: null
-                created_date: "2026-05-19 19:29:35.868682+05:30"
-                modified_date: "2026-05-19 19:29:35.868682+05:30"
+                created_date: "2026-08-13T08:55:23.802Z"
+                modified_date: "2026-08-13T08:55:23.802Z"
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -2015,7 +2121,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                error: "delivery_order_id is already linked to an inward_record"
+                error: "delivery_order is already linked to an inward_record"
                 code: "DELIVERY_ORDER_ALREADY_LINKED"
         '500':
           $ref: '#/components/responses/InternalServerError'
@@ -2042,7 +2148,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: delivery_order_id
+        - name: delivery_order
           in: query
           description: Filter by delivery order UUID
           schema:
@@ -2068,6 +2174,13 @@ paths:
             type: integer
             default: 0
             example: 0
+        - name: ordering
+          in: query
+          required: false
+          description: "Order by field (e.g., -created_date, status). Prefix with '-' for descending order."
+          schema:
+            type: string
+            example: "-created_date"
       responses:
         '200':
           description: Record deliveries retrieved successfully
@@ -2091,9 +2204,22 @@ paths:
                 count: 2
                 results:
                   - id: "11223344-5566-7788-99aa-bbccddeeff00"
-                    record_inward_id: "issue-uuid-1"
-                    facility_id: "f1a2b3c4-d5e6-7890-abcd-ef1234567890"
-                    delivery_order_id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
+                    delivery_order:
+                      id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
+                      name: "Delivery Order #001"
+                      destination: "Main Store"
+                      supplier: "Central Warehouse"
+                    record_order:
+                      id: "4df37546-7b7b-4e5b-b135-9179838a6962"
+                      name: "eaushadhi"
+                      category: "central"
+                      intent: "order"
+                      priority: "routine"
+                      reason: "patient_care"
+                      status: "draft"
+                      created_date: "2026-08-13T08:55:23.802Z"
+                      modified_date: "2026-08-13T08:55:23.802Z"
+                    status: "pending"
                     created_by:
                       id: "uuid"
                       username: "admin"
@@ -2101,11 +2227,25 @@ paths:
                       last_name: "User"
                       email: "admin@example.com"
                     updated_by: null
-                    created_date: "2026-05-19 19:29:35.868682+05:30"
-                    modified_date: "2026-05-19 19:29:35.868682+05:30"
+                    created_date: "2026-08-13T08:55:23.802Z"
+                    modified_date: "2026-08-13T08:55:23.802Z"
                   - id: "22334455-6677-8899-aabb-ccddeeff1122"
-                    facility_id: "f1a2b3c4-d5e6-7890-abcd-ef1234567890"
-                    delivery_order_id: "aabbccdd-eeff-1122-3344-556677889900"
+                    delivery_order:
+                      id: "aabbccdd-eeff-1122-3344-556677889900"
+                      name: "Delivery Order #002"
+                      destination: "Sub Store"
+                      supplier: "Regional Warehouse"
+                    record_order:
+                      id: "5ef48657-8c8c-5f6c-c246-0280949b7a73"
+                      name: "supply_order_02"
+                      category: "district"
+                      intent: "order"
+                      priority: "urgent"
+                      reason: "emergency_stock"
+                      status: "in_progress"
+                      created_date: "2026-08-13T09:01:00.000Z"
+                      modified_date: "2026-08-13T09:01:00.000Z"
+                    status: "in_progress"
                     created_by:
                       id: "uuid"
                       username: "admin"
@@ -2113,14 +2253,14 @@ paths:
                       last_name: "User"
                       email: "admin@example.com"
                     updated_by: null
-                    created_date: "2026-05-20 10:00:00.000000+05:30"
-                    modified_date: "2026-05-20 10:00:00.000000+05:30"
+                    created_date: "2026-08-13T09:01:00.000Z"
+                    modified_date: "2026-08-13T09:01:00.000Z"
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /institute/{institute_id}/record_inwards/{record_inward_id}/delivery/{delivery_id}/:
+  /institute/{institute_id}/record_inwards/{record_inward_id}/delivery/{record_delivery_id}/:
     get:
       tags:
         - Record Deliveries
@@ -2143,7 +2283,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: delivery_id
+        - name: record_delivery_id
           in: path
           required: true
           description: Record Delivery UUID
@@ -2167,8 +2307,22 @@ paths:
                           $ref: '#/components/schemas/RecordItemDelivery'
               example:
                 id: "11223344-5566-7788-99aa-bbccddeeff00"
-                facility_id: "f1a2b3c4-d5e6-7890-abcd-ef1234567890"
-                delivery_order_id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
+                delivery_order:
+                  id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
+                  name: "Delivery Order #001"
+                  destination: "Main Store"
+                  supplier: "Central Warehouse"
+                record_order:
+                  id: "4df37546-7b7b-4e5b-b135-9179838a6962"
+                  name: "eaushadhi"
+                  category: "central"
+                  intent: "order"
+                  priority: "routine"
+                  reason: "patient_care"
+                  status: "draft"
+                  created_date: "2026-08-13T08:55:23.802Z"
+                  modified_date: "2026-08-13T08:55:23.802Z"
+                status: "pending"
                 created_by:
                   id: "uuid"
                   username: "admin"
@@ -2176,22 +2330,50 @@ paths:
                   last_name: "User"
                   email: "admin@example.com"
                 updated_by: null
-                created_date: "2026-05-19 19:29:35.868682+05:30"
-                modified_date: "2026-05-19 19:29:35.868682+05:30"
+                created_date: "2026-08-13T08:55:23.802Z"
+                modified_date: "2026-08-13T08:55:23.802Z"
                 items:
                   - id: "item-delivery-uuid-1"
-                    record_inward_id: "issue-uuid-1"
-                    inward_record_item_id: "inward-item-uuid-1"
-                    facility_id: "f1a2b3c4-d5e6-7890-abcd-ef1234567890"
-                    supply_delivery_id: "4ef9aa11-2233-44dd-88ee-99ff00112233"
-                    record_delivery_id: "11223344-5566-7788-99aa-bbccddeeff00"
-                    product_id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
-                    product_knowledge_id: "7fa85f64-5717-4562-b3fc-2c963f66afa7"
+                    inward_record_item:
+                      id: "inward-item-uuid-1"
+                      item_name: "Paracetamol 500mg"
+                      batch_number: "BATCH001"
+                    supply_delivery:
+                      id: "6b31d86b-52fa-432a-9c2c-066161166dda"
+                      status: "in_progress"
+                      modified_date: "2026-08-13T09:05:24.707354Z"
+                      order:
+                        id: "bd2986df-f3ed-417d-94a0-02207a79cd18"
+                        status: "draft"
+                        extensions:
+                          core: {}
+                      supplied_inventory_item:
+                        id: "9c5fbd63-ab35-4ed4-a464-73a65cadedd0"
+                        status: "active"
+                        net_content: "100.000000"
+                      supplied_item:
+                        id: "644f06af-b15a-46f6-a611-6c260ac3567c"
+                        status: "active"
+                        batch:
+                          lot_number: "PCTJ25148"
+                      supplied_item_condition: "normal"
+                      supplied_item_pack_quantity: 1
+                      supplied_item_pack_size: 100
+                      supplied_item_quantity: 100
+                    record_delivery:
+                      id: "11223344-5566-7788-99aa-bbccddeeff00"
+                      status: "pending"
+                    product:
+                      id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
+                      name: "Paracetamol 500mg Tablet"
+                    product_knowledge:
+                      id: "7fa85f64-5717-4562-b3fc-2c963f66afa7"
+                      name: "Paracetamol - Clinical Guidelines"
                     quantity_dispatched: 100
                     quantity_accepted: 95
                     quantity_damaged: 3
                     quantity_short: 2
-                    status: "ACTIVE"
+                    status: "draft"
                     deleted: false
                     created_by:
                       id: "uuid"
@@ -2200,21 +2382,49 @@ paths:
                       last_name: "User"
                       email: "admin@example.com"
                     updated_by: null
-                    created_date: "2026-05-19 19:30:00.000000+05:30"
-                    modified_date: "2026-05-19 19:30:00.000000+05:30"
+                    created_date: "2026-08-13T09:03:00.000Z"
+                    modified_date: "2026-08-13T09:03:00.000Z"
                   - id: "item-delivery-uuid-2"
-                    record_inward_id: "issue-uuid-1"
-                    inward_record_item_id: "inward-item-uuid-2"
-                    facility_id: "f1a2b3c4-d5e6-7890-abcd-ef1234567890"
-                    supply_delivery_id: "5fgabb22-3344-55ee-99ff-00112233aabb"
-                    record_delivery_id: "11223344-5566-7788-99aa-bbccddeeff00"
-                    product_id: "aabbccdd-eeff-2233-4455-667788990011"
-                    product_knowledge_id: "8fb96f75-6828-5673-c4gd-3d974f77bgb8"
+                    inward_record_item:
+                      id: "inward-item-uuid-2"
+                      item_name: "Amoxicillin 250mg"
+                      batch_number: "BATCH002"
+                    supply_delivery:
+                      id: "7c42e97c-63gb-543b-0d3d-177272277ebe"
+                      status: "completed"
+                      modified_date: "2026-08-13T09:10:15.123456Z"
+                      order:
+                        id: "ce3097eg-g4fe-528e-05b1-13318b80de29"
+                        status: "active"
+                        extensions:
+                          core: {}
+                      supplied_inventory_item:
+                        id: "0d6gce74-bc46-5fe5-b575-84b76dbede01"
+                        status: "active"
+                        net_content: "50.000000"
+                      supplied_item:
+                        id: "755g17bg-c26b-57g7-b722-7d371bd4678d"
+                        status: "active"
+                        batch:
+                          lot_number: "AMOX26249"
+                      supplied_item_condition: "normal"
+                      supplied_item_pack_quantity: 1
+                      supplied_item_pack_size: 50
+                      supplied_item_quantity: 50
+                    record_delivery:
+                      id: "11223344-5566-7788-99aa-bbccddeeff00"
+                      status: "pending"
+                    product:
+                      id: "aabbccdd-eeff-2233-4455-667788990011"
+                      name: "Amoxicillin 250mg Capsule"
+                    product_knowledge:
+                      id: "8fb96f75-6828-5673-c4gd-3d974f77bgb8"
+                      name: "Amoxicillin - Clinical Guidelines"
                     quantity_dispatched: 50
                     quantity_accepted: 48
                     quantity_damaged: 1
                     quantity_short: 1
-                    status: "ACTIVE"
+                    status: "draft"
                     deleted: false
                     created_by:
                       id: "uuid"
@@ -2223,8 +2433,8 @@ paths:
                       last_name: "User"
                       email: "admin@example.com"
                     updated_by: null
-                    created_date: "2026-05-19 19:35:00.000000+05:30"
-                    modified_date: "2026-05-19 19:35:00.000000+05:30"
+                    created_date: "2026-08-13T09:05:00.000Z"
+                    modified_date: "2026-08-13T09:05:00.000Z"
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -2258,7 +2468,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: delivery_id
+        - name: record_delivery_id
           in: path
           required: true
           description: Record Delivery UUID
@@ -2282,8 +2492,21 @@ paths:
                 $ref: '#/components/schemas/RecordDelivery'
               example:
                 id: "11223344-5566-7788-99aa-bbccddeeff00"
-                facility_id: "f1a2b3c4-d5e6-7890-abcd-ef1234567890"
-                delivery_order_id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
+                delivery_order:
+                  id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
+                  name: "Delivery Order #001"
+                  destination: "Main Store"
+                  supplier: "Central Warehouse"
+                record_order:
+                  id: "4df37546-7b7b-4e5b-b135-9179838a6962"
+                  name: "eaushadhi"
+                  category: "central"
+                  intent: "order"
+                  priority: "routine"
+                  reason: "patient_care"
+                  status: "draft"
+                  created_date: "2026-08-13T08:55:23.802Z"
+                  modified_date: "2026-08-13T08:55:23.802Z"
                 status: "completed"
                 created_by:
                   id: "uuid"
@@ -2297,8 +2520,8 @@ paths:
                   first_name: "Admin"
                   last_name: "User"
                   email: "admin@example.com"
-                created_date: "2026-05-19 19:29:35.868682+05:30"
-                modified_date: "2026-05-19 20:00:00.000000+05:30"
+                created_date: "2026-08-13T08:55:23.802Z"
+                modified_date: "2026-08-13T09:04:00.000Z"
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -2313,7 +2536,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
   # ---------- Record Item Deliveries ----------
-  /institute/{institute_id}/record_inwards/{record_inward_id}/delivery/{delivery_id}/items/:
+  /institute/{institute_id}/record_inwards/{record_inward_id}/delivery/{record_delivery_id}/items/:
     post:
       tags:
         - Record Item Deliveries
@@ -2338,7 +2561,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: delivery_id
+        - name: record_delivery_id
           in: path
           required: true
           description: Record Delivery UUID
@@ -2352,13 +2575,8 @@ paths:
             schema:
               $ref: '#/components/schemas/RecordItemDeliveryCreate'
             example:
-              record_inward_id: "issue-uuid-1"
-              inward_record_item_id: "inward-item-uuid-1"
-              facility_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-              supply_delivery_id: "4ef9aa11-2233-44dd-88ee-99ff00112233"
-              record_delivery_id: "11223344-5566-7788-99aa-bbccddeeff00"
-              product_id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
-              product_knowledge_id: "7fa85f64-5717-4562-b3fc-2c963f66afa7"
+              inward_record_item: "inward-item-uuid-1"
+              supply_delivery: "6b31d86b-52fa-432a-9c2c-066161166dda"
               quantity_dispatched: 100
               quantity_accepted: 95
               quantity_damaged: 3
@@ -2372,13 +2590,41 @@ paths:
                 $ref: '#/components/schemas/RecordItemDelivery'
               example:
                 id: "item-delivery-uuid-1"
-                record_inward_id: "issue-uuid-1"
-                inward_record_item_id: "inward-item-uuid-1"
-                facility_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-                supply_delivery_id: "4ef9aa11-2233-44dd-88ee-99ff00112233"
-                record_delivery_id: "11223344-5566-7788-99aa-bbccddeeff00"
-                product_id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
-                product_knowledge_id: "7fa85f64-5717-4562-b3fc-2c963f66afa7"
+                inward_record_item:
+                  id: "inward-item-uuid-1"
+                  item_name: "Paracetamol 500mg"
+                  batch_number: "BATCH001"
+                supply_delivery:
+                  id: "6b31d86b-52fa-432a-9c2c-066161166dda"
+                  status: "in_progress"
+                  modified_date: "2026-08-13T09:05:24.707354Z"
+                  order:
+                    id: "bd2986df-f3ed-417d-94a0-02207a79cd18"
+                    status: "draft"
+                    extensions:
+                      core: {}
+                  supplied_inventory_item:
+                    id: "9c5fbd63-ab35-4ed4-a464-73a65cadedd0"
+                    status: "active"
+                    net_content: "100.000000"
+                  supplied_item:
+                    id: "644f06af-b15a-46f6-a611-6c260ac3567c"
+                    status: "active"
+                    batch:
+                      lot_number: "PCTJ25148"
+                  supplied_item_condition: "normal"
+                  supplied_item_pack_quantity: 1
+                  supplied_item_pack_size: 100
+                  supplied_item_quantity: 100
+                record_delivery:
+                  id: "11223344-5566-7788-99aa-bbccddeeff00"
+                  status: "pending"
+                product:
+                  id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
+                  name: "Paracetamol 500mg Tablet"
+                product_knowledge:
+                  id: "7fa85f64-5717-4562-b3fc-2c963f66afa7"
+                  name: "Paracetamol - Clinical Guidelines"
                 quantity_dispatched: 100
                 quantity_accepted: 95
                 quantity_damaged: 3
@@ -2392,8 +2638,8 @@ paths:
                   last_name: "User"
                   email: "admin@example.com"
                 updated_by: null
-                created_date: "2026-05-19 19:30:00.000000+05:30"
-                modified_date: "2026-05-19 19:30:00.000000+05:30"
+                created_date: "2026-08-13T09:03:00.000Z"
+                modified_date: "2026-08-13T09:03:00.000Z"
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -2410,7 +2656,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /institute/{institute_id}/record_inwards/{record_inward_id}/delivery/{delivery_id}/items/{item_delivery_id}/:
+  /institute/{institute_id}/record_inwards/{record_inward_id}/delivery/{record_delivery_id}/items/{item_delivery_id}/:
     patch:
       tags:
         - Record Item Deliveries
@@ -2433,7 +2679,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: delivery_id
+        - name: record_delivery_id
           in: path
           required: true
           description: Record Delivery UUID
@@ -2467,13 +2713,41 @@ paths:
                 $ref: '#/components/schemas/RecordItemDelivery'
               example:
                 id: "item-delivery-uuid-1"
-                record_inward_id: "issue-uuid-1"
-                inward_record_item_id: "inward-item-uuid-1"
-                facility_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-                supply_delivery_id: "4ef9aa11-2233-44dd-88ee-99ff00112233"
-                record_delivery_id: "11223344-5566-7788-99aa-bbccddeeff00"
-                product_id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
-                product_knowledge_id: "7fa85f64-5717-4562-b3fc-2c963f66afa7"
+                inward_record_item:
+                  id: "inward-item-uuid-1"
+                  item_name: "Paracetamol 500mg"
+                  batch_number: "BATCH001"
+                supply_delivery:
+                  id: "6b31d86b-52fa-432a-9c2c-066161166dda"
+                  status: "in_progress"
+                  modified_date: "2026-08-13T09:05:24.707354Z"
+                  order:
+                    id: "bd2986df-f3ed-417d-94a0-02207a79cd18"
+                    status: "draft"
+                    extensions:
+                      core: {}
+                  supplied_inventory_item:
+                    id: "9c5fbd63-ab35-4ed4-a464-73a65cadedd0"
+                    status: "active"
+                    net_content: "100.000000"
+                  supplied_item:
+                    id: "644f06af-b15a-46f6-a611-6c260ac3567c"
+                    status: "active"
+                    batch:
+                      lot_number: "PCTJ25148"
+                  supplied_item_condition: "normal"
+                  supplied_item_pack_quantity: 1
+                  supplied_item_pack_size: 100
+                  supplied_item_quantity: 100
+                record_delivery:
+                  id: "11223344-5566-7788-99aa-bbccddeeff00"
+                  status: "pending"
+                product:
+                  id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
+                  name: "Paracetamol 500mg Tablet"
+                product_knowledge:
+                  id: "7fa85f64-5717-4562-b3fc-2c963f66afa7"
+                  name: "Paracetamol - Clinical Guidelines"
                 quantity_dispatched: 100
                 quantity_accepted: 98
                 quantity_damaged: 1
@@ -2492,8 +2766,8 @@ paths:
                   first_name: "Admin"
                   last_name: "User"
                   email: "admin@example.com"
-                created_date: "2026-05-19 19:30:00.000000+05:30"
-                modified_date: "2026-05-19 20:30:00.000000+05:30"
+                created_date: "2026-08-13T09:03:00.000Z"
+                modified_date: "2026-08-13T09:02:00.000Z"
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -2588,8 +2862,8 @@ paths:
                   last_name: "User"
                   email: "admin@example.com"
                 updated_by: null
-                created_date: "2026-05-19 19:29:35.868682+05:30"
-                modified_date: "2026-05-19 19:29:35.868682+05:30"
+                created_date: "2026-08-13T08:55:23.802Z"
+                modified_date: "2026-08-13T08:55:23.802Z"
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -2714,8 +2988,8 @@ paths:
                       last_name: "User"
                       email: "admin@example.com"
                     updated_by: null
-                    created_date: "2026-05-19 19:29:35.868682+05:30"
-                    modified_date: "2026-05-19 19:29:35.868682+05:30"
+                    created_date: "2026-08-13T08:55:23.802Z"
+                    modified_date: "2026-08-13T08:55:23.802Z"
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -2817,8 +3091,8 @@ paths:
                   first_name: "Pharmacist"
                   last_name: "User"
                   email: "pharmacist@example.com"
-                created_date: "2026-05-19 19:29:35.868682+05:30"
-                modified_date: "2026-05-19 19:40:00.000000+05:30"
+                created_date: "2026-08-13T08:55:23.802Z"
+                modified_date: "2026-08-13T09:06:00.000Z"
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -3069,11 +3343,11 @@ components:
         created_date:
           type: string
           format: date-time
-          example: "2026-08-11T10:05:48.155327Z"
+          example: "2026-08-13T08:55:23.802Z"
         modified_date:
           type: string
           format: date-time
-          example: "2026-08-11T10:05:48.155343Z"
+          example: "2026-08-13T08:55:23.802Z"
 
     # Institute Create Schema
     InstituteCreate:
@@ -3134,7 +3408,7 @@ components:
           nullable: true
           description: Update metadata
           example:
-            last_sync: "2026-05-20T10:30:00Z"
+            last_sync: "2026-08-13T08:55:23.802Z"
             notes: "Updated after migration"
 
     # Institute Full Schema (Response)
@@ -3200,13 +3474,13 @@ components:
           format: date-time
           readOnly: true
           description: Timestamp when created
-          example: "2026-05-19 19:29:35.868682+05:30"
+          example: "2026-08-13T08:55:23.802Z"
         modified_date:
           type: string
           format: date-time
           readOnly: true
           description: Timestamp when last modified
-          example: "2026-05-19 19:29:35.868682+05:30"
+          example: "2026-08-13T08:55:23.802Z"
 
     # ===================== Supplier Mapping =====================
     SupplierMappingCreate:
@@ -3278,12 +3552,12 @@ components:
               type: string
               format: date-time
               readOnly: true
-              example: "2026-05-19 19:29:35.868682+05:30"
+              example: "2026-08-13T08:55:23.802Z"
             modified_date:
               type: string
               format: date-time
               readOnly: true
-              example: "2026-05-19 19:29:35.868682+05:30"
+              example: "2026-08-13T08:55:23.802Z"
 
     # ===================== Store Mapping =====================
     StoreMappingCreate:
@@ -3355,12 +3629,12 @@ components:
               type: string
               format: date-time
               readOnly: true
-              example: "2026-05-19 19:29:35.868682+05:30"
+              example: "2026-08-13T08:55:23.802Z"
             modified_date:
               type: string
               format: date-time
               readOnly: true
-              example: "2026-05-19 19:29:35.868682+05:30"
+              example: "2026-08-13T08:55:23.802Z"
 
     # ===================== DVDMS Lookup Schemas =====================
     DvdmsWarehouse:
@@ -3686,12 +3960,12 @@ components:
               type: string
               format: date-time
               readOnly: true
-              example: "2026-05-19 19:29:35.868682+05:30"
+              example: "2026-08-13T08:55:23.802Z"
             modified_date:
               type: string
               format: date-time
               readOnly: true
-              example: "2026-05-19 19:29:35.868682+05:30"
+              example: "2026-08-13T08:55:23.802Z"
 
     # ===================== DVDMS Outwards Record Schemas =====================
     DvdmsOutwardsRecord:
@@ -3755,12 +4029,12 @@ components:
           type: string
           format: date-time
           readOnly: true
-          example: "2026-05-19 19:29:35.868682+05:30"
+          example: "2026-08-13T08:55:23.802Z"
         modified_date:
           type: string
           format: date-time
           readOnly: true
-          example: "2026-05-21 09:05:00.000000+05:30"
+          example: "2026-08-13T09:10:00.000Z"
 
     # ===================== DVDMS Inwards Record Schemas =====================
     DvdmsInwardsRecordCreate:
@@ -3804,7 +4078,7 @@ components:
               type: string
               format: date-time
               description: Inwards record creation timestamp
-              example: "2026-05-20 10:30:00.000000+05:30"
+              example: "2026-08-13T08:55:23.802Z"
             eaushadhi_issue_status:
               type: string
               enum: [draft, pending, received, partially_received, completed, cancelled]
@@ -3896,12 +4170,12 @@ components:
           type: string
           format: date-time
           readOnly: true
-          example: "2026-05-20 11:00:00.000000+05:30"
+          example: "2026-08-13T08:56:00.000Z"
         modified_date:
           type: string
           format: date-time
           readOnly: true
-          example: "2026-05-20 11:30:00.000000+05:30"
+          example: "2026-08-13T08:57:00.000Z"
 
     # ===================== DVDMS Indent Status History Schemas =====================
     DvdmsIndentStatusHistory:
@@ -3944,13 +4218,13 @@ components:
             indent_id: "IND-2026-001234"
             current_status: "received"
             warehouse_name: "Bokaro DWH"
-            received_date: "2026-05-19 19:45:00"
+            received_date: "2026-08-13T08:55:23.802Z"
             received_by: "Warehouse Manager"
         checked_at:
           type: string
           format: date-time
           description: Timestamp when status was checked from DVDMS
-          example: "2026-05-19 19:50:00.000000+05:30"
+          example: "2026-08-13T08:55:23.802Z"
         created_by:
           allOf:
             - $ref: '#/components/schemas/UserSummary'
@@ -3960,7 +4234,7 @@ components:
           type: string
           format: date-time
           readOnly: true
-          example: "2026-05-19 19:50:00.000000+05:30"
+          example: "2026-08-13T08:55:23.802Z"
 
     # ===================== Record Item Order Schemas =====================
     # Shared item object used in supply requests
@@ -4090,29 +4364,62 @@ components:
               type: string
               format: date-time
               readOnly: true
-              example: "2026-05-19 19:29:35.868682+05:30"
+              example: "2026-08-13T08:55:23.802Z"
             modified_date:
               type: string
               format: date-time
               readOnly: true
-              example: "2026-05-19 19:29:35.868682+05:30"
+              example: "2026-08-13T08:55:23.802Z"
 
     # ===================== Record Delivery Schemas =====================
     RecordDeliveryCreate:
       type: object
       description: Input for creating a record_delivery link between inward_record and delivery_order.
       required:
-        - delivery_order_id
-        - facility_id
+        - delivery_order
+        - record_order
       properties:
-        delivery_order_id:
+        delivery_order:
           type: string
           format: uuid
           description: FK to CARE delivery_order
-        facility_id:
+        record_order:
           type: string
           format: uuid
-          description: FK to CARE facility
+          description: FK to record_order
+        status:
+          type: string
+          enum: [pending, in_progress, completed, cancelled]
+          description: |
+            Status of the record delivery:
+            - pending: Delivery created but not started
+            - in_progress: Delivery in progress
+            - completed: Delivery completed
+            - cancelled: Delivery cancelled
+          default: pending
+          example: "pending"
+
+    DeliveryOrderSummary:
+      type: object
+      description: Summary of delivery order information
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Delivery order UUID
+          example: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
+        name:
+          type: string
+          description: Delivery order name
+          example: "Delivery Order #001"
+        destination:
+          type: string
+          description: Destination facility/store
+          example: "Main Store"
+        supplier:
+          type: string
+          description: Supplier/warehouse
+          example: "Central Warehouse"
 
     RecordDelivery:
       allOf:
@@ -4129,6 +4436,16 @@ components:
               format: uuid
               readOnly: true
               example: "11223344-5566-7788-99aa-bbccddeeff00"
+            delivery_order:
+              allOf:
+                - $ref: '#/components/schemas/DeliveryOrderSummary'
+              readOnly: true
+              description: Delivery order details (expanded in response)
+            record_order:
+              allOf:
+                - $ref: '#/components/schemas/OrderSummary'
+              readOnly: true
+              description: Record order details (expanded in response)
             status:
               type: string
               enum: [pending, in_progress, completed, cancelled]
@@ -4152,12 +4469,12 @@ components:
               type: string
               format: date-time
               readOnly: true
-              example: "2026-05-19 19:29:35.868682+05:30"
+              example: "2026-08-13T08:55:23.802Z"
             modified_date:
               type: string
               format: date-time
               readOnly: true
-              example: "2026-05-19 19:29:35.868682+05:30"
+              example: "2026-08-13T08:55:23.802Z"
 
     RecordDeliveryUpdate:
       type: object
@@ -4242,12 +4559,12 @@ components:
               type: string
               format: date-time
               readOnly: true
-              example: "2026-05-19 19:29:35.868682+05:30"
+              example: "2026-08-13T08:55:23.802Z"
             modified_date:
               type: string
               format: date-time
               readOnly: true
-              example: "2026-05-19 19:29:35.868682+05:30"
+              example: "2026-08-13T08:55:23.802Z"
 
     ProductMappingUpdate:
       type: object
@@ -4263,49 +4580,168 @@ components:
           example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
 
     # ===================== Record Item Delivery Schemas =====================
+
+    # Summary schemas for expanded fields in RecordItemDelivery
+    InwardRecordItemSummary:
+      type: object
+      description: Summary of inward record item information
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Inward record item UUID
+          example: "inward-item-uuid-1"
+        item_name:
+          type: string
+          description: Item name
+          example: "Paracetamol 500mg"
+        batch_number:
+          type: string
+          description: Batch number
+          example: "BATCH001"
+
+    SupplierDeliverySummary:
+      type: object
+      description: Summary of supplier delivery information
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Supplier delivery UUID
+          example: "6b31d86b-52fa-432a-9c2c-066161166dda"
+        status:
+          type: string
+          description: Delivery status
+          example: "in_progress"
+        modified_date:
+          type: string
+          format: date-time
+          description: Last modified date
+          example: "2026-08-13T09:05:24.707354Z"
+        order:
+          type: object
+          description: Associated order details
+          properties:
+            id:
+              type: string
+              format: uuid
+              example: "bd2986df-f3ed-417d-94a0-02207a79cd18"
+            status:
+              type: string
+              example: "draft"
+            extensions:
+              type: object
+              properties:
+                core:
+                  type: object
+        supplied_inventory_item:
+          type: object
+          description: Inventory item details
+          properties:
+            id:
+              type: string
+              format: uuid
+              example: "9c5fbd63-ab35-4ed4-a464-73a65cadedd0"
+            status:
+              type: string
+              example: "active"
+            net_content:
+              type: string
+              example: "100.000000"
+        supplied_item:
+          type: object
+          description: Supplied item details
+          properties:
+            id:
+              type: string
+              format: uuid
+              example: "644f06af-b15a-46f6-a611-6c260ac3567c"
+            status:
+              type: string
+              example: "active"
+            batch:
+              type: object
+              properties:
+                lot_number:
+                  type: string
+                  example: "PCTJ25148"
+        supplied_item_condition:
+          type: string
+          description: Condition of supplied item
+          example: "normal"
+        supplied_item_pack_quantity:
+          type: number
+          description: Pack quantity
+          example: 1
+        supplied_item_pack_size:
+          type: number
+          description: Pack size
+          example: 100
+        supplied_item_quantity:
+          type: number
+          description: Total quantity
+          example: 100
+
+    ProductSummary:
+      type: object
+      description: Summary of product information
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Product UUID
+          example: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
+        name:
+          type: string
+          description: Product name
+          example: "Paracetamol 500mg Tablet"
+
+    ProductKnowledgeSummary:
+      type: object
+      description: Summary of product knowledge information
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Product knowledge UUID
+          example: "7fa85f64-5717-4562-b3fc-2c963f66afa7"
+        name:
+          type: string
+          description: Product knowledge name
+          example: "Paracetamol - Clinical Guidelines"
+
+    RecordDeliverySummary:
+      type: object
+      description: Summary of record delivery information
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Record delivery UUID
+          example: "11223344-5566-7788-99aa-bbccddeeff00"
+        status:
+          type: string
+          description: Delivery status
+          example: "pending"
+
     RecordItemDeliveryCreate:
       type: object
       required:
-        - record_inward_id
-        - inward_record_item_id
-        - facility_id
-        - supply_delivery_id
-        - record_delivery_id
-        - product_id
-        - product_knowledge_id
+        - inward_record_item
+        - supply_delivery
         - quantity_dispatched
         - quantity_accepted
         - quantity_damaged
         - quantity_short
       properties:
-        record_inward_id:
-          type: string
-          format: uuid
-          description: FK to the inward record
-        inward_record_item_id:
+        inward_record_item:
           type: string
           format: uuid
           description: FK to the inward item record that was imported
-        facility_id:
-          type: string
-          format: uuid
-          description: Facility id (denormalized for query performance)
-        supply_delivery_id:
+        supply_delivery:
           type: string
           format: uuid
           description: FK to CARE supply_delivery created from this import
-        record_delivery_id:
-          type: string
-          format: uuid
-          description: FK to the record_delivery linking the inward_record to the delivery_order
-        product_id:
-          type: string
-          format: uuid
-          description: FK to matched CARE product
-        product_knowledge_id:
-          type: string
-          format: uuid
-          description: FK to CARE product_knowledge
         quantity_dispatched:
           type: number
           format: decimal
@@ -4340,10 +4776,35 @@ components:
               format: uuid
               readOnly: true
               example: "item-delivery-uuid-1"
+            inward_record_item:
+              allOf:
+                - $ref: '#/components/schemas/InwardRecordItemSummary'
+              readOnly: true
+              description: Inward record item details (expanded in response)
+            supply_delivery:
+              allOf:
+                - $ref: '#/components/schemas/SupplierDeliverySummary'
+              readOnly: true
+              description: Supplier delivery details (expanded in response)
+            record_delivery:
+              allOf:
+                - $ref: '#/components/schemas/RecordDeliverySummary'
+              readOnly: true
+              description: Record delivery details (expanded in response)
+            product:
+              allOf:
+                - $ref: '#/components/schemas/ProductSummary'
+              readOnly: true
+              description: Product details (expanded in response)
+            product_knowledge:
+              allOf:
+                - $ref: '#/components/schemas/ProductKnowledgeSummary'
+              readOnly: true
+              description: Product knowledge details (expanded in response)
             status:
               type: string
-              enum: [ACTIVE, REVERSED]
-              default: ACTIVE
+              enum: [draft, ACTIVE, REVERSED]
+              default: draft
               readOnly: true
             deleted:
               type: boolean
@@ -4362,12 +4823,12 @@ components:
               type: string
               format: date-time
               readOnly: true
-              example: "2026-05-19 19:29:35.868682+05:30"
+              example: "2026-08-13T08:55:23.802Z"
             modified_date:
               type: string
               format: date-time
               readOnly: true
-              example: "2026-05-19 19:29:35.868682+05:30"
+              example: "2026-08-13T08:55:23.802Z"
 
     RecordItemDeliveryUpdate:
       type: object
