@@ -2,6 +2,7 @@ from django.shortcuts import HttpResponse
 from django.urls import path, re_path
 
 from care_dvdms.api.viewsets.dvdms_institute import DVDMSInstituteViewSet
+from care_dvdms.api.viewsets.dvdms_supplier import DVDMSSupplierViewSet
 
 
 def healthy(request):
@@ -18,5 +19,20 @@ urlpatterns = [
             "patch": "partial_update",
         }),
         name="dvdms-institute-detail",
+    ),
+    re_path(
+        r"^institute/(?P<institute_id>[^/.]+)/suppliers/$",
+        DVDMSSupplierViewSet.as_view({
+            "get": "list",
+            "post": "create",
+        }),
+        name="dvdms-supplier-list",
+    ),
+    re_path(
+        r"^institute/(?P<institute_id>[^/.]+)/suppliers/(?P<external_id>[^/.]+)/$",
+        DVDMSSupplierViewSet.as_view({
+            "delete": "destroy",
+        }),
+        name="dvdms-supplier-detail",
     ),
 ]
