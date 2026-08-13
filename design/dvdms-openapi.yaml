@@ -1362,7 +1362,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
   # ---------- DVDMS Outwards Record ----------
-  /record_order/{record_order_id}/outwards-record/:
+  /institute/{institute_id}/record_order/{record_order_id}/outward/:
     get:
       tags:
         - DVDMS Outwards Record
@@ -1371,6 +1371,13 @@ paths:
         Retrieve the outwards record with sync status and details for a specific record order.
       operationId: getOutwardsRecord
       parameters:
+        - name: institute_id
+          in: path
+          required: true
+          description: Institute UUID
+          schema:
+            type: string
+            format: uuid
         - name: record_order_id
           in: path
           required: true
@@ -1387,7 +1394,6 @@ paths:
                 $ref: '#/components/schemas/DvdmsOutwardsRecord'
               example:
                 id: "outwards-uuid-1"
-                record_order: "uuid1"
                 eaushadhi_indent_no: "IND-2026-001234"
                 status: "created"
                 eaushadhi_indent_status: "partially_issued"
@@ -1412,7 +1418,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /record_order/{record_order_id}/outwards-record/fetch-inwards/:
+  /institute/{institute_id}/record_order/{record_order_id}/outward/fetch-inwards/:
     post:
       tags:
         - DVDMS Outwards Record
@@ -1423,6 +1429,13 @@ paths:
         and updates the outwards record with the latest issue information.
       operationId: fetchInwards
       parameters:
+        - name: institute_id
+          in: path
+          required: true
+          description: Institute UUID
+          schema:
+            type: string
+            format: uuid
         - name: record_order_id
           in: path
           required: true
@@ -1439,7 +1452,6 @@ paths:
                 $ref: '#/components/schemas/DvdmsOutwardsRecord'
               example:
                 id: "outwards-uuid-1"
-                record_order: "uuid1"
                 eaushadhi_indent_no: "IND-2026-001234"
                 status: "created"
                 eaushadhi_indent_status: "partially_issued"
@@ -1478,7 +1490,54 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /record_order/{record_order_id}/inwards-records/:
+  /institute/{institute_id}/record_inwards/:
+    post:
+      tags:
+        - DVDMS Inwards Record
+      summary: Create an inwards record
+      description: |
+        Create a new inwards/issue record for an institute. The record is created with draft status.
+      operationId: createInwardsRecord
+      parameters:
+        - name: institute_id
+          in: path
+          required: true
+          description: Institute UUID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DvdmsInwardsRecordCreate'
+            example:
+              eaushadhi_issue_no: "ISS-2026-005678"
+              outward_record: "outwards-uuid-1"
+              eaushadhi_indent_no: "IND-2026-001234"
+      responses:
+        '201':
+          description: Inwards record created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DvdmsInwardsRecord'
+              example:
+                id: "issue-uuid-1"
+                eaushadhi_issue_no: "ISS-2026-005678"
+                created_at: "2026-05-20 10:30:00.000000+05:30"
+                eaushadhi_issue_status: "draft"
+                outward_record: "outwards-uuid-1"
+                eaushadhi_indent_no: "IND-2026-001234"
+                sync_log_id: null
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
     get:
       tags:
         - DVDMS Inwards Record
@@ -1488,10 +1547,10 @@ paths:
         These represent the issues created in DVDMS for the indent.
       operationId: getInwardsRecords
       parameters:
-        - name: record_order_id
+        - name: institute_id
           in: path
           required: true
-          description: Record Order UUID
+          description: Institute UUID
           schema:
             type: string
             format: uuid
@@ -1556,7 +1615,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /record_order/{record_order_id}/inwards-records/{inward_record_id}/:
+  /institute/{institute_id}/record_inwards/{record_inward_id}/:
     get:
       tags:
         - DVDMS Inwards Record
@@ -1566,7 +1625,14 @@ paths:
         drug information, batch numbers, manufacturer, received quantities, and status.
       operationId: getInwardRecordDetail
       parameters:
-        - name: inward_record_id
+        - name: institute_id
+          in: path
+          required: true
+          description: Institute UUID
+          schema:
+            type: string
+            format: uuid
+        - name: record_inward_id
           in: path
           required: true
           description: Inward Record UUID
@@ -1645,18 +1711,84 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
   # ---------- Product Mapping ----------
-  /product-mappings/:
+  /institute/{institute_id}/product-mappings/:
+    post:
+      tags:
+        - Product Mapping
+      summary: Create a product mapping
+      description: |
+        Create a new mapping between an eAushadhi/DVDMS drug and a CARE product for an institute.
+      operationId: createProductMapping
+      parameters:
+        - name: institute_id
+          in: path
+          required: true
+          description: Institute UUID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductMappingCreate'
+            example:
+              eaushadhi_drug_details:
+                drug_id: "D00251"
+                drug_name: "Ofloxacin Tablet IP 400 mg 1x1"
+              product_knowledge_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+      responses:
+        '201':
+          description: Product mapping created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductMapping'
+              example:
+                id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                eaushadhi_drug_details:
+                  drug_id: "D00251"
+                  drug_name: "Ofloxacin Tablet IP 400 mg 1x1"
+                product_knowledge_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                usage_count: 0
+                created_by:
+                  id: "uuid"
+                  username: "admin"
+                  first_name: "Admin"
+                  last_name: "User"
+                  email: "admin@example.com"
+                updated_by: null
+                created_date: "2026-05-19 19:29:35.868682+05:30"
+                modified_date: "2026-05-19 19:29:35.868682+05:30"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Conflict - Product mapping already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Product mapping already exists for this drug"
+                code: "MAPPING_EXISTS"
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
     get:
       tags:
         - Product Mapping
       summary: Get product mappings
       description: |
-        Retrieve paginated list of product mappings between eAushadhi/DVDMS drugs and CARE products.
+        Retrieve paginated list of product mappings between eAushadhi/DVDMS drugs and CARE products for an institute.
       operationId: getProductMappings
       parameters:
-        - name: facility_id
-          in: query
-          description: Filter by facility UUID
+        - name: institute_id
+          in: path
+          required: true
+          description: Institute UUID
           schema:
             type: string
             format: uuid
@@ -1708,8 +1840,6 @@ paths:
                 count: 2
                 results:
                   - id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-                    facility_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-                    institute_id: "2fa85f64-5717-4562-b3fc-2c963f66afa5"
                     eaushadhi_drug_details:
                       drug_id: "D00251"
                       drug_name: "Ofloxacin Tablet IP 400 mg 1x1"
@@ -1725,8 +1855,6 @@ paths:
                     created_date: "2026-05-19 19:29:35.868682+05:30"
                     modified_date: "2026-05-19 19:29:35.868682+05:30"
                   - id: "4fa85f64-5717-4562-b3fc-2c963f66afa7"
-                    facility_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-                    institute_id: "2fa85f64-5717-4562-b3fc-2c963f66afa5"
                     eaushadhi_drug_details:
                       drug_id: "D00252"
                       drug_name: "Paracetamol Tablet IP 500 mg 10x10"
@@ -1746,8 +1874,83 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+  /institute/{institute_id}/product-mappings/{product_mapping_id}/:
+    patch:
+      tags:
+        - Product Mapping
+      summary: Update a product mapping
+      description: |
+        Update an existing product mapping, including drug details and product knowledge reference.
+      operationId: updateProductMapping
+      parameters:
+        - name: institute_id
+          in: path
+          required: true
+          description: Institute UUID
+          schema:
+            type: string
+            format: uuid
+        - name: product_mapping_id
+          in: path
+          required: true
+          description: Product Mapping UUID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductMappingUpdate'
+            example:
+              eaushadhi_drug_details:
+                drug_id: "D00251"
+                drug_name: "Ofloxacin Tablet IP 400 mg 1x1 (Updated)"
+              product_knowledge_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+      responses:
+        '200':
+          description: Product mapping updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductMapping'
+              example:
+                id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                eaushadhi_drug_details:
+                  drug_id: "D00251"
+                  drug_name: "Ofloxacin Tablet IP 400 mg 1x1 (Updated)"
+                product_knowledge_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                usage_count: 15
+                created_by:
+                  id: "uuid"
+                  username: "admin"
+                  first_name: "Admin"
+                  last_name: "User"
+                  email: "admin@example.com"
+                updated_by:
+                  id: "uuid"
+                  username: "admin"
+                  first_name: "Admin"
+                  last_name: "User"
+                  email: "admin@example.com"
+                created_date: "2026-05-19 19:29:35.868682+05:30"
+                modified_date: "2026-05-19 20:30:00.000000+05:30"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Product mapping not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   # ---------- Record Deliveries ----------
-  /inwards-records/{inward_record_id}/record-deliveries/:
+  /institute/{institute_id}/record_inwards/{record_inward_id}/delivery/:
     post:
       tags:
         - Record Deliveries
@@ -1758,7 +1961,14 @@ paths:
         may have multiple record_deliveries over time (partial imports, supplier splits).
       operationId: createRecordDelivery
       parameters:
-        - name: inward_record_id
+        - name: institute_id
+          in: path
+          required: true
+          description: Institute UUID
+          schema:
+            type: string
+            format: uuid
+        - name: record_inward_id
           in: path
           required: true
           description: Inward Record UUID
@@ -1772,7 +1982,6 @@ paths:
             schema:
               $ref: '#/components/schemas/RecordDeliveryCreate'
             example:
-              inward_record_id: "issue-uuid-1"
               facility_id: "f1a2b3c4-d5e6-7890-abcd-ef1234567890"
               delivery_order_id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
       responses:
@@ -1784,7 +1993,6 @@ paths:
                 $ref: '#/components/schemas/RecordDelivery'
               example:
                 id: "11223344-5566-7788-99aa-bbccddeeff00"
-                inward_record_id: "issue-uuid-1"
                 facility_id: "f1a2b3c4-d5e6-7890-abcd-ef1234567890"
                 delivery_order_id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
                 created_by:
@@ -1820,7 +2028,14 @@ paths:
         Retrieve paginated list of record deliveries for a specific inward record.
       operationId: getRecordDeliveries
       parameters:
-        - name: inward_record_id
+        - name: institute_id
+          in: path
+          required: true
+          description: Institute UUID
+          schema:
+            type: string
+            format: uuid
+        - name: record_inward_id
           in: path
           required: true
           description: Inward Record UUID
@@ -1876,7 +2091,7 @@ paths:
                 count: 2
                 results:
                   - id: "11223344-5566-7788-99aa-bbccddeeff00"
-                    inward_record_id: "issue-uuid-1"
+                    record_inward_id: "issue-uuid-1"
                     facility_id: "f1a2b3c4-d5e6-7890-abcd-ef1234567890"
                     delivery_order_id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
                     created_by:
@@ -1889,7 +2104,6 @@ paths:
                     created_date: "2026-05-19 19:29:35.868682+05:30"
                     modified_date: "2026-05-19 19:29:35.868682+05:30"
                   - id: "22334455-6677-8899-aabb-ccddeeff1122"
-                    inward_record_id: "issue-uuid-1"
                     facility_id: "f1a2b3c4-d5e6-7890-abcd-ef1234567890"
                     delivery_order_id: "aabbccdd-eeff-1122-3344-556677889900"
                     created_by:
@@ -1906,7 +2120,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /inwards-records/{inward_record_id}/record-deliveries/{record_delivery_id}/:
+  /institute/{institute_id}/record_inwards/{record_inward_id}/delivery/{delivery_id}/:
     get:
       tags:
         - Record Deliveries
@@ -1915,14 +2129,21 @@ paths:
         Retrieve a specific record delivery with all item-level delivery details.
       operationId: getRecordDeliveryDetail
       parameters:
-        - name: inward_record_id
+        - name: institute_id
+          in: path
+          required: true
+          description: Institute UUID
+          schema:
+            type: string
+            format: uuid
+        - name: record_inward_id
           in: path
           required: true
           description: Inward Record UUID
           schema:
             type: string
             format: uuid
-        - name: record_delivery_id
+        - name: delivery_id
           in: path
           required: true
           description: Record Delivery UUID
@@ -1946,7 +2167,6 @@ paths:
                           $ref: '#/components/schemas/RecordItemDelivery'
               example:
                 id: "11223344-5566-7788-99aa-bbccddeeff00"
-                inward_record_id: "issue-uuid-1"
                 facility_id: "f1a2b3c4-d5e6-7890-abcd-ef1234567890"
                 delivery_order_id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
                 created_by:
@@ -1960,7 +2180,7 @@ paths:
                 modified_date: "2026-05-19 19:29:35.868682+05:30"
                 items:
                   - id: "item-delivery-uuid-1"
-                    inward_record_id: "issue-uuid-1"
+                    record_inward_id: "issue-uuid-1"
                     inward_record_item_id: "inward-item-uuid-1"
                     facility_id: "f1a2b3c4-d5e6-7890-abcd-ef1234567890"
                     supply_delivery_id: "4ef9aa11-2233-44dd-88ee-99ff00112233"
@@ -1983,7 +2203,7 @@ paths:
                     created_date: "2026-05-19 19:30:00.000000+05:30"
                     modified_date: "2026-05-19 19:30:00.000000+05:30"
                   - id: "item-delivery-uuid-2"
-                    inward_record_id: "issue-uuid-1"
+                    record_inward_id: "issue-uuid-1"
                     inward_record_item_id: "inward-item-uuid-2"
                     facility_id: "f1a2b3c4-d5e6-7890-abcd-ef1234567890"
                     supply_delivery_id: "5fgabb22-3344-55ee-99ff-00112233aabb"
@@ -2016,8 +2236,84 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+    patch:
+      tags:
+        - Record Deliveries
+      summary: Update record delivery status
+      description: |
+        Update the status of a record delivery.
+      operationId: updateRecordDeliveryStatus
+      parameters:
+        - name: institute_id
+          in: path
+          required: true
+          description: Institute UUID
+          schema:
+            type: string
+            format: uuid
+        - name: record_inward_id
+          in: path
+          required: true
+          description: Inward Record UUID
+          schema:
+            type: string
+            format: uuid
+        - name: delivery_id
+          in: path
+          required: true
+          description: Record Delivery UUID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordDeliveryUpdate'
+            example:
+              status: "completed"
+      responses:
+        '200':
+          description: Record delivery status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordDelivery'
+              example:
+                id: "11223344-5566-7788-99aa-bbccddeeff00"
+                facility_id: "f1a2b3c4-d5e6-7890-abcd-ef1234567890"
+                delivery_order_id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
+                status: "completed"
+                created_by:
+                  id: "uuid"
+                  username: "admin"
+                  first_name: "Admin"
+                  last_name: "User"
+                  email: "admin@example.com"
+                updated_by:
+                  id: "uuid"
+                  username: "admin"
+                  first_name: "Admin"
+                  last_name: "User"
+                  email: "admin@example.com"
+                created_date: "2026-05-19 19:29:35.868682+05:30"
+                modified_date: "2026-05-19 20:00:00.000000+05:30"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Record delivery not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   # ---------- Record Item Deliveries ----------
-  /inwards-records/{inward_record_id}/record-deliveries/{record_delivery_id}/record-item-deliveries/:
+  /institute/{institute_id}/record_inwards/{record_inward_id}/delivery/{delivery_id}/items/:
     post:
       tags:
         - Record Item Deliveries
@@ -2028,14 +2324,21 @@ paths:
         UNIQUE(record_item_id) — Phase 1 assumes one delivery per item.
       operationId: createRecordItemDelivery
       parameters:
-        - name: inward_record_id
+        - name: institute_id
+          in: path
+          required: true
+          description: Institute UUID
+          schema:
+            type: string
+            format: uuid
+        - name: record_inward_id
           in: path
           required: true
           description: Inward Record UUID
           schema:
             type: string
             format: uuid
-        - name: record_delivery_id
+        - name: delivery_id
           in: path
           required: true
           description: Record Delivery UUID
@@ -2049,7 +2352,7 @@ paths:
             schema:
               $ref: '#/components/schemas/RecordItemDeliveryCreate'
             example:
-              inward_record_id: "issue-uuid-1"
+              record_inward_id: "issue-uuid-1"
               inward_record_item_id: "inward-item-uuid-1"
               facility_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
               supply_delivery_id: "4ef9aa11-2233-44dd-88ee-99ff00112233"
@@ -2069,7 +2372,7 @@ paths:
                 $ref: '#/components/schemas/RecordItemDelivery'
               example:
                 id: "item-delivery-uuid-1"
-                inward_record_id: "issue-uuid-1"
+                record_inward_id: "issue-uuid-1"
                 inward_record_item_id: "inward-item-uuid-1"
                 facility_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
                 supply_delivery_id: "4ef9aa11-2233-44dd-88ee-99ff00112233"
@@ -2104,6 +2407,103 @@ paths:
               example:
                 error: "An active delivery already exists for this record_item"
                 code: "RECORD_ITEM_ALREADY_HAS_DELIVERY"
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /institute/{institute_id}/record_inwards/{record_inward_id}/delivery/{delivery_id}/items/{item_delivery_id}/:
+    patch:
+      tags:
+        - Record Item Deliveries
+      summary: Update record item delivery
+      description: |
+        Update a record item delivery (e.g., update quantities or status).
+      operationId: updateRecordItemDelivery
+      parameters:
+        - name: institute_id
+          in: path
+          required: true
+          description: Institute UUID
+          schema:
+            type: string
+            format: uuid
+        - name: record_inward_id
+          in: path
+          required: true
+          description: Inward Record UUID
+          schema:
+            type: string
+            format: uuid
+        - name: delivery_id
+          in: path
+          required: true
+          description: Record Delivery UUID
+          schema:
+            type: string
+            format: uuid
+        - name: item_delivery_id
+          in: path
+          required: true
+          description: Record Item Delivery UUID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordItemDeliveryUpdate'
+            example:
+              quantity_accepted: 98
+              quantity_damaged: 1
+              quantity_short: 1
+              status: "ACTIVE"
+      responses:
+        '200':
+          description: Record item delivery updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordItemDelivery'
+              example:
+                id: "item-delivery-uuid-1"
+                record_inward_id: "issue-uuid-1"
+                inward_record_item_id: "inward-item-uuid-1"
+                facility_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                supply_delivery_id: "4ef9aa11-2233-44dd-88ee-99ff00112233"
+                record_delivery_id: "11223344-5566-7788-99aa-bbccddeeff00"
+                product_id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
+                product_knowledge_id: "7fa85f64-5717-4562-b3fc-2c963f66afa7"
+                quantity_dispatched: 100
+                quantity_accepted: 98
+                quantity_damaged: 1
+                quantity_short: 1
+                status: "ACTIVE"
+                deleted: false
+                created_by:
+                  id: "uuid"
+                  username: "admin"
+                  first_name: "Admin"
+                  last_name: "User"
+                  email: "admin@example.com"
+                updated_by:
+                  id: "uuid"
+                  username: "admin"
+                  first_name: "Admin"
+                  last_name: "User"
+                  email: "admin@example.com"
+                created_date: "2026-05-19 19:30:00.000000+05:30"
+                modified_date: "2026-05-19 20:30:00.000000+05:30"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Record item delivery not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '500':
           $ref: '#/components/responses/InternalServerError'
 
@@ -3298,7 +3698,6 @@ components:
       type: object
       required:
         - id
-        - record_order
         - status
         - created_date
         - modified_date
@@ -3309,11 +3708,6 @@ components:
           readOnly: true
           description: Outwards record external_id
           example: "outwards-uuid-1"
-        record_order:
-          type: string
-          format: uuid
-          description: Reference to record order UUID
-          example: "uuid1"
         eaushadhi_indent_no:
           type: string
           nullable: true
@@ -3369,42 +3763,17 @@ components:
           example: "2026-05-21 09:05:00.000000+05:30"
 
     # ===================== DVDMS Inwards Record Schemas =====================
-    DvdmsInwardsRecord:
+    DvdmsInwardsRecordCreate:
       type: object
+      description: Input for creating a new inwards record
       required:
-        - id
         - eaushadhi_issue_no
-        - created_at
-        - eaushadhi_issue_status
         - outward_record
       properties:
-        id:
-          type: string
-          format: uuid
-          readOnly: true
-          description: Inwards record external_id
-          example: "issue-uuid-1"
         eaushadhi_issue_no:
           type: string
           description: eAushadhi/DVDMS issue number
           example: "ISS-2026-005678"
-        created_at:
-          type: string
-          format: date-time
-          description: Inwards record creation timestamp
-          example: "2026-05-20 10:30:00.000000+05:30"
-        eaushadhi_issue_status:
-          type: string
-          enum: [draft, pending, received, partially_received, completed, cancelled]
-          description: |
-            Current issue status in eAushadhi/DVDMS system:
-            - draft: Issue created but not submitted
-            - pending: Issue submitted, awaiting receipt
-            - received: Issue received at destination
-            - partially_received: Some items received
-            - completed: All items received
-            - cancelled: Issue cancelled
-          example: "received"
         outward_record:
           type: string
           format: uuid
@@ -3415,11 +3784,44 @@ components:
           nullable: true
           description: eAushadhi/DVDMS indent number
           example: "IND-2026-001234"
-        sync_log_id:
-          type: string
-          nullable: true
-          description: Sync log identifier for tracking DVDMS sync operations
-          example: "sync-log-456"
+
+    DvdmsInwardsRecord:
+      allOf:
+        - $ref: '#/components/schemas/DvdmsInwardsRecordCreate'
+        - type: object
+          required:
+            - id
+            - created_at
+            - eaushadhi_issue_status
+          properties:
+            id:
+              type: string
+              format: uuid
+              readOnly: true
+              description: Inwards record external_id
+              example: "issue-uuid-1"
+            created_at:
+              type: string
+              format: date-time
+              description: Inwards record creation timestamp
+              example: "2026-05-20 10:30:00.000000+05:30"
+            eaushadhi_issue_status:
+              type: string
+              enum: [draft, pending, received, partially_received, completed, cancelled]
+              description: |
+                Current issue status in eAushadhi/DVDMS system:
+                - draft: Issue created but not submitted
+                - pending: Issue submitted, awaiting receipt
+                - received: Issue received at destination
+                - partially_received: Some items received
+                - completed: All items received
+                - cancelled: Issue cancelled
+              example: "received"
+            sync_log_id:
+              type: string
+              nullable: true
+              description: Sync log identifier for tracking DVDMS sync operations
+              example: "sync-log-456"
 
     # ===================== DVDMS Inward Item Record Schemas =====================
     DvdmsInwardItemRecord:
@@ -3700,14 +4102,9 @@ components:
       type: object
       description: Input for creating a record_delivery link between inward_record and delivery_order.
       required:
-        - inward_record_id
         - delivery_order_id
         - facility_id
       properties:
-        inward_record_id:
-          type: string
-          format: uuid
-          description: FK to the inward_record this delivery belongs to
         delivery_order_id:
           type: string
           format: uuid
@@ -3732,6 +4129,16 @@ components:
               format: uuid
               readOnly: true
               example: "11223344-5566-7788-99aa-bbccddeeff00"
+            status:
+              type: string
+              enum: [pending, in_progress, completed, cancelled]
+              description: |
+                Status of the record delivery:
+                - pending: Delivery created but not started
+                - in_progress: Delivery in progress
+                - completed: Delivery completed
+                - cancelled: Delivery cancelled
+              example: "pending"
             created_by:
               allOf:
                 - $ref: '#/components/schemas/UserSummary'
@@ -3752,6 +4159,23 @@ components:
               readOnly: true
               example: "2026-05-19 19:29:35.868682+05:30"
 
+    RecordDeliveryUpdate:
+      type: object
+      description: Input for updating a record delivery status
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum: [pending, in_progress, completed, cancelled]
+          description: |
+            Updated status:
+            - pending: Delivery created but not started
+            - in_progress: Delivery in progress
+            - completed: Delivery completed
+            - cancelled: Delivery cancelled
+          example: "completed"
+
     # ===================== Product Mapping Schemas =====================
     EaushadhiDrugDetails:
       type: object
@@ -3768,35 +4192,13 @@ components:
           description: eAushadhi/DVDMS drug name
           example: "Ofloxacin Tablet IP 400 mg 1x1"
 
-    ProductMapping:
+    ProductMappingCreate:
       type: object
-      description: Mapping between eAushadhi/DVDMS drugs and CARE products
+      description: Input for creating a new product mapping
       required:
-        - id
-        - facility_id
-        - institute_id
         - eaushadhi_drug_details
         - product_knowledge_id
-        - usage_count
-        - created_date
-        - modified_date
       properties:
-        id:
-          type: string
-          format: uuid
-          readOnly: true
-          description: Product mapping external_id
-          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-        facility_id:
-          type: string
-          format: uuid
-          description: FK to CARE facility
-          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-        institute_id:
-          type: string
-          format: uuid
-          description: FK to institute mapping
-          example: "institute-uuid-1"
         eaushadhi_drug_details:
           $ref: '#/components/schemas/EaushadhiDrugDetails'
           description: eAushadhi/DVDMS drug details
@@ -3805,35 +4207,66 @@ components:
           format: uuid
           description: FK to CARE product_knowledge
           example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-        usage_count:
-          type: integer
-          description: Number of times this mapping has been used
-          example: 15
-        created_by:
-          allOf:
-            - $ref: '#/components/schemas/UserSummary'
-          readOnly: true
-        updated_by:
-          allOf:
-            - $ref: '#/components/schemas/UserSummary'
-          nullable: true
-          readOnly: true
-        created_date:
+
+    ProductMapping:
+      allOf:
+        - $ref: '#/components/schemas/ProductMappingCreate'
+        - type: object
+          description: Mapping between eAushadhi/DVDMS drugs and CARE products
+          required:
+            - id
+            - usage_count
+            - created_date
+            - modified_date
+          properties:
+            id:
+              type: string
+              format: uuid
+              readOnly: true
+              description: Product mapping external_id
+              example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+            usage_count:
+              type: integer
+              description: Number of times this mapping has been used
+              example: 15
+            created_by:
+              allOf:
+                - $ref: '#/components/schemas/UserSummary'
+              readOnly: true
+            updated_by:
+              allOf:
+                - $ref: '#/components/schemas/UserSummary'
+              nullable: true
+              readOnly: true
+            created_date:
+              type: string
+              format: date-time
+              readOnly: true
+              example: "2026-05-19 19:29:35.868682+05:30"
+            modified_date:
+              type: string
+              format: date-time
+              readOnly: true
+              example: "2026-05-19 19:29:35.868682+05:30"
+
+    ProductMappingUpdate:
+      type: object
+      description: Input for updating a product mapping
+      properties:
+        eaushadhi_drug_details:
+          $ref: '#/components/schemas/EaushadhiDrugDetails'
+          description: Updated eAushadhi/DVDMS drug details
+        product_knowledge_id:
           type: string
-          format: date-time
-          readOnly: true
-          example: "2026-05-19 19:29:35.868682+05:30"
-        modified_date:
-          type: string
-          format: date-time
-          readOnly: true
-          example: "2026-05-19 19:29:35.868682+05:30"
+          format: uuid
+          description: Updated FK to CARE product_knowledge
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
 
     # ===================== Record Item Delivery Schemas =====================
     RecordItemDeliveryCreate:
       type: object
       required:
-        - inward_record_id
+        - record_inward_id
         - inward_record_item_id
         - facility_id
         - supply_delivery_id
@@ -3845,7 +4278,7 @@ components:
         - quantity_damaged
         - quantity_short
       properties:
-        inward_record_id:
+        record_inward_id:
           type: string
           format: uuid
           description: FK to the inward record
@@ -3935,6 +4368,27 @@ components:
               format: date-time
               readOnly: true
               example: "2026-05-19 19:29:35.868682+05:30"
+
+    RecordItemDeliveryUpdate:
+      type: object
+      description: Input for updating a record item delivery
+      properties:
+        quantity_accepted:
+          type: number
+          format: decimal
+          description: Updated quantity accepted/received in good condition
+        quantity_damaged:
+          type: number
+          format: decimal
+          description: Updated quantity received but damaged
+        quantity_short:
+          type: number
+          format: decimal
+          description: Updated quantity short/missing (not received)
+        status:
+          type: string
+          enum: [ACTIVE, REVERSED]
+          description: Updated status of the item delivery
 
     # Error Schema
     Error:
