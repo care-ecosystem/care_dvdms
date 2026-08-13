@@ -37,22 +37,22 @@ security:
   - BearerAuth: []
 
 paths:
-  /facility/{facility_external_id}/institute/:
+  /facility/{facility_id}/institute/:
     post:
       tags:
         - Institutes
       summary: Create institute for a facility
       description: |
         Create a mapping between a CARE facility and DVDMS institute.
-        A facility can have only one institute (UNIQUE on facility_external_id).
+        A facility can have only one institute (UNIQUE on facility_id).
 
-        **Note:** facility_external_id is in the URL, so it's automatically set from the path parameter.
+        **Note:** facility_id is in the URL, so it's automatically set from the path parameter.
       operationId: createInstitute
       parameters:
-        - name: facility_external_id
+        - name: facility_id
           in: path
           required: true
-          description: CARE facility external_id (UUID)
+          description: CARE facility ID (UUID)
           schema:
             type: string
             format: uuid
@@ -116,10 +116,10 @@ paths:
         Returns 404 if no mapping exists.
       operationId: getInstitute
       parameters:
-        - name: facility_external_id
+        - name: facility_id
           in: path
           required: true
-          description: CARE facility external_id (UUID)
+          description: CARE facility ID (UUID)
           schema:
             type: string
             format: uuid
@@ -170,10 +170,10 @@ paths:
         All fields are optional; only supplied fields are updated.
       operationId: updateInstitute
       parameters:
-        - name: facility_external_id
+        - name: facility_id
           in: path
           required: true
-          description: CARE facility external_id (UUID)
+          description: CARE facility ID (UUID)
           schema:
             type: string
             format: uuid
@@ -248,7 +248,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
   # ---------- Supplier Mappings ----------
-  /facility/{facility_external_id}/institute/{institute_id}/suppliers/:
+  /facility/{facility_id}/institute/{institute_id}/suppliers/:
     post:
       tags:
         - Supplier Mappings
@@ -259,6 +259,13 @@ paths:
         At most one supplier can be marked as default.
       operationId: createSupplierMapping
       parameters:
+        - name: facility_id
+          in: path
+          required: true
+          description: CARE facility ID (UUID)
+          schema:
+            type: string
+            format: uuid
         - name: institute_id
           in: path
           required: true
@@ -329,6 +336,13 @@ paths:
       description: Get all supplier mappings for this institute
       operationId: listSupplierMappings
       parameters:
+        - name: facility_id
+          in: path
+          required: true
+          description: CARE facility ID (UUID)
+          schema:
+            type: string
+            format: uuid
         - name: institute_id
           in: path
           required: true
@@ -382,7 +396,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /facility/{facility_external_id}/institute/{institute_id}/suppliers/{supplier_mapping_id}/:
+  /facility/{facility_id}/institute/{institute_id}/suppliers/{supplier_mapping_id}/:
     delete:
       tags:
         - Supplier Mappings
@@ -390,6 +404,13 @@ paths:
       description: Soft-delete a supplier mapping
       operationId: deleteSupplierMapping
       parameters:
+        - name: facility_id
+          in: path
+          required: true
+          description: CARE facility ID (UUID)
+          schema:
+            type: string
+            format: uuid
         - name: institute_id
           in: path
           required: true
@@ -424,7 +445,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
   # ---------- Store Mappings ----------
-  /facility/{facility_external_id}/institute/{institute_id}/stores/:
+  /facility/{facility_id}/institute/{institute_id}/stores/:
     post:
       tags:
         - Store Mappings
@@ -435,6 +456,13 @@ paths:
         At most one store can be marked as default.
       operationId: createStoreMapping
       parameters:
+        - name: facility_id
+          in: path
+          required: true
+          description: CARE facility ID (UUID)
+          schema:
+            type: string
+            format: uuid
         - name: institute_id
           in: path
           required: true
@@ -505,6 +533,13 @@ paths:
       description: Get all store mappings for this institute
       operationId: listStoreMappings
       parameters:
+        - name: facility_id
+          in: path
+          required: true
+          description: CARE facility ID (UUID)
+          schema:
+            type: string
+            format: uuid
         - name: institute_id
           in: path
           required: true
@@ -558,7 +593,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /facility/{facility_external_id}/institute/{institute_id}/stores/{store_mapping_id}/:
+  /facility/{facility_id}/institute/{institute_id}/stores/{store_mapping_id}/:
     delete:
       tags:
         - Store Mappings
@@ -566,6 +601,13 @@ paths:
       description: Soft-delete a store mapping
       operationId: deleteStoreMapping
       parameters:
+        - name: facility_id
+          in: path
+          required: true
+          description: CARE facility ID (UUID)
+          schema:
+            type: string
+            format: uuid
         - name: institute_id
           in: path
           required: true
@@ -998,7 +1040,7 @@ paths:
                 code: "DVDMS_API_ERROR"
 
   # ---------- Record Orders ----------
-  /facility/{facility_id}/destination/{destination_id}/record-orders/:
+  /institute/{institute_id}/record_order/:
     post:
       tags:
         - Record Orders
@@ -1008,17 +1050,10 @@ paths:
         This represents an order that will be synced to DVDMS.
       operationId: createRecordOrder
       parameters:
-        - name: facility_id
+        - name: institute_id
           in: path
           required: true
-          description: Facility UUID
-          schema:
-            type: string
-            format: uuid
-        - name: destination_id
-          in: path
-          required: true
-          description: Destination facility UUID
+          description: Institute UUID
           schema:
             type: string
             format: uuid
@@ -1030,7 +1065,6 @@ paths:
               $ref: '#/components/schemas/RecordOrderCreate'
             example:
               name: "eaushadhi"
-              institute: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
               order: "61808cc9-4c50-4eda-9803-0e914b23f342"
               institute_store: "c2f8d3b5-ae90-4f7c-b401-8e3c9d6f1b25"
               institute_supplier: "b1e7c2a4-9d8f-4e6b-a3c1-7f2d8e5b9c34"
@@ -1045,11 +1079,6 @@ paths:
               example:
                 id: "uuid1"
                 name: "eaushadhi"
-                institute:
-                  id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-                  eaushadhi_institute_id: "000931"
-                  eaushadhi_user_ref_id: "14462"
-                  eaushadhi_institute_name: "Ranchi DH"
                 order:
                   id: "4df37546-7b7b-4e5b-b135-9179838a6962"
                   name: "eaushadhi"
@@ -1122,20 +1151,13 @@ paths:
         - Record Orders
       summary: List record orders
       description: |
-        Retrieve a paginated list of record orders for a facility and destination.
+        Retrieve a paginated list of record orders for an institute.
       operationId: listRecordOrders
       parameters:
-        - name: facility_id
+        - name: institute_id
           in: path
           required: true
-          description: Facility UUID
-          schema:
-            type: string
-            format: uuid
-        - name: destination_id
-          in: path
-          required: true
-          description: Destination facility UUID
+          description: Institute UUID
           schema:
             type: string
             format: uuid
@@ -1198,11 +1220,6 @@ paths:
                 results:
                   - id: "uuid1"
                     name: "eaushadhi"
-                    institute:
-                      id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-                      eaushadhi_institute_id: "000931"
-                      eaushadhi_user_ref_id: "14462"
-                      eaushadhi_institute_name: "Ranchi DH"
                     order:
                       id: "4df37546-7b7b-4e5b-b135-9179838a6962"
                       name: "eaushadhi"
@@ -1240,7 +1257,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
-          description: Facility or destination not found
+          description: Institute not found
           content:
             application/json:
               schema:
@@ -1248,7 +1265,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /facility/{facility_id}/destination/{destination_id}/record-orders/{record_order_id}/:
+  /institute/{institute_id}/record_order/{record_order_id}/:
     patch:
       tags:
         - Record Orders
@@ -1257,17 +1274,10 @@ paths:
         Update record order fields like status. All fields are optional.
       operationId: updateRecordOrder
       parameters:
-        - name: facility_id
+        - name: institute_id
           in: path
           required: true
-          description: Facility UUID
-          schema:
-            type: string
-            format: uuid
-        - name: destination_id
-          in: path
-          required: true
-          description: Destination facility UUID
+          description: Institute UUID
           schema:
             type: string
             format: uuid
@@ -1302,11 +1312,6 @@ paths:
               example:
                 id: "uuid1"
                 name: "eaushadhi"
-                institute:
-                  id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-                  eaushadhi_institute_id: "000931"
-                  eaushadhi_user_ref_id: "14462"
-                  eaushadhi_institute_name: "Ranchi DH"
                 order:
                   id: "4df37546-7b7b-4e5b-b135-9179838a6962"
                   name: "eaushadhi"
@@ -1357,7 +1362,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
   # ---------- DVDMS Outwards Record ----------
-  /record-orders/{record_order_id}/outwards-record/:
+  /record_order/{record_order_id}/outwards-record/:
     get:
       tags:
         - DVDMS Outwards Record
@@ -1407,7 +1412,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /record-orders/{record_order_id}/outwards-record/fetch-inwards/:
+  /record_order/{record_order_id}/outwards-record/fetch-inwards/:
     post:
       tags:
         - DVDMS Outwards Record
@@ -1473,7 +1478,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /record-orders/{record_order_id}/inwards-records/:
+  /record_order/{record_order_id}/inwards-records/:
     get:
       tags:
         - DVDMS Inwards Record
@@ -1551,8 +1556,559 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+  /record_order/{record_order_id}/inwards-records/{inward_record_id}/:
+    get:
+      tags:
+        - DVDMS Inwards Record
+      summary: Get inward record with item-level details
+      description: |
+        Retrieve a specific inward record with all item-level details including
+        drug information, batch numbers, manufacturer, received quantities, and status.
+      operationId: getInwardRecordDetail
+      parameters:
+        - name: inward_record_id
+          in: path
+          required: true
+          description: Inward Record UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Inward record retrieved successfully with item details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/DvdmsInwardsRecord'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        description: Item-level details for this inward record
+                        items:
+                          $ref: '#/components/schemas/DvdmsInwardItemRecord'
+              example:
+                id: "issue-uuid-1"
+                eaushadhi_issue_no: "ISS-2026-005678"
+                created_at: "2026-05-20 10:30:00.000000+05:30"
+                eaushadhi_issue_status: "received"
+                outward_record: "outwards-uuid-1"
+                eaushadhi_indent_no: "IND-2026-001234"
+                sync_log_id: "sync-log-456"
+                items:
+                  - id: "inward-item-uuid-1"
+                    record_order_item: "record-item-order-uuid-1"
+                    drug_id: "10002270"
+                    drug_name: "abc 500mg tablet"
+                    brand_id: "10103406"
+                    batch: "BATCH-2026-001"
+                    manufacturer: "ABC Pharmaceuticals Ltd."
+                    received_quantity: "100.000000"
+                    status: "received"
+                    created_by:
+                      id: "uuid"
+                      username: "admin"
+                      first_name: "Admin"
+                      last_name: "User"
+                      email: "admin@example.com"
+                    updated_by: null
+                    created_date: "2026-05-20 11:00:00.000000+05:30"
+                    modified_date: "2026-05-20 11:30:00.000000+05:30"
+                  - id: "inward-item-uuid-2"
+                    record_order_item: "record-item-order-uuid-2"
+                    drug_id: "10002271"
+                    drug_name: "xyz 250mg capsule"
+                    brand_id: "10103407"
+                    batch: "BATCH-2026-002"
+                    manufacturer: "XYZ Pharma Inc."
+                    received_quantity: "50.000000"
+                    status: "partially_received"
+                    created_by:
+                      id: "uuid"
+                      username: "admin"
+                      first_name: "Admin"
+                      last_name: "User"
+                      email: "admin@example.com"
+                    updated_by: null
+                    created_date: "2026-05-20 11:15:00.000000+05:30"
+                    modified_date: "2026-05-20 11:45:00.000000+05:30"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Inward record not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ---------- Product Mapping ----------
+  /product-mappings/:
+    get:
+      tags:
+        - Product Mapping
+      summary: Get product mappings
+      description: |
+        Retrieve paginated list of product mappings between eAushadhi/DVDMS drugs and CARE products.
+      operationId: getProductMappings
+      parameters:
+        - name: facility_id
+          in: query
+          description: Filter by facility UUID
+          schema:
+            type: string
+            format: uuid
+        - name: eaushadhi_drug_id
+          in: query
+          description: Filter by eAushadhi drug ID
+          schema:
+            type: string
+        - name: product_knowledge_id
+          in: query
+          description: Filter by product knowledge UUID
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          description: Number of results to return per page
+          schema:
+            type: integer
+            default: 10
+            example: 10
+        - name: offset
+          in: query
+          description: Number of results to skip
+          schema:
+            type: integer
+            default: 0
+            example: 0
+      responses:
+        '200':
+          description: Product mappings retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - count
+                  - results
+                properties:
+                  count:
+                    type: integer
+                    description: Total number of product mappings
+                    example: 2
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ProductMapping'
+              example:
+                count: 2
+                results:
+                  - id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                    facility_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                    institute_id: "2fa85f64-5717-4562-b3fc-2c963f66afa5"
+                    eaushadhi_drug_details:
+                      drug_id: "D00251"
+                      drug_name: "Ofloxacin Tablet IP 400 mg 1x1"
+                    product_knowledge_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                    usage_count: 15
+                    created_by:
+                      id: "uuid"
+                      username: "admin"
+                      first_name: "Admin"
+                      last_name: "User"
+                      email: "admin@example.com"
+                    updated_by: null
+                    created_date: "2026-05-19 19:29:35.868682+05:30"
+                    modified_date: "2026-05-19 19:29:35.868682+05:30"
+                  - id: "4fa85f64-5717-4562-b3fc-2c963f66afa7"
+                    facility_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                    institute_id: "2fa85f64-5717-4562-b3fc-2c963f66afa5"
+                    eaushadhi_drug_details:
+                      drug_id: "D00252"
+                      drug_name: "Paracetamol Tablet IP 500 mg 10x10"
+                    product_knowledge_id: "4fa85f64-5717-4562-b3fc-2c963f66afa7"
+                    usage_count: 0
+                    created_by:
+                      id: "uuid"
+                      username: "admin"
+                      first_name: "Admin"
+                      last_name: "User"
+                      email: "admin@example.com"
+                    updated_by: null
+                    created_date: "2026-05-20 10:00:00.000000+05:30"
+                    modified_date: "2026-05-20 10:00:00.000000+05:30"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ---------- Record Deliveries ----------
+  /inwards-records/{inward_record_id}/record-deliveries/:
+    post:
+      tags:
+        - Record Deliveries
+      summary: Create a record delivery
+      description: |
+        Link an inward_record to a CARE delivery_order. Each delivery_order belongs
+        to exactly one inward_record (UNIQUE on delivery_order_id), but an inward_record
+        may have multiple record_deliveries over time (partial imports, supplier splits).
+      operationId: createRecordDelivery
+      parameters:
+        - name: inward_record_id
+          in: path
+          required: true
+          description: Inward Record UUID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordDeliveryCreate'
+            example:
+              inward_record_id: "issue-uuid-1"
+              facility_id: "f1a2b3c4-d5e6-7890-abcd-ef1234567890"
+              delivery_order_id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
+      responses:
+        '201':
+          description: Record delivery created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordDelivery'
+              example:
+                id: "11223344-5566-7788-99aa-bbccddeeff00"
+                inward_record_id: "issue-uuid-1"
+                facility_id: "f1a2b3c4-d5e6-7890-abcd-ef1234567890"
+                delivery_order_id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
+                created_by:
+                  id: "uuid"
+                  username: "admin"
+                  first_name: "Admin"
+                  last_name: "User"
+                  email: "admin@example.com"
+                updated_by: null
+                created_date: "2026-05-19 19:29:35.868682+05:30"
+                modified_date: "2026-05-19 19:29:35.868682+05:30"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Conflict - this delivery_order is already linked to an inward_record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "delivery_order_id is already linked to an inward_record"
+                code: "DELIVERY_ORDER_ALREADY_LINKED"
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      tags:
+        - Record Deliveries
+      summary: Get record deliveries for an inward record
+      description: |
+        Retrieve paginated list of record deliveries for a specific inward record.
+      operationId: getRecordDeliveries
+      parameters:
+        - name: inward_record_id
+          in: path
+          required: true
+          description: Inward Record UUID
+          schema:
+            type: string
+            format: uuid
+        - name: delivery_order_id
+          in: query
+          description: Filter by delivery order UUID
+          schema:
+            type: string
+            format: uuid
+        - name: facility_id
+          in: query
+          description: Filter by facility UUID
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          description: Number of results to return per page
+          schema:
+            type: integer
+            default: 10
+            example: 10
+        - name: offset
+          in: query
+          description: Number of results to skip
+          schema:
+            type: integer
+            default: 0
+            example: 0
+      responses:
+        '200':
+          description: Record deliveries retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - count
+                  - results
+                properties:
+                  count:
+                    type: integer
+                    description: Total number of record deliveries
+                    example: 2
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RecordDelivery'
+              example:
+                count: 2
+                results:
+                  - id: "11223344-5566-7788-99aa-bbccddeeff00"
+                    inward_record_id: "issue-uuid-1"
+                    facility_id: "f1a2b3c4-d5e6-7890-abcd-ef1234567890"
+                    delivery_order_id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
+                    created_by:
+                      id: "uuid"
+                      username: "admin"
+                      first_name: "Admin"
+                      last_name: "User"
+                      email: "admin@example.com"
+                    updated_by: null
+                    created_date: "2026-05-19 19:29:35.868682+05:30"
+                    modified_date: "2026-05-19 19:29:35.868682+05:30"
+                  - id: "22334455-6677-8899-aabb-ccddeeff1122"
+                    inward_record_id: "issue-uuid-1"
+                    facility_id: "f1a2b3c4-d5e6-7890-abcd-ef1234567890"
+                    delivery_order_id: "aabbccdd-eeff-1122-3344-556677889900"
+                    created_by:
+                      id: "uuid"
+                      username: "admin"
+                      first_name: "Admin"
+                      last_name: "User"
+                      email: "admin@example.com"
+                    updated_by: null
+                    created_date: "2026-05-20 10:00:00.000000+05:30"
+                    modified_date: "2026-05-20 10:00:00.000000+05:30"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /inwards-records/{inward_record_id}/record-deliveries/{record_delivery_id}/:
+    get:
+      tags:
+        - Record Deliveries
+      summary: Get record delivery detail with item-level details
+      description: |
+        Retrieve a specific record delivery with all item-level delivery details.
+      operationId: getRecordDeliveryDetail
+      parameters:
+        - name: inward_record_id
+          in: path
+          required: true
+          description: Inward Record UUID
+          schema:
+            type: string
+            format: uuid
+        - name: record_delivery_id
+          in: path
+          required: true
+          description: Record Delivery UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Record delivery retrieved successfully with item details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/RecordDelivery'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        description: Item-level delivery details
+                        items:
+                          $ref: '#/components/schemas/RecordItemDelivery'
+              example:
+                id: "11223344-5566-7788-99aa-bbccddeeff00"
+                inward_record_id: "issue-uuid-1"
+                facility_id: "f1a2b3c4-d5e6-7890-abcd-ef1234567890"
+                delivery_order_id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
+                created_by:
+                  id: "uuid"
+                  username: "admin"
+                  first_name: "Admin"
+                  last_name: "User"
+                  email: "admin@example.com"
+                updated_by: null
+                created_date: "2026-05-19 19:29:35.868682+05:30"
+                modified_date: "2026-05-19 19:29:35.868682+05:30"
+                items:
+                  - id: "item-delivery-uuid-1"
+                    inward_record_id: "issue-uuid-1"
+                    inward_record_item_id: "inward-item-uuid-1"
+                    facility_id: "f1a2b3c4-d5e6-7890-abcd-ef1234567890"
+                    supply_delivery_id: "4ef9aa11-2233-44dd-88ee-99ff00112233"
+                    record_delivery_id: "11223344-5566-7788-99aa-bbccddeeff00"
+                    product_id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
+                    product_knowledge_id: "7fa85f64-5717-4562-b3fc-2c963f66afa7"
+                    quantity_dispatched: 100
+                    quantity_accepted: 95
+                    quantity_damaged: 3
+                    quantity_short: 2
+                    status: "ACTIVE"
+                    deleted: false
+                    created_by:
+                      id: "uuid"
+                      username: "admin"
+                      first_name: "Admin"
+                      last_name: "User"
+                      email: "admin@example.com"
+                    updated_by: null
+                    created_date: "2026-05-19 19:30:00.000000+05:30"
+                    modified_date: "2026-05-19 19:30:00.000000+05:30"
+                  - id: "item-delivery-uuid-2"
+                    inward_record_id: "issue-uuid-1"
+                    inward_record_item_id: "inward-item-uuid-2"
+                    facility_id: "f1a2b3c4-d5e6-7890-abcd-ef1234567890"
+                    supply_delivery_id: "5fgabb22-3344-55ee-99ff-00112233aabb"
+                    record_delivery_id: "11223344-5566-7788-99aa-bbccddeeff00"
+                    product_id: "aabbccdd-eeff-2233-4455-667788990011"
+                    product_knowledge_id: "8fb96f75-6828-5673-c4gd-3d974f77bgb8"
+                    quantity_dispatched: 50
+                    quantity_accepted: 48
+                    quantity_damaged: 1
+                    quantity_short: 1
+                    status: "ACTIVE"
+                    deleted: false
+                    created_by:
+                      id: "uuid"
+                      username: "admin"
+                      first_name: "Admin"
+                      last_name: "User"
+                      email: "admin@example.com"
+                    updated_by: null
+                    created_date: "2026-05-19 19:35:00.000000+05:30"
+                    modified_date: "2026-05-19 19:35:00.000000+05:30"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Record delivery not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ---------- Record Item Deliveries ----------
+  /inwards-records/{inward_record_id}/record-deliveries/{record_delivery_id}/record-item-deliveries/:
+    post:
+      tags:
+        - Record Item Deliveries
+      summary: Create a record item delivery
+      description: |
+        Record that an inward item record has been imported into CARE.
+        The record_item provides drug/batch/quantity context via FK.
+        UNIQUE(record_item_id) — Phase 1 assumes one delivery per item.
+      operationId: createRecordItemDelivery
+      parameters:
+        - name: inward_record_id
+          in: path
+          required: true
+          description: Inward Record UUID
+          schema:
+            type: string
+            format: uuid
+        - name: record_delivery_id
+          in: path
+          required: true
+          description: Record Delivery UUID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordItemDeliveryCreate'
+            example:
+              inward_record_id: "issue-uuid-1"
+              inward_record_item_id: "inward-item-uuid-1"
+              facility_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+              supply_delivery_id: "4ef9aa11-2233-44dd-88ee-99ff00112233"
+              record_delivery_id: "11223344-5566-7788-99aa-bbccddeeff00"
+              product_id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
+              product_knowledge_id: "7fa85f64-5717-4562-b3fc-2c963f66afa7"
+              quantity_dispatched: 100
+              quantity_accepted: 95
+              quantity_damaged: 3
+              quantity_short: 2
+      responses:
+        '201':
+          description: Record item delivery created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordItemDelivery'
+              example:
+                id: "item-delivery-uuid-1"
+                inward_record_id: "issue-uuid-1"
+                inward_record_item_id: "inward-item-uuid-1"
+                facility_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                supply_delivery_id: "4ef9aa11-2233-44dd-88ee-99ff00112233"
+                record_delivery_id: "11223344-5566-7788-99aa-bbccddeeff00"
+                product_id: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
+                product_knowledge_id: "7fa85f64-5717-4562-b3fc-2c963f66afa7"
+                quantity_dispatched: 100
+                quantity_accepted: 95
+                quantity_damaged: 3
+                quantity_short: 2
+                status: "ACTIVE"
+                deleted: false
+                created_by:
+                  id: "uuid"
+                  username: "admin"
+                  first_name: "Admin"
+                  last_name: "User"
+                  email: "admin@example.com"
+                updated_by: null
+                created_date: "2026-05-19 19:30:00.000000+05:30"
+                modified_date: "2026-05-19 19:30:00.000000+05:30"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Conflict - this record_item already has a delivery
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "An active delivery already exists for this record_item"
+                code: "RECORD_ITEM_ALREADY_HAS_DELIVERY"
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   # ---------- Record Item Orders ----------
-  /facility/{facility_id}/destination/{destination_id}/record-item-orders/:
+  /institute/{institute_id}/record_order/{record_order_id}/item/:
     post:
       tags:
         - Record Item Orders
@@ -1562,17 +2118,17 @@ paths:
         This represents an individual item in an order that will be synced to DVDMS.
       operationId: createRecordItemOrder
       parameters:
-        - name: facility_id
+        - name: institute_id
           in: path
           required: true
-          description: Facility UUID
+          description: Institute UUID
           schema:
             type: string
             format: uuid
-        - name: destination_id
+        - name: record_order_id
           in: path
           required: true
-          description: Destination facility UUID
+          description: Record Order UUID
           schema:
             type: string
             format: uuid
@@ -1583,7 +2139,6 @@ paths:
             schema:
               $ref: '#/components/schemas/RecordItemOrderCreate'
             example:
-              record_order: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
               supply_request: "2e1cb879-8101-4160-b324-bc97e07c35f3"
               drug:
                 id: "10002270"
@@ -1602,44 +2157,6 @@ paths:
                 $ref: '#/components/schemas/RecordItemOrder'
               example:
                 id: "uuid-item-order-1"
-                record_order:
-                  id: "uuid1"
-                  name: "eaushadhi"
-                  institute:
-                    id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-                    eaushadhi_institute_id: "000931"
-                    eaushadhi_user_ref_id: "14462"
-                    eaushadhi_institute_name: "Ranchi DH"
-                  order:
-                    id: "4df37546-7b7b-4e5b-b135-9179838a6962"
-                    name: "eaushadhi"
-                    category: "central"
-                    status: "draft"
-                  institute_store:
-                    id: "c2f8d3b5-ae90-4f7c-b401-8e3c9d6f1b25"
-                    eaushadhi_store_id: "99901002"
-                    eaushadhi_store_name: "CHC Pharmacy"
-                    store:
-                      id: "060d0e05-ffdc-446e-b844-d22cd6bced04"
-                      name: "Counter 1"
-                      form: "ro"
-                  institute_supplier:
-                    id: "b1e7c2a4-9d8f-4e6b-a3c1-7f2d8e5b9c34"
-                    eaushadhi_warehouse_id: "99901000"
-                    eaushadhi_warehouse_name: "Bokaro_DWH"
-                    supplier:
-                      id: "5aa85d4e-3456-41fb-aee2-8076f07cb91b"
-                      name: "Medplus"
-                      org_type: "product_supplier"
-                  status: "draft"
-                  created_by:
-                    id: "uuid"
-                    username: "admin"
-                    first_name: "Admin"
-                    last_name: "User"
-                    email: "admin@example.com"
-                  created_date: "2026-05-19 19:29:35.868682+05:30"
-                  modified_date: "2026-05-19 19:29:35.868682+05:30"
                 supply_request:
                   id: "2e1cb879-8101-4160-b324-bc97e07c35f3"
                   item:
@@ -1678,7 +2195,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
-          description: Facility or record order not found
+          description: Institute or record order not found
           content:
             application/json:
               schema:
@@ -1691,20 +2208,20 @@ paths:
         - Record Item Orders
       summary: List record item orders
       description: |
-        Retrieve a paginated list of record item orders for a facility and destination.
+        Retrieve a paginated list of record item orders for a record order.
       operationId: listRecordItemOrders
       parameters:
-        - name: facility_id
+        - name: institute_id
           in: path
           required: true
-          description: Facility UUID
+          description: Institute UUID
           schema:
             type: string
             format: uuid
-        - name: destination_id
+        - name: record_order_id
           in: path
           required: true
-          description: Destination facility UUID
+          description: Record Order UUID
           schema:
             type: string
             format: uuid
@@ -1766,36 +2283,6 @@ paths:
                 count: 1
                 results:
                   - id: "uuid-item-order-1"
-                    record_order:
-                      id: "uuid1"
-                      name: "eaushadhi"
-                      institute:
-                        id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-                        eaushadhi_institute_id: "000931"
-                        eaushadhi_user_ref_id: "14462"
-                        eaushadhi_institute_name: "Ranchi DH"
-                      order:
-                        id: "4df37546-7b7b-4e5b-b135-9179838a6962"
-                        name: "eaushadhi"
-                        category: "central"
-                        status: "draft"
-                      institute_store:
-                        id: "c2f8d3b5-ae90-4f7c-b401-8e3c9d6f1b25"
-                        eaushadhi_store_id: "99901002"
-                        eaushadhi_store_name: "CHC Pharmacy"
-                        store:
-                          id: "060d0e05-ffdc-446e-b844-d22cd6bced04"
-                          name: "Counter 1"
-                          form: "ro"
-                      institute_supplier:
-                        id: "b1e7c2a4-9d8f-4e6b-a3c1-7f2d8e5b9c34"
-                        eaushadhi_warehouse_id: "99901000"
-                        eaushadhi_warehouse_name: "Bokaro_DWH"
-                        supplier:
-                          id: "5aa85d4e-3456-41fb-aee2-8076f07cb91b"
-                          name: "Medplus"
-                          org_type: "product_supplier"
-                      status: "draft"
                     supply_request:
                       id: "2e1cb879-8101-4160-b324-bc97e07c35f3"
                       item:
@@ -1820,7 +2307,6 @@ paths:
                       sub_group_id: "0"
                       unit_id: "630001"
                       drug_category: "10"
-                    institute_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
                     created_by:
                       id: "uuid"
                       username: "admin"
@@ -1833,7 +2319,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
-          description: Facility or destination not found
+          description: Institute not found
           content:
             application/json:
               schema:
@@ -1841,7 +2327,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /facility/{facility_id}/destination/{destination_id}/record-item-orders/{record_item_order_id}/:
+  /institute/{institute_id}/record_order/{record_order_id}/item/{record_order_item_id}/:
     patch:
       tags:
         - Record Item Orders
@@ -1850,21 +2336,21 @@ paths:
         Update record item order fields including drug information. All fields are optional.
       operationId: updateRecordItemOrder
       parameters:
-        - name: facility_id
+        - name: institute_id
           in: path
           required: true
-          description: Facility UUID
+          description: Institute UUID
           schema:
             type: string
             format: uuid
-        - name: destination_id
+        - name: record_order_id
           in: path
           required: true
-          description: Destination facility UUID
+          description: Record Order UUID
           schema:
             type: string
             format: uuid
-        - name: record_item_order_id
+        - name: record_order_item_id
           in: path
           required: true
           description: Record Item Order UUID
@@ -1899,15 +2385,6 @@ paths:
                 $ref: '#/components/schemas/RecordItemOrder'
               example:
                 id: "uuid-item-order-1"
-                record_order:
-                  id: "uuid1"
-                  name: "eaushadhi"
-                  institute:
-                    id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-                    eaushadhi_institute_id: "000931"
-                    eaushadhi_user_ref_id: "14462"
-                    eaushadhi_institute_name: "Ranchi DH"
-                  status: "draft"
                 supply_request:
                   id: "2e1cb879-8101-4160-b324-bc97e07c35f3"
                   item:
@@ -1928,7 +2405,6 @@ paths:
                   sub_group_id: "0"
                   unit_id: "630001"
                   drug_category: "10"
-                institute_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
                 created_by:
                   id: "uuid"
                   username: "admin"
@@ -2239,7 +2715,7 @@ components:
       type: object
       description: |
         All fields optional; only supplied fields are updated.
-        facility_external_id and eaushadhi_institute_id cannot be changed (use delete + create instead).
+        facility_id and eaushadhi_institute_id cannot be changed (use delete + create instead).
       properties:
         eaushadhi_institute_name:
           type: string
@@ -2736,7 +3212,6 @@ components:
       type: object
       required:
         - name
-        - institute
         - order
         - institute_store
         - institute_supplier
@@ -2746,11 +3221,6 @@ components:
           type: string
           description: Record order name
           example: "eaushadhi"
-        institute:
-          type: string
-          format: uuid
-          description: Institute UUID
-          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
         order:
           type: string
           format: uuid
@@ -2788,11 +3258,6 @@ components:
               readOnly: true
               description: Record order external_id
               example: "uuid"
-            institute:
-              allOf:
-                - $ref: '#/components/schemas/InstituteSummary'
-              readOnly: true
-              description: Institute details (expanded in response)
             order:
               allOf:
                 - $ref: '#/components/schemas/OrderSummary'
@@ -2956,6 +3421,86 @@ components:
           description: Sync log identifier for tracking DVDMS sync operations
           example: "sync-log-456"
 
+    # ===================== DVDMS Inward Item Record Schemas =====================
+    DvdmsInwardItemRecord:
+      type: object
+      required:
+        - id
+        - record_order_item
+        - drug_id
+        - drug_name
+        - received_quantity
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: Inward item record external_id
+          example: "inward-item-uuid-1"
+        record_order_item:
+          type: string
+          format: uuid
+          description: Reference to record order item UUID
+          example: "record-item-order-uuid-1"
+        drug_id:
+          type: string
+          description: DVDMS drug/item ID
+          example: "10002270"
+        drug_name:
+          type: string
+          description: Drug name
+          example: "abc 500mg tablet"
+        brand_id:
+          type: string
+          nullable: true
+          description: DVDMS brand ID
+          example: "10103406"
+        batch:
+          type: string
+          nullable: true
+          description: Batch number of the received item
+          example: "BATCH-2026-001"
+        manufacturer:
+          type: string
+          nullable: true
+          description: Manufacturer name
+          example: "ABC Pharmaceuticals Ltd."
+        received_quantity:
+          type: string
+          description: Quantity received
+          example: "100.000000"
+        status:
+          type: string
+          enum: [pending, received, partially_received, rejected, damaged]
+          description: |
+            Inward item status:
+            - pending: Item expected but not yet received
+            - received: Item fully received
+            - partially_received: Partial quantity received
+            - rejected: Item rejected during receiving
+            - damaged: Item received but damaged
+          example: "received"
+        created_by:
+          allOf:
+            - $ref: '#/components/schemas/UserSummary'
+          readOnly: true
+        updated_by:
+          allOf:
+            - $ref: '#/components/schemas/UserSummary'
+          nullable: true
+          readOnly: true
+        created_date:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2026-05-20 11:00:00.000000+05:30"
+        modified_date:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2026-05-20 11:30:00.000000+05:30"
+
     # ===================== DVDMS Indent Status History Schemas =====================
     DvdmsIndentStatusHistory:
       type: object
@@ -3098,15 +3643,9 @@ components:
     RecordItemOrderCreate:
       type: object
       required:
-        - record_order
         - supply_request
         - drug
       properties:
-        record_order:
-          type: string
-          format: uuid
-          description: Reference to record order UUID
-          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
         supply_request:
           type: string
           format: uuid
@@ -3121,7 +3660,6 @@ components:
         - type: object
           required:
             - id
-            - institute_id
             - created_by
             - created_date
             - modified_date
@@ -3132,22 +3670,252 @@ components:
               readOnly: true
               description: Record item order external_id
               example: "uuid"
-            record_order:
-              allOf:
-                - $ref: '#/components/schemas/RecordOrder'
-              readOnly: true
-              description: Record order details (expanded in response)
             supply_request:
               allOf:
                 - $ref: '#/components/schemas/SupplyRequestSummary'
               readOnly: true
               description: Supply request details (expanded in response)
-            institute_id:
+            created_by:
+              allOf:
+                - $ref: '#/components/schemas/UserSummary'
+              readOnly: true
+            updated_by:
+              allOf:
+                - $ref: '#/components/schemas/UserSummary'
+              nullable: true
+              readOnly: true
+            created_date:
+              type: string
+              format: date-time
+              readOnly: true
+              example: "2026-05-19 19:29:35.868682+05:30"
+            modified_date:
+              type: string
+              format: date-time
+              readOnly: true
+              example: "2026-05-19 19:29:35.868682+05:30"
+
+    # ===================== Record Delivery Schemas =====================
+    RecordDeliveryCreate:
+      type: object
+      description: Input for creating a record_delivery link between inward_record and delivery_order.
+      required:
+        - inward_record_id
+        - delivery_order_id
+        - facility_id
+      properties:
+        inward_record_id:
+          type: string
+          format: uuid
+          description: FK to the inward_record this delivery belongs to
+        delivery_order_id:
+          type: string
+          format: uuid
+          description: FK to CARE delivery_order
+        facility_id:
+          type: string
+          format: uuid
+          description: FK to CARE facility
+
+    RecordDelivery:
+      allOf:
+        - $ref: '#/components/schemas/RecordDeliveryCreate'
+        - type: object
+          description: Link between an inward_record and a CARE delivery_order.
+          required:
+            - id
+            - created_date
+            - modified_date
+          properties:
+            id:
               type: string
               format: uuid
               readOnly: true
-              description: FK to institute
-              example: "uuid"
+              example: "11223344-5566-7788-99aa-bbccddeeff00"
+            created_by:
+              allOf:
+                - $ref: '#/components/schemas/UserSummary'
+              readOnly: true
+            updated_by:
+              allOf:
+                - $ref: '#/components/schemas/UserSummary'
+              nullable: true
+              readOnly: true
+            created_date:
+              type: string
+              format: date-time
+              readOnly: true
+              example: "2026-05-19 19:29:35.868682+05:30"
+            modified_date:
+              type: string
+              format: date-time
+              readOnly: true
+              example: "2026-05-19 19:29:35.868682+05:30"
+
+    # ===================== Product Mapping Schemas =====================
+    EaushadhiDrugDetails:
+      type: object
+      required:
+        - drug_id
+        - drug_name
+      properties:
+        drug_id:
+          type: string
+          description: eAushadhi/DVDMS drug ID
+          example: "D00251"
+        drug_name:
+          type: string
+          description: eAushadhi/DVDMS drug name
+          example: "Ofloxacin Tablet IP 400 mg 1x1"
+
+    ProductMapping:
+      type: object
+      description: Mapping between eAushadhi/DVDMS drugs and CARE products
+      required:
+        - id
+        - facility_id
+        - institute_id
+        - eaushadhi_drug_details
+        - product_knowledge_id
+        - usage_count
+        - created_date
+        - modified_date
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: Product mapping external_id
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        facility_id:
+          type: string
+          format: uuid
+          description: FK to CARE facility
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        institute_id:
+          type: string
+          format: uuid
+          description: FK to institute mapping
+          example: "institute-uuid-1"
+        eaushadhi_drug_details:
+          $ref: '#/components/schemas/EaushadhiDrugDetails'
+          description: eAushadhi/DVDMS drug details
+        product_knowledge_id:
+          type: string
+          format: uuid
+          description: FK to CARE product_knowledge
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        usage_count:
+          type: integer
+          description: Number of times this mapping has been used
+          example: 15
+        created_by:
+          allOf:
+            - $ref: '#/components/schemas/UserSummary'
+          readOnly: true
+        updated_by:
+          allOf:
+            - $ref: '#/components/schemas/UserSummary'
+          nullable: true
+          readOnly: true
+        created_date:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2026-05-19 19:29:35.868682+05:30"
+        modified_date:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2026-05-19 19:29:35.868682+05:30"
+
+    # ===================== Record Item Delivery Schemas =====================
+    RecordItemDeliveryCreate:
+      type: object
+      required:
+        - inward_record_id
+        - inward_record_item_id
+        - facility_id
+        - supply_delivery_id
+        - record_delivery_id
+        - product_id
+        - product_knowledge_id
+        - quantity_dispatched
+        - quantity_accepted
+        - quantity_damaged
+        - quantity_short
+      properties:
+        inward_record_id:
+          type: string
+          format: uuid
+          description: FK to the inward record
+        inward_record_item_id:
+          type: string
+          format: uuid
+          description: FK to the inward item record that was imported
+        facility_id:
+          type: string
+          format: uuid
+          description: Facility id (denormalized for query performance)
+        supply_delivery_id:
+          type: string
+          format: uuid
+          description: FK to CARE supply_delivery created from this import
+        record_delivery_id:
+          type: string
+          format: uuid
+          description: FK to the record_delivery linking the inward_record to the delivery_order
+        product_id:
+          type: string
+          format: uuid
+          description: FK to matched CARE product
+        product_knowledge_id:
+          type: string
+          format: uuid
+          description: FK to CARE product_knowledge
+        quantity_dispatched:
+          type: number
+          format: decimal
+          description: Quantity dispatched as per eAushadhi/DVDMS system
+        quantity_accepted:
+          type: number
+          format: decimal
+          description: Quantity accepted/received in good condition
+        quantity_damaged:
+          type: number
+          format: decimal
+          description: Quantity received but damaged
+        quantity_short:
+          type: number
+          format: decimal
+          description: Quantity short/missing (not received)
+
+    RecordItemDelivery:
+      allOf:
+        - $ref: '#/components/schemas/RecordItemDeliveryCreate'
+        - type: object
+          required:
+            - id
+            - status
+            - deleted
+            - created_by
+            - created_date
+            - modified_date
+          properties:
+            id:
+              type: string
+              format: uuid
+              readOnly: true
+              example: "item-delivery-uuid-1"
+            status:
+              type: string
+              enum: [ACTIVE, REVERSED]
+              default: ACTIVE
+              readOnly: true
+            deleted:
+              type: boolean
+              default: false
+              readOnly: true
             created_by:
               allOf:
                 - $ref: '#/components/schemas/UserSummary'
