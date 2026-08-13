@@ -81,7 +81,12 @@ class DVDMSLookupViewSet(ViewSet):
                 )
             cache.set(DVDMS_UNITS_CACHE_KEY, units, settings.DVDMS_LOOKUP_CACHE_TTL)
 
-        results = [unit for unit in units if str(unit.get("gnumSeatid")) == institute.eaushadhi_user_ref_id]
+        results = [
+            unit
+            for unit in units
+            if str(unit.get("gnumHospitalCode")) == institute.eaushadhi_institute_id
+            and str(unit.get("gnumSeatid")) == institute.eaushadhi_user_ref_id
+        ]
 
         return Response(results)
 
