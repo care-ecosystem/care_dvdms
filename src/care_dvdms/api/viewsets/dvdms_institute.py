@@ -121,6 +121,10 @@ class DVDMSInstituteViewSet(EMRBaseViewSet):
 
         updated = False
 
+        if spec.eaushadhi_institute_id is not None:
+            instance.eaushadhi_institute_id = spec.eaushadhi_institute_id
+            updated = True
+
         if spec.eaushadhi_institute_name is not None:
             instance.eaushadhi_institute_name = spec.eaushadhi_institute_name
             updated = True

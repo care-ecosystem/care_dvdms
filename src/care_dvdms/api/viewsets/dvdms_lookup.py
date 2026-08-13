@@ -51,4 +51,11 @@ class DVDMSGroupLookupViewSet(ViewSet):
                 )
             cache.set(GROUPS_CACHE_KEY, groups, settings.DVDMS_LOOKUP_CACHE_TTL)
 
-        return Response({"count": len(groups), "results": groups})
+        results = [
+            group
+            for group in groups
+            if str(group.get("gnumHospitalCode")) == institute.eaushadhi_institute_id
+            and str(group.get("gnumSeatid")) == institute.eaushadhi_user_ref_id
+        ]
+
+        return Response({"count": len(results), "results": results})
