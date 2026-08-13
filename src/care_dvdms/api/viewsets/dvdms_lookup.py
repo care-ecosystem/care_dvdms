@@ -109,6 +109,8 @@ class DVDMSLookupViewSet(ViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        item_name = request.query_params.get("hststr_item_name")
+
         institute = self.get_institute()
         self.check_permissions_for_institute(request, institute)
 
@@ -136,6 +138,7 @@ class DVDMSLookupViewSet(ViewSet):
             and str(drug.get("sstnum_item_cat_no")) == DVDMS_DRUG_ITEM_CAT_NO
             and str(drug.get("hstnum_group_id")) == hstnum_group_id
             and str(drug.get("hstnum_subgroup_id")) == hstnum_subgroup_id
+            and (not item_name or item_name.lower() in str(drug.get("hststr_item_name", "")).lower())
         ]
 
         return Response(results)
