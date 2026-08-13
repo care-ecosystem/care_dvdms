@@ -84,12 +84,18 @@ def _reload_plugin_settings(*, setting, **kwargs):
         plugin_settings.reload()
 
 
-# TODO: Add your settings keys and defaults here
-REQUIRED_SETTINGS: set[str] = set()
+REQUIRED_SETTINGS: set[str] = {
+    "DVDMS_API_ENDPOINT",
+    "DVDMS_AUTH_TOKEN",
+}
 
 DEFAULTS: dict[str, Any] = {
-    # "CARE_DVDMS_API_KEY": "",
-    # "CARE_DVDMS_API_ENDPOINT": "",
+    "DVDMS_API_ENDPOINT": "",
+    "DVDMS_AUTH_TOKEN": "",
+    "DVDMS_AUTH_TOKEN_TYPE": "Basic",
+    "DVDMS_API_CONNECT_TIMEOUT": 10,
+    "DVDMS_API_READ_TIMEOUT": 30,
+    "DVDMS_LOOKUP_CACHE_TTL": 86400,
 }
 
 plugin_settings = PluginSettings(

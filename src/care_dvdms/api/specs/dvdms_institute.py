@@ -49,6 +49,7 @@ class DVDMSInstituteUpdateSpec(EMRResource):
     __model__ = DVDMSInstitute
     __exclude__ = ["id", "facility", "created_by", "updated_by", "created_date", "modified_date", "deleted", "external_id", "history"]
 
+    eaushadhi_institute_id: str | None = None
     eaushadhi_institute_name: str | None = None
     eaushadhi_user_ref_id: str | None = None
     schema_version: str | None = None
