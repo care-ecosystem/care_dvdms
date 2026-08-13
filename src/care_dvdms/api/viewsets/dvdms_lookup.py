@@ -9,15 +9,13 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
+from care_dvdms.api.services.constants import DVDMS_GROUPS_CACHE_KEY, DVDMS_SUBGROUPS_CACHE_KEY
 from care_dvdms.api.services.dvdms_group_master_service import DVDMSGroupMasterService
 from care_dvdms.api.services.dvdms_subgroup_master_service import DVDMSSubGroupMasterService
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
 from care_dvdms.settings import plugin_settings as settings
 
 logger = logging.getLogger(__name__)
-
-GROUPS_CACHE_KEY = "dvdms:lookup:groups"
-SUBGROUPS_CACHE_KEY = "dvdms:lookup:subgroups"
 
 
 class DVDMSLookupViewSet(ViewSet):
@@ -35,7 +33,7 @@ class DVDMSLookupViewSet(ViewSet):
         institute = self.get_institute()
         self.check_permissions_for_institute(request, institute)
 
-        groups = cache.get(GROUPS_CACHE_KEY)
+        groups = cache.get(DVDMS_GROUPS_CACHE_KEY)
         if groups is None:
             try:
                 groups = DVDMSGroupMasterService.fetch_groups()
@@ -49,7 +47,7 @@ class DVDMSLookupViewSet(ViewSet):
                     {"error": "Internal server error occurred", "code": "INTERNAL_ERROR"},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
-            cache.set(GROUPS_CACHE_KEY, groups, settings.DVDMS_LOOKUP_CACHE_TTL)
+            cache.set(DVDMS_GROUPS_CACHE_KEY, groups, settings.DVDMS_LOOKUP_CACHE_TTL)
 
         results = [
             group
@@ -71,7 +69,7 @@ class DVDMSLookupViewSet(ViewSet):
         institute = self.get_institute()
         self.check_permissions_for_institute(request, institute)
 
-        subgroups = cache.get(SUBGROUPS_CACHE_KEY)
+        subgroups = cache.get(DVDMS_SUBGROUPS_CACHE_KEY)
         if subgroups is None:
             try:
                 subgroups = DVDMSSubGroupMasterService.fetch_subgroups()
@@ -85,7 +83,7 @@ class DVDMSLookupViewSet(ViewSet):
                     {"error": "Internal server error occurred", "code": "INTERNAL_ERROR"},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
-            cache.set(SUBGROUPS_CACHE_KEY, subgroups, settings.DVDMS_LOOKUP_CACHE_TTL)
+            cache.set(DVDMS_SUBGROUPS_CACHE_KEY, subgroups, settings.DVDMS_LOOKUP_CACHE_TTL)
 
         results = [
             subgroup
