@@ -13,12 +13,14 @@ from care_dvdms.api.services.constants import (
     DVDMS_DRUG_ITEM_CAT_NO,
     DVDMS_DRUGS_CACHE_KEY,
     DVDMS_GROUPS_CACHE_KEY,
+    DVDMS_STORES_CACHE_KEY,
     DVDMS_SUBGROUPS_CACHE_KEY,
     DVDMS_UNITS_CACHE_KEY,
 )
 from care_dvdms.api.services.dvdms_master_data_services import (
     fetch_drugs,
     fetch_groups,
+    fetch_stores,
     fetch_subgroups,
     fetch_units,
 )
@@ -139,6 +141,42 @@ class DVDMSLookupViewSet(ViewSet):
             and str(drug.get("hstnum_group_id")) == hstnum_group_id
             and str(drug.get("hstnum_subgroup_id")) == hstnum_subgroup_id
             and (not item_name or item_name.lower() in str(drug.get("hststr_item_name", "")).lower())
+        ]
+
+        return Response(results)
+
+    def stores(self, request, *args, **kwargs):
+        from_store_id = request.query_params.get("fromStoreid")
+        if not from_store_id:
+            return Response(
+                {"error": "fromStoreid query parameter is required", "code": "MISSING_PARAMETER"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        institute = self.get_institute()
+        self.check_permissions_for_institute(request, institute)
+
+        stores = cache.get(DVDMS_STORES_CACHE_KEY)
+        if stores is None:
+            try:
+                stores = fetch_stores()
+            except requests.exceptions.RequestException:
+                return Response(
+                    {"error": "Failed to fetch stores from DVDMS", "code": "DVDMS_API_ERROR"},
+                    status=status.HTTP_502_BAD_GATEWAY,
+                )
+            except Exception:
+                return Response(
+                    {"error": "Internal server error occurred", "code": "INTERNAL_ERROR"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+            cache.set(DVDMS_STORES_CACHE_KEY, stores, settings.DVDMS_LOOKUP_CACHE_TTL)
+
+        results = [
+            store
+            for store in stores
+            if str(store.get("hstnumStoreId")) == from_store_id
+            and str(store.get("gnumSeatid")) == institute.eaushadhi_user_ref_id
         ]
 
         return Response(results)
