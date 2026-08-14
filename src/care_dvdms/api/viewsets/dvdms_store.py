@@ -118,7 +118,12 @@ class DVDMSStoreViewSet(EMRBaseViewSet):
                     created_by=request.user,
                     updated_by=request.user,
                 )
-        except IntegrityError:
+        except IntegrityError as exc:
+            if "uniq_default_store_per_institute" in str(exc):
+                return Response(
+                    {"error": "Only one store can be marked as default per institute"},
+                    status=status.HTTP_409_CONFLICT,
+                )
             return Response(
                 {"error": "This store is already mapped for this institute"},
                 status=status.HTTP_409_CONFLICT,
