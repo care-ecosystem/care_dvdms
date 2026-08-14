@@ -20,14 +20,17 @@ def _dvdms_request(method, path, **kwargs):
     response.raise_for_status()
 
     body = response.json()
+    if isinstance(body, list):
+        return body
+
     if body.get("status") != 1:
         raise requests.exceptions.RequestException(body.get("message", "DVDMS API request failed"))
 
     return body.get("data", [])
 
 
-def dvdms_get(path):
-    return _dvdms_request("GET", path)
+def dvdms_get(path, params=None):
+    return _dvdms_request("GET", path, params=params)
 
 
 def dvdms_post(path, payload=None):

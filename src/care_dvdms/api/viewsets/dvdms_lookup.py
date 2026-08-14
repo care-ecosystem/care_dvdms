@@ -16,6 +16,7 @@ from care_dvdms.api.services.constants import (
     DVDMS_STORES_CACHE_KEY,
     DVDMS_SUBGROUPS_CACHE_KEY,
     DVDMS_UNITS_CACHE_KEY,
+    DVDMS_WAREHOUSES_CACHE_KEY,
 )
 from care_dvdms.api.services.dvdms_master_data_services import (
     fetch_drugs,
@@ -23,6 +24,7 @@ from care_dvdms.api.services.dvdms_master_data_services import (
     fetch_stores,
     fetch_subgroups,
     fetch_units,
+    fetch_warehouses,
 )
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
 from care_dvdms.settings import plugin_settings as settings
@@ -180,6 +182,29 @@ class DVDMSLookupViewSet(ViewSet):
         ]
 
         return Response(results)
+
+    def warehouses(self, request, *args, **kwargs):
+        institute = self.get_institute()
+        self.check_permissions_for_institute(request, institute)
+
+        cache_key = f"{DVDMS_WAREHOUSES_CACHE_KEY}:{institute.eaushadhi_user_ref_id}"
+        warehouses = cache.get(cache_key)
+        if warehouses is None:
+            try:
+                warehouses = fetch_warehouses(institute.eaushadhi_user_ref_id)
+            except requests.exceptions.RequestException:
+                return Response(
+                    {"error": "Failed to fetch warehouses from DVDMS", "code": "DVDMS_API_ERROR"},
+                    status=status.HTTP_502_BAD_GATEWAY,
+                )
+            except Exception:
+                return Response(
+                    {"error": "Internal server error occurred", "code": "INTERNAL_ERROR"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+            cache.set(cache_key, warehouses, settings.DVDMS_LOOKUP_CACHE_TTL)
+
+        return Response(warehouses)
 
     def subgroups(self, request, *args, **kwargs):
         group_id = request.query_params.get("group_id")

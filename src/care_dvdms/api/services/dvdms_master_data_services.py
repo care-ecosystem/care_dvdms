@@ -4,6 +4,7 @@ from care_dvdms.api.services.constants import (
     DVDMS_STORE_LIST_PATH,
     DVDMS_SUBGROUP_LIST_PATH,
     DVDMS_UNIT_LIST_PATH,
+    DVDMS_WAREHOUSE_LIST_PATH,
 )
 from care_dvdms.api.services.dvdms_client import dvdms_get
 
@@ -26,3 +27,7 @@ def fetch_drugs():
 
 def fetch_stores():
     return dvdms_get(DVDMS_STORE_LIST_PATH)
+
+
+def fetch_warehouses(seat_id):
+    return dvdms_get(DVDMS_WAREHOUSE_LIST_PATH, params={"seatId": seat_id})
