@@ -744,7 +744,7 @@ paths:
       description: |
         Fetch the list of available stores directly from the DVDMS system
         for this institute.
-        Requires a fromStoreid query parameter to specify the source warehouse.
+        Optionally filter by fromStoreid query parameter to specify the source warehouse.
         Uses the institute's credentials to query DVDMS API.
       operationId: getDvdmsStores
       parameters:
@@ -757,7 +757,7 @@ paths:
             format: uuid
         - name: fromStoreid
           in: query
-          required: true
+          required: false
           description: DVDMS warehouse/from_store ID to fetch stores for
           schema:
             type: string
@@ -776,15 +776,6 @@ paths:
                   name: "Chas_Chc"
                 - id: 99901000
                   name: "JMHIDPCL"
-        '400':
-          description: Bad Request - fromStoreid is required
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                error: "fromStoreid query parameter is required"
-                code: "MISSING_PARAMETER"
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
