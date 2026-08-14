@@ -3,6 +3,7 @@ from django.urls import path, re_path
 
 from care_dvdms.api.viewsets.dvdms_institute import DVDMSInstituteViewSet
 from care_dvdms.api.viewsets.dvdms_lookup import DVDMSLookupViewSet
+from care_dvdms.api.viewsets.dvdms_store import DVDMSStoreViewSet
 from care_dvdms.api.viewsets.dvdms_supplier import DVDMSSupplierViewSet
 
 
@@ -41,6 +42,25 @@ urlpatterns = [
             }
         ),
         name="dvdms-supplier-detail",
+    ),
+    re_path(
+        r"^facility/(?P<facility_id>[^/.]+)/institute/(?P<institute_id>[^/.]+)/stores/$",
+        DVDMSStoreViewSet.as_view(
+            {
+                "get": "list",
+                "post": "create",
+            }
+        ),
+        name="dvdms-store-list",
+    ),
+    re_path(
+        r"^facility/(?P<facility_id>[^/.]+)/institute/(?P<institute_id>[^/.]+)/stores/(?P<external_id>[^/.]+)/$",
+        DVDMSStoreViewSet.as_view(
+            {
+                "delete": "destroy",
+            }
+        ),
+        name="dvdms-store-detail",
     ),
     re_path(
         r"^institute/(?P<institute_id>[^/.]+)/lookup/groups/$",
