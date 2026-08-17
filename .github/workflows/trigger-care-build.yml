@@ -3,6 +3,7 @@ name: Trigger CARE Backend Build
 on:
   push:
     branches: [main, develop]
+    # No paths restriction - triggers on ANY change
 
 jobs:
   trigger-backend-build:
@@ -13,14 +14,19 @@ jobs:
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.CARE_REPO_DISPATCH_TOKEN }}
-          repository: care-ecosystem/care  # TODO: update to your care fork/org
-          event-type: dvdms-updated     # TODO: rename event type
+          repository: care-ecosystem/care
+          event-type: dvdms-plugin-updated
           client-payload: '{"plugin": "care_dvdms", "ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
 
       - name: Verify dispatch sent
         run: |
-          echo "Dispatch event sent to care-ecosystem/care"
-          echo "Event type: dvdms-updated"
+          echo "Dispatch event sent successfully"
+          echo "Target repository: care-ecosystem/care"
+          echo "Event type: dvdms-plugin-updated"
           echo "Triggered from: ${{ github.ref }}"
           echo "Commit SHA: ${{ github.sha }}"
-          echo "Check: https://github.com/care-ecosystem/care/actions"
+          echo ""
+          echo "Check for workflow run at:"
+          echo "https://github.com/care-ecosystem/care/actions"
+          echo ""
+          echo "Note: It may take 1-2 minutes for the workflow to appear"
