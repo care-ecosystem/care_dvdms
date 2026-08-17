@@ -42,6 +42,7 @@ urlpatterns = [
         r"^institute/(?P<institute_id>[^/.]+)/suppliers/(?P<external_id>[^/.]+)/$",
         DVDMSSupplierViewSet.as_view(
             {
+                "patch": "partial_update",
                 "delete": "destroy",
             }
         ),
@@ -61,6 +62,7 @@ urlpatterns = [
         r"^facility/(?P<facility_id>[^/.]+)/institute/(?P<institute_id>[^/.]+)/stores/(?P<external_id>[^/.]+)/$",
         DVDMSStoreViewSet.as_view(
             {
+                "patch": "partial_update",
                 "delete": "destroy",
             }
         ),
