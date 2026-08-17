@@ -2,6 +2,7 @@ from care.emr.api.viewsets.base import EMRBaseViewSet
 from care.emr.models.supply_request import SupplyRequest
 from care.security.authorization.base import AuthorizationController
 from care.utils.shortcuts import get_object_or_404
+from django.db import transaction
 from django_filters import rest_framework as filters
 from rest_framework import status
 from rest_framework.exceptions import NotFound, PermissionDenied
@@ -97,25 +98,27 @@ class DVDMSRecordItemOrderViewSet(EMRBaseViewSet):
         supply_request = get_object_or_404(
             SupplyRequest.objects.select_related("item", "order"),
             external_id=spec.supply_request,
+            order=record_order.order,
         )
 
-        drug = DVDMSDrug.objects.create(
-            drug_id=spec.drug.id,
-            name=spec.drug.name,
-            brand_id=spec.drug.brand_id,
-            group_id=spec.drug.group_id,
-            sub_group_id=spec.drug.sub_group_id,
-            unit_id=spec.drug.unit_id,
-            drug_category=spec.drug.drug_category,
-        )
-        item_order = DVDMSRecordItemOrder.objects.create(
-            institute=institute,
-            record_order=record_order,
-            supply_request=supply_request,
-            drug=drug,
-            created_by=request.user,
-            updated_by=request.user,
-        )
+        with transaction.atomic():
+            drug = DVDMSDrug.objects.create(
+                drug_id=spec.drug.id,
+                name=spec.drug.name,
+                brand_id=spec.drug.brand_id,
+                group_id=spec.drug.group_id,
+                sub_group_id=spec.drug.sub_group_id,
+                unit_id=spec.drug.unit_id,
+                drug_category=spec.drug.drug_category,
+            )
+            item_order = DVDMSRecordItemOrder.objects.create(
+                institute=institute,
+                record_order=record_order,
+                supply_request=supply_request,
+                drug=drug,
+                created_by=request.user,
+                updated_by=request.user,
+            )
 
         result = DVDMSRecordItemOrderListSpec.serialize(item_order)
         return Response(result.to_json(), status=status.HTTP_201_CREATED)
