@@ -10,11 +10,11 @@ from care_dvdms.models.dvdms_record_item_order import DVDMSRecordItemOrder
 class DVDMSDrugSpec(BaseModel):
     id: str = Field(max_length=50)
     name: str = Field(max_length=255)
-    brand_id: str = ""
-    group_id: str = ""
-    sub_group_id: str = ""
-    unit_id: str = ""
-    drug_category: str = ""
+    brand_id: str = Field(default="", max_length=50)
+    group_id: str = Field(default="", max_length=50)
+    sub_group_id: str = Field(default="", max_length=50)
+    unit_id: str = Field(default="", max_length=50)
+    drug_category: str = Field(default="", max_length=50)
 
 
 class DVDMSRecordItemOrderListSpec(EMRResource):

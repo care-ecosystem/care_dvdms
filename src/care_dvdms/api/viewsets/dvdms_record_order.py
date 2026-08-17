@@ -79,7 +79,9 @@ class DVDMSRecordOrderViewSet(EMRBaseViewSet):
 
         spec = DVDMSRecordOrderCreateSpec(**request.data)
 
-        order = get_object_or_404(RequestOrder, external_id=spec.order)
+        order = get_object_or_404(
+            RequestOrder, external_id=spec.order, destination__facility=institute.facility
+        )
         institute_store = get_object_or_404(
             DVDMSStore.objects.select_related("location"),
             external_id=spec.institute_store,
