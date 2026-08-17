@@ -3,6 +3,10 @@ from django.urls import path, re_path
 
 from care_dvdms.api.viewsets.dvdms_institute import DVDMSInstituteViewSet
 from care_dvdms.api.viewsets.dvdms_lookup import DVDMSLookupViewSet
+from care_dvdms.api.viewsets.dvdms_record_item_order import (
+    DVDMSRecordItemOrderViewSet,
+)
+from care_dvdms.api.viewsets.dvdms_record_order import DVDMSRecordOrderViewSet
 from care_dvdms.api.viewsets.dvdms_store import DVDMSStoreViewSet
 from care_dvdms.api.viewsets.dvdms_supplier import DVDMSSupplierViewSet
 
@@ -86,5 +90,43 @@ urlpatterns = [
         r"^institute/(?P<institute_id>[^/.]+)/lookup/stores/$",
         DVDMSLookupViewSet.as_view({"get": "stores"}),
         name="dvdms-lookup-stores",
+    ),
+    re_path(
+        r"^institute/(?P<institute_id>[^/.]+)/record_order/$",
+        DVDMSRecordOrderViewSet.as_view(
+            {
+                "get": "list",
+                "post": "create",
+            }
+        ),
+        name="dvdms-record-order-list",
+    ),
+    re_path(
+        r"^institute/(?P<institute_id>[^/.]+)/record_order/(?P<external_id>[^/.]+)/$",
+        DVDMSRecordOrderViewSet.as_view(
+            {
+                "patch": "partial_update",
+            }
+        ),
+        name="dvdms-record-order-detail",
+    ),
+    re_path(
+        r"^institute/(?P<institute_id>[^/.]+)/record_order/(?P<record_order_id>[^/.]+)/item/$",
+        DVDMSRecordItemOrderViewSet.as_view(
+            {
+                "get": "list",
+                "post": "create",
+            }
+        ),
+        name="dvdms-record-item-order-list",
+    ),
+    re_path(
+        r"^institute/(?P<institute_id>[^/.]+)/record_order/(?P<record_order_id>[^/.]+)/item/(?P<external_id>[^/.]+)/$",
+        DVDMSRecordItemOrderViewSet.as_view(
+            {
+                "patch": "partial_update",
+            }
+        ),
+        name="dvdms-record-item-order-detail",
     ),
 ]

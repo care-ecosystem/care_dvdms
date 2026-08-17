@@ -113,89 +113,102 @@ Ref store_created_by: dvdms_store.created_by_id ?> care_user.id
 Ref store_updated_by: dvdms_store.updated_by_id ?> care_user.id
 
 // ============================================================================
-// RECORD ORDER - DVDMS Indent/Requisition Order [COMMENTED OUT]
-// Maps to CARE orders and DVDMS stores/suppliers for sync
+// RECORD ORDER - DVDMS Indent/Requisition Order (N:1 relationship)
+// Maps a CARE request order to DVDMS store/supplier mappings for sync
 // ============================================================================
-// Table dvdms_record_order {
-//   id INTEGER [pk, increment]
-//   external_id UUID [unique, not null, note: 'Exposed via API as id']
-//
-//   institute_id INTEGER [not null, note: 'FK to dvdms_institute.id']
-//   order_id INTEGER [not null, note: 'FK to care_order.id - the CARE order being synced']
-//   institute_store_id INTEGER [not null, note: 'FK to dvdms_store.id - destination store']
-//   institute_supplier_id INTEGER [not null, note: 'FK to dvdms_supplier.id - source warehouse']
-//
-//   name VARCHAR(255) [not null, note: 'Order name (e.g., "eaushadhi")']
-//
-//   status VARCHAR(50) [not null,
-//     note: 'Order status: draft, pending, approved, rejected, completed']
-//
-//   created_date TIMESTAMP [not null, note: "indexed"]
-//   modified_date TIMESTAMP [not null, note: "indexed"]
-//   deleted BOOLEAN [default: false, note: "indexed"]
-//
-//   created_by_id INTEGER [null]
-//   updated_by_id INTEGER [null]
-//
-//   history JSON [default: '{}']
-//   meta JSON [default: 'null', null]
-//
-//   indexes {
-//     institute_id
-//     order_id
-//     institute_store_id
-//     institute_supplier_id
-//     status
-//     deleted
-//     (institute_id, order_id) [unique, note: 'one record order per order per institute where deleted=false']
-//   }
-// }
+Table dvdms_record_order {
+  id INTEGER [pk, increment]
+  external_id UUID [unique, not null, note: 'Exposed via API as id']
 
-// Ref record_order_institute: dvdms_record_order.institute_id ?> dvdms_institute.id
-// Ref record_order_care_order: dvdms_record_order.order_id ?> care_order.id
-// Ref record_order_store: dvdms_record_order.institute_store_id ?> dvdms_store.id
-// Ref record_order_supplier: dvdms_record_order.institute_supplier_id ?> dvdms_supplier.id
-// Ref record_order_created_by: dvdms_record_order.created_by_id ?> care_user.id
-// Ref record_order_updated_by: dvdms_record_order.updated_by_id ?> care_user.id
+  institute_id INTEGER [not null, note: 'FK to dvdms_institute.id']
+  order_id INTEGER [not null, note: 'FK to care_request_order.id - the CARE order being synced. ON DELETE PROTECT']
+  institute_store_id INTEGER [not null, note: 'FK to dvdms_store.id - destination store. ON DELETE PROTECT']
+  institute_supplier_id INTEGER [not null, note: 'FK to dvdms_supplier.id - source warehouse. ON DELETE PROTECT']
+
+  name VARCHAR(255) [not null, note: 'Order name (e.g., "eaushadhi")']
+
+  status VARCHAR(20) [not null, default: 'draft',
+    note: 'Order status: draft, pending, approved, rejected, completed']
+
+  created_date TIMESTAMP [not null, note: "indexed"]
+  modified_date TIMESTAMP [not null, note: "indexed"]
+  deleted BOOLEAN [default: false, note: "indexed"]
+
+  created_by_id INTEGER [null]
+  updated_by_id INTEGER [null]
+
+  history JSON [default: '{}']
+  meta JSON [default: 'null', null]
+
+  indexes {
+    institute_id
+    order_id
+    institute_store_id
+    institute_supplier_id
+    status
+    deleted
+  }
+}
+
+Ref record_order_institute: dvdms_record_order.institute_id ?> dvdms_institute.id
+Ref record_order_care_order: dvdms_record_order.order_id ?> care_request_order.id
+Ref record_order_store: dvdms_record_order.institute_store_id ?> dvdms_store.id
+Ref record_order_supplier: dvdms_record_order.institute_supplier_id ?> dvdms_supplier.id
+Ref record_order_created_by: dvdms_record_order.created_by_id ?> care_user.id
+Ref record_order_updated_by: dvdms_record_order.updated_by_id ?> care_user.id
 
 // ============================================================================
-// RECORD ITEM ORDER - Line Items in DVDMS Orders [COMMENTED OUT]
-// Maps CARE supply requests to DVDMS drugs
+// DVDMS DRUG - Snapshot of a DVDMS drug/item (1:1 owned by a record item order)
 // ============================================================================
-// Table dvdms_record_item_order {
-//   id INTEGER [pk, increment]
-//   external_id UUID [unique, not null, note: 'Exposed via API as id']
-//
-//   institute_id INTEGER [not null, note: 'FK to dvdms_institute.id - denormalized for fast lookup']
-//   record_order_id INTEGER [not null, note: 'FK to dvdms_record_order.id - parent order']
-//   supply_request_id INTEGER [not null, note: 'FK to care_supply_request.id - CARE supply request']
-//
-//   drug JSON [not null, note: 'Drug details: {id, name, brand_id, group_id, sub_group_id, unit_id, drug_category}']
-//
-//   created_date TIMESTAMP [not null, note: "indexed"]
-//   modified_date TIMESTAMP [not null, note: "indexed"]
-//   deleted BOOLEAN [default: false, note: "indexed"]
-//
-//   created_by_id INTEGER [null]
-//   updated_by_id INTEGER [null]
-//
-//   history JSON [default: '{}']
-//   meta JSON [default: 'null', null]
-//
-//   indexes {
-//     institute_id
-//     record_order_id
-//     supply_request_id
-//     deleted
-//     (record_order_id, supply_request_id) [unique, note: 'one item order per supply request per order where deleted=false']
-//   }
-// }
+Table dvdms_drug {
+  id INTEGER [pk, increment]
 
-// Ref item_order_institute: dvdms_record_item_order.institute_id ?> dvdms_institute.id
-// Ref item_order_record_order: dvdms_record_item_order.record_order_id ?> dvdms_record_order.id
-// Ref item_order_supply_request: dvdms_record_item_order.supply_request_id ?> care_supply_request.id
-// Ref item_order_created_by: dvdms_record_item_order.created_by_id ?> care_user.id
-// Ref item_order_updated_by: dvdms_record_item_order.updated_by_id ?> care_user.id
+  drug_id VARCHAR(50) [not null, note: 'DVDMS item ID']
+  name VARCHAR(255) [not null, note: 'Drug name']
+  brand_id VARCHAR(50) [default: '', note: 'DVDMS brand ID']
+  group_id VARCHAR(50) [default: '', note: 'DVDMS group ID']
+  sub_group_id VARCHAR(50) [default: '', note: 'DVDMS subgroup ID']
+  unit_id VARCHAR(50) [default: '', note: 'DVDMS unit ID']
+  drug_category VARCHAR(50) [default: '', note: 'Drug category']
+}
+
+// ============================================================================
+// RECORD ITEM ORDER - Line Items in DVDMS Orders (N:1 relationship)
+// Maps a CARE supply request to a DVDMS drug snapshot within a record order
+// ============================================================================
+Table dvdms_record_item_order {
+  id INTEGER [pk, increment]
+  external_id UUID [unique, not null, note: 'Exposed via API as id']
+
+  institute_id INTEGER [not null, note: 'FK to dvdms_institute.id - denormalized for fast lookup']
+  record_order_id INTEGER [not null, note: 'FK to dvdms_record_order.id - parent order']
+  supply_request_id INTEGER [not null, note: 'FK to care_supply_request.id - CARE supply request. ON DELETE PROTECT']
+  drug_id INTEGER [not null, unique, note: 'FK to dvdms_drug.id - 1:1 drug snapshot owned by this item order']
+
+  created_date TIMESTAMP [not null, note: "indexed"]
+  modified_date TIMESTAMP [not null, note: "indexed"]
+  deleted BOOLEAN [default: false, note: "indexed"]
+
+  created_by_id INTEGER [null]
+  updated_by_id INTEGER [null]
+
+  history JSON [default: '{}']
+  meta JSON [default: 'null', null]
+
+  indexes {
+    institute_id
+    record_order_id
+    supply_request_id
+    deleted
+  }
+}
+
+Ref item_order_institute: dvdms_record_item_order.institute_id ?> dvdms_institute.id
+Ref item_order_record_order: dvdms_record_item_order.record_order_id ?> dvdms_record_order.id
+Ref item_order_supply_request: dvdms_record_item_order.supply_request_id ?> care_supply_request.id
+Ref item_order_drug: dvdms_record_item_order.drug_id - dvdms_drug.id
+Ref item_order_created_by: dvdms_record_item_order.created_by_id ?> care_user.id
+Ref item_order_updated_by: dvdms_record_item_order.updated_by_id ?> care_user.id
 
 // ============================================================================
 // DVDMS LOOKUP CACHE (Optional - for performance) [COMMENTED OUT]
@@ -305,27 +318,31 @@ Table care_organization {
   external_id UUID [unique, not null]
 }
 
-// CARE models below are not directly used by active DVDMS models (commented out)
+Table care_request_order {
+  id INTEGER [pk, increment]
+  external_id UUID [unique, not null]
 
-// Table care_order {
-//   id INTEGER [pk, increment]
-//   external_id UUID [unique, not null]
-//
-//   destination_id INTEGER [null, note: "FK to care_facility"]
-//   origin_id INTEGER [null, note: "FK to care_facility"]
-//   supplier_id INTEGER [null, note: "FK to care_organization"]
-// }
-//
-// Ref order_destination: care_order.destination_id ?> care_facility.id
-// Ref order_origin: care_order.origin_id ?> care_facility.id
-// Ref order_supplier: care_order.supplier_id ?> care_organization.id
+  destination_id INTEGER [not null, note: "FK to care_location"]
+  origin_id INTEGER [null, note: "FK to care_location"]
+  supplier_id INTEGER [null, note: "FK to care_organization"]
+}
 
-// Table care_supply_request {
-//   id INTEGER [pk, increment]
-//   external_id UUID [unique, not null]
-//
-//   order_id INTEGER [not null, note: "FK to care_order"]
-//   item_id INTEGER [not null, note: "FK to care_item (TBD)"]
-// }
-//
-// Ref supply_request_order: care_supply_request.order_id ?> care_order.id
+Ref order_destination: care_request_order.destination_id ?> care_location.id
+Ref order_origin: care_request_order.origin_id ?> care_location.id
+Ref order_supplier: care_request_order.supplier_id ?> care_organization.id
+
+Table care_product_knowledge {
+  id INTEGER [pk, increment]
+  external_id UUID [unique, not null]
+}
+
+Table care_supply_request {
+  id INTEGER [pk, increment]
+  external_id UUID [unique, not null]
+
+  order_id INTEGER [not null, note: "FK to care_request_order"]
+  item_id INTEGER [not null, note: "FK to care_product_knowledge"]
+}
+
+Ref supply_request_order: care_supply_request.order_id ?> care_request_order.id
+Ref supply_request_item: care_supply_request.item_id ?> care_product_knowledge.id
