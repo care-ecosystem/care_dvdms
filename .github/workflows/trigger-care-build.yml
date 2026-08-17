@@ -2,7 +2,7 @@ name: Trigger CARE Backend Build
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, production]
     # No paths restriction - triggers on ANY change
 
 jobs:
