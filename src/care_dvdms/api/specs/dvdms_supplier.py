@@ -12,7 +12,6 @@ class DVDMSSupplierListSpec(EMRResource):
 
     id: UUID4 | None = None
     institute_id: UUID4 | None = None
-    supplier_id: UUID4 | None = None
     eaushadhi_warehouse_id: str | None = None
     eaushadhi_warehouse_name: str | None = None
     is_default: bool | None = None
@@ -29,7 +28,6 @@ class DVDMSSupplierListSpec(EMRResource):
     def perform_extra_serialization(cls, mapping, obj):
         mapping["id"] = obj.external_id
         mapping["institute_id"] = obj.institute.external_id if obj.institute else None
-        mapping["supplier_id"] = obj.supplier.external_id if obj.supplier else None
         mapping["supplier"] = {
             "id": obj.supplier.external_id,
             "name": obj.supplier.name,

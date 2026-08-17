@@ -147,11 +147,6 @@ class DVDMSLookupViewSet(ViewSet):
 
     def stores(self, request, *args, **kwargs):
         from_store_id = request.query_params.get("fromStoreid")
-        if not from_store_id:
-            return Response(
-                {"error": "fromStoreid query parameter is required", "code": "MISSING_PARAMETER"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
 
         institute = self.get_institute()
         self.check_permissions_for_institute(request, institute)
@@ -175,7 +170,7 @@ class DVDMSLookupViewSet(ViewSet):
         results = [
             store
             for store in stores
-            if str(store.get("hstnumStoreId")) == from_store_id
+            if (not from_store_id or str(store.get("hstnumStoreId")) == from_store_id)
             and str(store.get("gnumSeatid")) == institute.eaushadhi_user_ref_id
         ]
 
