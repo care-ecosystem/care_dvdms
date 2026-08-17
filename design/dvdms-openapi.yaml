@@ -248,7 +248,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
   # ---------- Supplier Mappings ----------
-  /facility/{facility_id}/institute/{institute_id}/suppliers/:
+  /institute/{institute_id}/suppliers/:
     post:
       tags:
         - Supplier Mappings
@@ -259,13 +259,6 @@ paths:
         At most one supplier can be marked as default.
       operationId: createSupplierMapping
       parameters:
-        - name: facility_id
-          in: path
-          required: true
-          description: CARE facility ID (UUID)
-          schema:
-            type: string
-            format: uuid
         - name: institute_id
           in: path
           required: true
@@ -336,13 +329,6 @@ paths:
       description: Get all supplier mappings for this institute
       operationId: listSupplierMappings
       parameters:
-        - name: facility_id
-          in: path
-          required: true
-          description: CARE facility ID (UUID)
-          schema:
-            type: string
-            format: uuid
         - name: institute_id
           in: path
           required: true
@@ -417,7 +403,96 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /facility/{facility_id}/institute/{institute_id}/suppliers/{supplier_mapping_id}/:
+  /institute/{institute_id}/suppliers/{supplier_mapping_id}/:
+    patch:
+      tags:
+        - Supplier Mappings
+      summary: Update a supplier mapping
+      description: |
+        Update a supplier mapping. All fields are optional; only supplied fields are updated.
+        Re-pointing the `supplier` re-validates that the new supplier isn't already mapped
+        for this institute. At most one supplier can be marked as default.
+      operationId: updateSupplierMapping
+      parameters:
+        - name: institute_id
+          in: path
+          required: true
+          description: Institute UUID
+          schema:
+            type: string
+            format: uuid
+        - name: supplier_mapping_id
+          in: path
+          required: true
+          description: Supplier mapping UUID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupplierMappingUpdate'
+            examples:
+              rename_warehouse:
+                summary: Rename the DVDMS warehouse
+                value:
+                  eaushadhi_warehouse_name: "Bokaro_DWH_2"
+              set_default:
+                summary: Mark as default
+                value:
+                  is_default: true
+              repoint_supplier:
+                summary: Re-point to a different CARE supplier
+                value:
+                  supplier: "5aa85d4e-3456-41fb-aee2-8076f07cb91b"
+      responses:
+        '200':
+          description: Supplier mapping updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupplierMapping'
+              example:
+                id: "uuid1"
+                supplier:
+                  id: "b1e7c2a4-9d8f-4e6b-a3c1-7f2d8e5b9c34"
+                  name: "Medplus"
+                  org_type: "product_supplier"
+                eaushadhi_warehouse_id: "99901000"
+                eaushadhi_warehouse_name: "Bokaro_DWH_2"
+                is_default: true
+                institute_id: "uuid"
+                created_by:
+                  id: "uuid"
+                  username: "admin"
+                  first_name: "Admin"
+                  last_name: "User"
+                  email: "admin@example.com"
+                updated_by:
+                  id: "uuid2"
+                  username: "manager"
+                  first_name: "Manager"
+                  last_name: "User"
+                  email: "manager@example.com"
+                created_date: "2026-08-13T08:55:23.802Z"
+                modified_date: "2026-08-13T09:05:00.000Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Conflict - supplier already mapped or multiple defaults
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
     delete:
       tags:
         - Supplier Mappings
@@ -425,13 +500,6 @@ paths:
       description: Soft-delete a supplier mapping
       operationId: deleteSupplierMapping
       parameters:
-        - name: facility_id
-          in: path
-          required: true
-          description: CARE facility ID (UUID)
-          schema:
-            type: string
-            format: uuid
         - name: institute_id
           in: path
           required: true
@@ -636,6 +704,102 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
   /facility/{facility_id}/institute/{institute_id}/stores/{store_mapping_id}/:
+    patch:
+      tags:
+        - Store Mappings
+      summary: Update a store mapping
+      description: |
+        Update a store mapping. All fields are optional; only supplied fields are updated.
+        Re-pointing the `store` re-validates that the new store isn't already mapped
+        for this institute. At most one store can be marked as default.
+      operationId: updateStoreMapping
+      parameters:
+        - name: facility_id
+          in: path
+          required: true
+          description: CARE facility ID (UUID)
+          schema:
+            type: string
+            format: uuid
+        - name: institute_id
+          in: path
+          required: true
+          description: Institute UUID
+          schema:
+            type: string
+            format: uuid
+        - name: store_mapping_id
+          in: path
+          required: true
+          description: Store mapping UUID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreMappingUpdate'
+            examples:
+              rename_store:
+                summary: Rename the DVDMS store
+                value:
+                  eaushadhi_store_name: "CHC Pharmacy 2"
+              set_default:
+                summary: Mark as default
+                value:
+                  is_default: true
+              repoint_store:
+                summary: Re-point to a different CARE store
+                value:
+                  store: "060d0e05-ffdc-446e-b844-d22cd6bced04"
+      responses:
+        '200':
+          description: Store mapping updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreMapping'
+              example:
+                id: "uuid1"
+                store:
+                  id: "c2f8d3b5-ae90-4f7c-b401-8e3c9d6f1b25"
+                  name: "Counter 1"
+                  form: "ro"
+                eaushadhi_store_id: "99901002"
+                eaushadhi_store_name: "CHC Pharmacy 2"
+                is_default: true
+                institute_id: "uuid"
+                created_by:
+                  id: "uuid"
+                  username: "admin"
+                  first_name: "Admin"
+                  last_name: "User"
+                  email: "admin@example.com"
+                updated_by:
+                  id: "uuid2"
+                  username: "manager"
+                  first_name: "Manager"
+                  last_name: "User"
+                  email: "manager@example.com"
+                created_date: "2026-08-13T08:55:23.802Z"
+                modified_date: "2026-08-13T09:05:00.000Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Conflict - store already mapped or multiple defaults
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
     delete:
       tags:
         - Store Mappings
@@ -3682,6 +3846,29 @@ components:
             At most one supplier per institute can be default.
           example: true
 
+    SupplierMappingUpdate:
+      type: object
+      properties:
+        supplier:
+          type: string
+          format: uuid
+          description: CARE supplier external_id (FK to organization with org_type='product_supplier')
+          example: "b1e7c2a4-9d8f-4e6b-a3c1-7f2d8e5b9c34"
+        eaushadhi_warehouse_id:
+          type: string
+          description: DVDMS warehouse/from_store ID
+          example: "99901000"
+        eaushadhi_warehouse_name:
+          type: string
+          description: DVDMS warehouse name (for matching inwards)
+          example: "Bokaro_DWH"
+        is_default:
+          type: boolean
+          description: |
+            Mark this supplier as default for unmapped warehouses.
+            At most one supplier per institute can be default.
+          example: true
+
     SupplierMapping:
       allOf:
         - $ref: '#/components/schemas/SupplierMappingCreate'
@@ -3754,6 +3941,29 @@ components:
         is_default:
           type: boolean
           default: false
+          description: |
+            Mark this store as default for indent/issue operations.
+            At most one store per institute can be default.
+          example: true
+
+    StoreMappingUpdate:
+      type: object
+      properties:
+        store:
+          type: string
+          format: uuid
+          description: CARE store external_id
+          example: "c2f8d3b5-ae90-4f7c-b401-8e3c9d6f1b25"
+        eaushadhi_store_id:
+          type: string
+          description: DVDMS store/to_store ID
+          example: "99901002"
+        eaushadhi_store_name:
+          type: string
+          description: DVDMS store name (for display)
+          example: "CHC Pharmacy"
+        is_default:
+          type: boolean
           description: |
             Mark this store as default for indent/issue operations.
             At most one store per institute can be default.
