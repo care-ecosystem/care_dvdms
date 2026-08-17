@@ -248,7 +248,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
   # ---------- Supplier Mappings ----------
-  /facility/{facility_id}/institute/{institute_id}/suppliers/:
+  /institute/{institute_id}/suppliers/:
     post:
       tags:
         - Supplier Mappings
@@ -259,13 +259,6 @@ paths:
         At most one supplier can be marked as default.
       operationId: createSupplierMapping
       parameters:
-        - name: facility_id
-          in: path
-          required: true
-          description: CARE facility ID (UUID)
-          schema:
-            type: string
-            format: uuid
         - name: institute_id
           in: path
           required: true
@@ -336,13 +329,6 @@ paths:
       description: Get all supplier mappings for this institute
       operationId: listSupplierMappings
       parameters:
-        - name: facility_id
-          in: path
-          required: true
-          description: CARE facility ID (UUID)
-          schema:
-            type: string
-            format: uuid
         - name: institute_id
           in: path
           required: true
@@ -417,7 +403,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /facility/{facility_id}/institute/{institute_id}/suppliers/{supplier_mapping_id}/:
+  /institute/{institute_id}/suppliers/{supplier_mapping_id}/:
     patch:
       tags:
         - Supplier Mappings
@@ -428,13 +414,6 @@ paths:
         for this institute. At most one supplier can be marked as default.
       operationId: updateSupplierMapping
       parameters:
-        - name: facility_id
-          in: path
-          required: true
-          description: CARE facility ID (UUID)
-          schema:
-            type: string
-            format: uuid
         - name: institute_id
           in: path
           required: true
@@ -521,13 +500,6 @@ paths:
       description: Soft-delete a supplier mapping
       operationId: deleteSupplierMapping
       parameters:
-        - name: facility_id
-          in: path
-          required: true
-          description: CARE facility ID (UUID)
-          schema:
-            type: string
-            format: uuid
         - name: institute_id
           in: path
           required: true
