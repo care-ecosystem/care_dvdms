@@ -6,7 +6,7 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 
-from care_dvdms.api.services.dvdms_outward_record_services import track_indent
+from care_dvdms.api.services.dvdms_indent_services import track_indent
 from care_dvdms.api.specs.dvdms_outward_record_order import (
     DVDMSOutwardRecordOrderListSpec,
 )
@@ -94,7 +94,7 @@ class DVDMSOutwardRecordOrderViewSet(EMRBaseViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        outward_record = track_indent(institute, outward_record, request.user)
+        # outward_record = track_indent(institute, outward_record, request.user)
 
         result = DVDMSOutwardRecordOrderListSpec.serialize(outward_record)
         return Response(result.to_json(), status=status.HTTP_200_OK)
