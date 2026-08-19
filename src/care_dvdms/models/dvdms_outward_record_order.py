@@ -9,6 +9,7 @@ class DVDMSOutwardRecordOrderStatus(models.TextChoices):
     created = "created"
     submitted = "submitted"
     cancelled = "cancelled"
+    failed = "failed"
 
 
 class DVDMSOutwardRecordOrder(EMRBaseModel):

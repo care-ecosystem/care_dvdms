@@ -96,6 +96,7 @@ DEFAULTS: dict[str, Any] = {
     "DVDMS_API_CONNECT_TIMEOUT": 10,
     "DVDMS_API_READ_TIMEOUT": 30,
     "DVDMS_LOOKUP_CACHE_TTL": 86400,
+    "DVDMS_API_RETRY_COUNT": 3,
 }
 
 plugin_settings = PluginSettings(

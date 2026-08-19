@@ -120,7 +120,7 @@ class DVDMSInstituteViewSet(EMRBaseViewSet):
 
         spec = DVDMSInstituteUpdateSpec(**request.data)
 
-        updated = False
+        update_fields = []
 
         if spec.eaushadhi_institute_id is not None:
             if (
@@ -133,29 +133,30 @@ class DVDMSInstituteViewSet(EMRBaseViewSet):
                     status=status.HTTP_409_CONFLICT,
                 )
             instance.eaushadhi_institute_id = spec.eaushadhi_institute_id
-            updated = True
+            update_fields.append("eaushadhi_institute_id")
 
         if spec.eaushadhi_institute_name is not None:
             instance.eaushadhi_institute_name = spec.eaushadhi_institute_name
-            updated = True
+            update_fields.append("eaushadhi_institute_name")
 
         if spec.eaushadhi_user_ref_id is not None:
             instance.eaushadhi_user_ref_id = spec.eaushadhi_user_ref_id
-            updated = True
+            update_fields.append("eaushadhi_user_ref_id")
 
         if spec.schema_version is not None:
             instance.schema_version = spec.schema_version
-            updated = True
+            update_fields.append("schema_version")
 
         if spec.meta is not None:
             instance.meta = spec.meta
-            updated = True
+            update_fields.append("meta")
 
-        if updated:
+        if update_fields:
             instance.updated_by = request.user
+            update_fields += ["updated_by", "modified_date"]
             try:
                 with transaction.atomic():
-                    instance.save()
+                    instance.save(update_fields=update_fields)
             except IntegrityError:
                 return Response(
                     {"error": "eaushadhi_institute_id is already in use by another facility"},

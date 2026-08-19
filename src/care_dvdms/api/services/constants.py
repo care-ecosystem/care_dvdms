@@ -3,6 +3,7 @@ DVDMS_SUBGROUP_LIST_PATH = "/subGroupMst/list"
 DVDMS_UNIT_LIST_PATH = "/unitMst/list"
 DVDMS_DRUG_LIST_PATH = "/drug/list"
 DVDMS_STORE_LIST_PATH = "/getStoreDetailsForCare/list"
+DVDMS_SAVE_INDENT_PATH = "/save/indent"
 
 DVDMS_GROUPS_CACHE_KEY = "dvdms:lookup:groups"
 DVDMS_SUBGROUPS_CACHE_KEY = "dvdms:lookup:subgroups"
