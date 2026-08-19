@@ -2,6 +2,7 @@ from care.emr.api.viewsets.base import EMRBaseViewSet
 from care.emr.models.supply_request import RequestOrder
 from care.security.authorization.base import AuthorizationController
 from care.utils.shortcuts import get_object_or_404
+from django.db import IntegrityError
 from django_filters import rest_framework as filters
 from rest_framework import status
 from rest_framework.exceptions import NotFound, PermissionDenied
@@ -17,6 +18,7 @@ from care_dvdms.models.dvdms_institute import DVDMSInstitute
 from care_dvdms.models.dvdms_record_order import DVDMSRecordOrder
 from care_dvdms.models.dvdms_store import DVDMSStore
 from care_dvdms.models.dvdms_supplier import DVDMSSupplier
+from care_dvdms.tasks import save_indent_task
 
 
 class DVDMSRecordOrderFilters(filters.FilterSet):
@@ -95,15 +97,27 @@ class DVDMSRecordOrderViewSet(EMRBaseViewSet):
             deleted=False,
         )
 
-        record_order = DVDMSRecordOrder.objects.create(
-            institute=institute,
-            name=spec.name,
-            order=order,
-            institute_store=institute_store,
-            institute_supplier=institute_supplier,
-            status=spec.status,
-            created_by=request.user,
-            updated_by=request.user,
+        try:
+            record_order = DVDMSRecordOrder.objects.create(
+                institute=institute,
+                name=spec.name,
+                order=order,
+                institute_store=institute_store,
+                institute_supplier=institute_supplier,
+                status=spec.status,
+                created_by=request.user,
+                updated_by=request.user,
+            )
+        except IntegrityError:
+            return Response(
+                {"error": "This order is already linked to a record order."},
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        save_indent_task.delay(
+            institute_id=str(institute.external_id),
+            record_order_id=str(record_order.external_id),
+            user_id=str(request.user.external_id),
         )
 
         result = DVDMSRecordOrderListSpec.serialize(record_order)

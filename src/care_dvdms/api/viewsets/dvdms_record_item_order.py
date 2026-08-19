@@ -2,7 +2,7 @@ from care.emr.api.viewsets.base import EMRBaseViewSet
 from care.emr.models.supply_request import SupplyRequest
 from care.security.authorization.base import AuthorizationController
 from care.utils.shortcuts import get_object_or_404
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django_filters import rest_framework as filters
 from rest_framework import status
 from rest_framework.exceptions import NotFound, PermissionDenied
@@ -101,23 +101,29 @@ class DVDMSRecordItemOrderViewSet(EMRBaseViewSet):
             order=record_order.order,
         )
 
-        with transaction.atomic():
-            drug = DVDMSDrug.objects.create(
-                drug_id=spec.drug.id,
-                name=spec.drug.name,
-                brand_id=spec.drug.brand_id,
-                group_id=spec.drug.group_id,
-                sub_group_id=spec.drug.sub_group_id,
-                unit_id=spec.drug.unit_id,
-                drug_category=spec.drug.drug_category,
-            )
-            item_order = DVDMSRecordItemOrder.objects.create(
-                institute=institute,
-                record_order=record_order,
-                supply_request=supply_request,
-                drug=drug,
-                created_by=request.user,
-                updated_by=request.user,
+        try:
+            with transaction.atomic():
+                drug = DVDMSDrug.objects.create(
+                    drug_id=spec.drug.id,
+                    name=spec.drug.name,
+                    brand_id=spec.drug.brand_id,
+                    group_id=spec.drug.group_id,
+                    sub_group_id=spec.drug.sub_group_id,
+                    unit_id=spec.drug.unit_id,
+                    drug_category=spec.drug.drug_category,
+                )
+                item_order = DVDMSRecordItemOrder.objects.create(
+                    institute=institute,
+                    record_order=record_order,
+                    supply_request=supply_request,
+                    drug=drug,
+                    created_by=request.user,
+                    updated_by=request.user,
+                )
+        except IntegrityError:
+            return Response(
+                {"error": "This supply request is already linked to a supply request"},
+                status=status.HTTP_409_CONFLICT,
             )
 
         result = DVDMSRecordItemOrderListSpec.serialize(item_order)

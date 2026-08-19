@@ -21,14 +21,29 @@ def _dvdms_request(method, path, **kwargs):
 
     body = response.json()
     if body.get("status") != 1:
-        raise requests.exceptions.RequestException(body.get("message", "DVDMS API request failed"))
+        raise requests.exceptions.RequestException(
+            body.get("message", "DVDMS API request failed"), response=response
+        )
 
-    return body.get("data", [])
+    return body, response.status_code
 
 
 def dvdms_get(path):
-    return _dvdms_request("GET", path)
+    body, _ = _dvdms_request("GET", path)
+    return body.get("data", [])
 
 
 def dvdms_post(path, payload=None):
+    body, _ = _dvdms_request("POST", path, json=payload)
+    return body.get("data", [])
+
+
+def dvdms_post_full(path, payload=None):
+    """Like dvdms_post, but returns the full response body and HTTP status code."""
     return _dvdms_request("POST", path, json=payload)
+
+
+def get_status_code(exc):
+    """Extract the HTTP status code from a DVDMS request exception, if any."""
+    response = getattr(exc, "response", None)
+    return response.status_code if response is not None else None
