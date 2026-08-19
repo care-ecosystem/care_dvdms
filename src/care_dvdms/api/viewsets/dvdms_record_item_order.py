@@ -63,6 +63,17 @@ class DVDMSRecordItemOrderViewSet(EMRBaseViewSet):
             deleted=False,
         )
 
+    def _get_locked_record_order(self, institute):
+        record_order_id = self.kwargs.get("record_order_id")
+        if not record_order_id:
+            raise NotFound("record_order_id is required")
+        return get_object_or_404(
+            DVDMSRecordOrder.objects.select_for_update(),
+            external_id=record_order_id,
+            institute=institute,
+            deleted=False,
+        )
+
     def _authorize_facility(self, institute):
         if not AuthorizationController.call("can_use_dvdms_integration", self.request.user, institute.facility):
             raise PermissionDenied("You are not authorized to use DVDMS plugin for this facility")
@@ -99,22 +110,23 @@ class DVDMSRecordItemOrderViewSet(EMRBaseViewSet):
         """POST .../item/ - Create record item order"""
         institute = self.get_institute()
         self._authorize_manage_facility(institute)
-        record_order = self.get_record_order(institute)
-
-        error = self._check_mutable(record_order)
-        if error:
-            return error
 
         spec = DVDMSRecordItemOrderCreateSpec(**request.data)
 
-        supply_request = get_object_or_404(
-            SupplyRequest.objects.select_related("item", "order"),
-            external_id=spec.supply_request,
-            order=record_order.order,
-        )
-
         try:
             with transaction.atomic():
+                record_order = self._get_locked_record_order(institute)
+
+                error = self._check_mutable(record_order)
+                if error:
+                    return error
+
+                supply_request = get_object_or_404(
+                    SupplyRequest.objects.select_related("item", "order"),
+                    external_id=spec.supply_request,
+                    order=record_order.order,
+                )
+
                 drug = DVDMSDrug.objects.create(
                     drug_id=spec.drug.id,
                     name=spec.drug.name,
@@ -145,45 +157,48 @@ class DVDMSRecordItemOrderViewSet(EMRBaseViewSet):
         """PATCH .../item/{record_order_item_id}/ - Update record item order"""
         institute = self.get_institute()
         self._authorize_manage_facility(institute)
-        record_order = self.get_record_order(institute)
-
-        error = self._check_mutable(record_order)
-        if error:
-            return error
 
         item_order_id = self.kwargs.get(self.lookup_field)
-        item_order = get_object_or_404(
-            DVDMSRecordItemOrder.objects.select_related(*SELECT_RELATED_FIELDS),
-            external_id=item_order_id,
-            institute=institute,
-            record_order=record_order,
-            deleted=False,
-        )
-
         spec = DVDMSRecordItemOrderUpdateSpec(**request.data)
-        if spec.drug is not None:
-            drug = item_order.drug
-            drug.drug_id = spec.drug.id
-            drug.name = spec.drug.name
-            drug.brand_id = spec.drug.brand_id
-            drug.group_id = spec.drug.group_id
-            drug.sub_group_id = spec.drug.sub_group_id
-            drug.unit_id = spec.drug.unit_id
-            drug.drug_category = spec.drug.drug_category
-            drug.save(
-                update_fields=[
-                    "drug_id",
-                    "name",
-                    "brand_id",
-                    "group_id",
-                    "sub_group_id",
-                    "unit_id",
-                    "drug_category",
-                ]
+
+        with transaction.atomic():
+            record_order = self._get_locked_record_order(institute)
+
+            error = self._check_mutable(record_order)
+            if error:
+                return error
+
+            item_order = get_object_or_404(
+                DVDMSRecordItemOrder.objects.select_related(*SELECT_RELATED_FIELDS),
+                external_id=item_order_id,
+                institute=institute,
+                record_order=record_order,
+                deleted=False,
             )
 
-        item_order.updated_by = request.user
-        item_order.save(update_fields=["updated_by", "modified_date"])
+            if spec.drug is not None:
+                drug = item_order.drug
+                drug.drug_id = spec.drug.id
+                drug.name = spec.drug.name
+                drug.brand_id = spec.drug.brand_id
+                drug.group_id = spec.drug.group_id
+                drug.sub_group_id = spec.drug.sub_group_id
+                drug.unit_id = spec.drug.unit_id
+                drug.drug_category = spec.drug.drug_category
+                drug.save(
+                    update_fields=[
+                        "drug_id",
+                        "name",
+                        "brand_id",
+                        "group_id",
+                        "sub_group_id",
+                        "unit_id",
+                        "drug_category",
+                    ]
+                )
+
+            item_order.updated_by = request.user
+            item_order.save(update_fields=["updated_by", "modified_date"])
 
         result = DVDMSRecordItemOrderListSpec.serialize(item_order)
         return Response(result.to_json(), status=status.HTTP_200_OK)

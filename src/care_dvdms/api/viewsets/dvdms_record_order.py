@@ -2,7 +2,7 @@ from care.emr.api.viewsets.base import EMRBaseViewSet
 from care.emr.models.supply_request import RequestOrder
 from care.security.authorization.base import AuthorizationController
 from care.utils.shortcuts import get_object_or_404
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django_filters import rest_framework as filters
 from rest_framework import status
 from rest_framework.exceptions import NotFound, PermissionDenied
@@ -123,45 +123,49 @@ class DVDMSRecordOrderViewSet(EMRBaseViewSet):
         self._authorize_manage_facility(institute)
 
         record_order_id = self.kwargs.get(self.lookup_field)
-        record_order = get_object_or_404(
-            DVDMSRecordOrder.objects.select_related(
-                "institute",
-                "order",
-                "institute_store",
-                "institute_store__location",
-                "institute_supplier",
-                "institute_supplier__supplier",
-                "created_by",
-                "updated_by",
-            ),
-            external_id=record_order_id,
-            institute=institute,
-            deleted=False,
-        )
-
         spec = DVDMSRecordOrderUpdateSpec(**request.data)
-        newly_approved = (
-            spec.status == DVDMSRecordOrderStatus.approved
-            and record_order.status != DVDMSRecordOrderStatus.approved
-        )
-        if newly_approved and not record_order.item_orders.filter(deleted=False).exists():
-            return Response(
-                {"error": "Cannot approve an order with no items"},
-                status=status.HTTP_409_CONFLICT,
-            )
-        update_fields = ["updated_by", "modified_date"]
-        if spec.status is not None:
-            record_order.status = spec.status
-            update_fields.append("status")
-        record_order.updated_by = request.user
-        record_order.save(update_fields=update_fields)
 
-        if newly_approved:
-            save_indent_task.delay(
-                institute_id=str(institute.external_id),
-                record_order_id=str(record_order.external_id),
-                user_id=str(request.user.external_id),
+        with transaction.atomic():
+            record_order = get_object_or_404(
+                DVDMSRecordOrder.objects.select_for_update(of=("self",)).select_related(
+                    "institute",
+                    "order",
+                    "institute_store",
+                    "institute_store__location",
+                    "institute_supplier",
+                    "institute_supplier__supplier",
+                    "created_by",
+                    "updated_by",
+                ),
+                external_id=record_order_id,
+                institute=institute,
+                deleted=False,
             )
+
+            newly_approved = (
+                spec.status == DVDMSRecordOrderStatus.approved
+                and record_order.status != DVDMSRecordOrderStatus.approved
+            )
+            if newly_approved and not record_order.item_orders.filter(deleted=False).exists():
+                return Response(
+                    {"error": "Cannot approve an order with no items"},
+                    status=status.HTTP_409_CONFLICT,
+                )
+            update_fields = ["updated_by", "modified_date"]
+            if spec.status is not None:
+                record_order.status = spec.status
+                update_fields.append("status")
+            record_order.updated_by = request.user
+            record_order.save(update_fields=update_fields)
+
+            if newly_approved:
+                transaction.on_commit(
+                    lambda: save_indent_task.delay(
+                        institute_id=str(institute.external_id),
+                        record_order_id=str(record_order.external_id),
+                        user_id=str(request.user.external_id),
+                    )
+                )
 
         result = DVDMSRecordOrderListSpec.serialize(record_order)
         return Response(result.to_json(), status=status.HTTP_200_OK)
