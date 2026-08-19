@@ -1,5 +1,4 @@
 import datetime
-from enum import Enum
 
 from care.emr.resources.base import EMRResource
 from care.emr.resources.inventory.supply_request.request_order import (
@@ -7,15 +6,7 @@ from care.emr.resources.inventory.supply_request.request_order import (
 )
 from pydantic import UUID4
 
-from care_dvdms.models.dvdms_record_order import DVDMSRecordOrder
-
-
-class DVDMSRecordOrderStatusOptions(str, Enum):
-    draft = "draft"
-    pending = "pending"
-    approved = "approved"
-    rejected = "rejected"
-    completed = "completed"
+from care_dvdms.models.dvdms_record_order import DVDMSRecordOrder, DVDMSRecordOrderStatus
 
 
 class DVDMSRecordOrderListSpec(EMRResource):
@@ -96,7 +87,7 @@ class DVDMSRecordOrderCreateSpec(EMRResource):
     order: UUID4
     institute_store: UUID4
     institute_supplier: UUID4
-    status: DVDMSRecordOrderStatusOptions = DVDMSRecordOrderStatusOptions.draft
+    status: DVDMSRecordOrderStatus = DVDMSRecordOrderStatus.draft
 
 
 class DVDMSRecordOrderUpdateSpec(EMRResource):
@@ -119,4 +110,4 @@ class DVDMSRecordOrderUpdateSpec(EMRResource):
         "history",
     ]
 
-    status: DVDMSRecordOrderStatusOptions | None = None
+    status: DVDMSRecordOrderStatus | None = None

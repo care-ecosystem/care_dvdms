@@ -121,7 +121,7 @@ Table dvdms_record_order {
   external_id UUID [unique, not null, note: 'Exposed via API as id']
 
   institute_id INTEGER [not null, note: 'FK to dvdms_institute.id']
-  order_id INTEGER [not null, note: 'FK to care_request_order.id - the CARE order being synced. ON DELETE PROTECT']
+  order_id INTEGER [not null, unique, note: 'FK to care_request_order.id - the CARE order being synced (1:1). ON DELETE PROTECT']
   institute_store_id INTEGER [not null, note: 'FK to dvdms_store.id - destination store. ON DELETE PROTECT']
   institute_supplier_id INTEGER [not null, note: 'FK to dvdms_supplier.id - source warehouse. ON DELETE PROTECT']
 
@@ -151,7 +151,7 @@ Table dvdms_record_order {
 }
 
 Ref record_order_institute: dvdms_record_order.institute_id ?> dvdms_institute.id
-Ref record_order_care_order: dvdms_record_order.order_id ?> care_request_order.id
+Ref record_order_care_order: dvdms_record_order.order_id - care_request_order.id
 Ref record_order_store: dvdms_record_order.institute_store_id ?> dvdms_store.id
 Ref record_order_supplier: dvdms_record_order.institute_supplier_id ?> dvdms_supplier.id
 Ref record_order_created_by: dvdms_record_order.created_by_id ?> care_user.id
@@ -182,7 +182,7 @@ Table dvdms_record_item_order {
 
   institute_id INTEGER [not null, note: 'FK to dvdms_institute.id - denormalized for fast lookup']
   record_order_id INTEGER [not null, note: 'FK to dvdms_record_order.id - parent order']
-  supply_request_id INTEGER [not null, note: 'FK to care_supply_request.id - CARE supply request. ON DELETE PROTECT']
+  supply_request_id INTEGER [not null, unique, note: 'FK to care_supply_request.id - CARE supply request (1:1). ON DELETE PROTECT']
   drug_id INTEGER [not null, unique, note: 'FK to dvdms_drug.id - 1:1 drug snapshot owned by this item order']
 
   created_date TIMESTAMP [not null, note: "indexed"]
@@ -205,89 +205,86 @@ Table dvdms_record_item_order {
 
 Ref item_order_institute: dvdms_record_item_order.institute_id ?> dvdms_institute.id
 Ref item_order_record_order: dvdms_record_item_order.record_order_id ?> dvdms_record_order.id
-Ref item_order_supply_request: dvdms_record_item_order.supply_request_id ?> care_supply_request.id
+Ref item_order_supply_request: dvdms_record_item_order.supply_request_id - care_supply_request.id
 Ref item_order_drug: dvdms_record_item_order.drug_id - dvdms_drug.id
 Ref item_order_created_by: dvdms_record_item_order.created_by_id ?> care_user.id
 Ref item_order_updated_by: dvdms_record_item_order.updated_by_id ?> care_user.id
 
 // ============================================================================
-// DVDMS LOOKUP CACHE (Optional - for performance) [COMMENTED OUT]
-// Caches DVDMS API responses to avoid repeated lookups
+// SYNC LOG - Audit trail for DVDMS fetch/sync API calls (N:1 relationship)
 // ============================================================================
-// Table dvdms_lookup_cache {
-//   id INTEGER [pk, increment]
-//   external_id UUID [unique, not null]
-//   institute_id INTEGER [not null, note: 'FK to dvdms_institute.id - cache scoped to institute']
-//
-//   cache_type VARCHAR(50) [not null, note: 'Type: warehouse, store, drug, group, subgroup, unit']
-//   cache_key VARCHAR(500) [not null, note: 'Unique key for this cache entry (e.g., "warehouses" or "drugs?groupid=101047")']
-//
-//   data JSON [not null, note: 'Array of items from DVDMS API response']
-//
-//   fetched_at TIMESTAMP [not null]
-//   expires_at TIMESTAMP [not null, note: 'Cache TTL - typically 24 hours']
-//   fetch_status VARCHAR(50) [not null, note: 'Status: success, failed']
-//   fetch_error TEXT [null, note: 'Error message if fetch_status=failed']
-//
-//   created_date TIMESTAMP [not null, note: "indexed"]
-//   modified_date TIMESTAMP [not null, note: "indexed"]
-//   deleted BOOLEAN [default: false, note: "indexed"]
-//
-//   indexes {
-//     institute_id
-//     cache_type
-//     expires_at
-//     deleted
-//     (institute_id, cache_type, cache_key) [unique, note: 'one cache entry per (institute, type, key) where deleted=false']
-//   }
-// }
+Table dvdms_sync_log {
+  id INTEGER [pk, increment]
+  external_id UUID [unique, not null, note: 'Exposed via API as id']
 
-// Ref lookup_cache_institute: dvdms_lookup_cache.institute_id ?> dvdms_institute.id
+  institute_id INTEGER [not null, note: 'FK to dvdms_institute.id']
+
+  triggered_by VARCHAR(20) [not null, default: 'user', note: 'user, cron, retry']
+  sync_type VARCHAR(20) [not null, note: 'save_indent, track_indent, acknowledge']
+  request_status VARCHAR(20) [not null, default: 'pending', note: 'pending, success, failure']
+
+  http_status_code SMALLINT [null, note: 'HTTP status code received from the DVDMS API']
+  request_payload JSON [null, note: 'Request payload sent to the DVDMS API']
+  response_payload JSON [null, note: 'Response payload received from the DVDMS API']
+  error_detail TEXT [null, note: 'Details of the error if the request fails']
+  api_response_time_ms INTEGER [null, note: 'API response time in milliseconds']
+  retry_count INTEGER [not null, default: 0, note: 'Number of retry attempts for the fetch']
+
+  created_date TIMESTAMP [not null, note: "indexed"]
+  modified_date TIMESTAMP [not null, note: "indexed"]
+  deleted BOOLEAN [default: false, note: "indexed"]
+
+  created_by_id INTEGER [null]
+  updated_by_id INTEGER [null]
+
+  history JSON [default: '{}']
+  meta JSON [default: 'null', null]
+
+  indexes {
+    institute_id
+    request_status
+    deleted
+  }
+}
+
+Ref sync_log_institute: dvdms_sync_log.institute_id ?> dvdms_institute.id
+Ref sync_log_created_by: dvdms_sync_log.created_by_id ?> care_user.id
+Ref sync_log_updated_by: dvdms_sync_log.updated_by_id ?> care_user.id
 
 // ============================================================================
-// DVDMS API FETCH LOG - Audit trail for API calls [COMMENTED OUT]
-// Tracks all API interactions with DVDMS for debugging and monitoring
+// OUTWARD RECORD ORDER - e-Aushadhi Indent tracking (1:1 owned by a record order)
 // ============================================================================
-// Table dvdms_api_fetch_log {
-//   id INTEGER [pk, increment]
-//   external_id UUID [unique, not null]
-//   institute_id INTEGER [not null, note: 'FK to dvdms_institute.id']
-//
-//   endpoint VARCHAR(255) [not null, note: 'DVDMS API endpoint called (e.g., "warehouses", "stores", "drugs")']
-//   method VARCHAR(10) [not null, note: 'HTTP method: GET, POST, etc.']
-//   request_payload JSON [null, note: 'Request parameters/body sent to DVDMS']
-//
-//   status_code INTEGER [null, note: 'HTTP response status code']
-//   response_payload JSON [null, note: 'Full response from DVDMS API']
-//
-//   triggered_by VARCHAR(50) [not null, note: 'Who triggered: USER, CRON, RETRY']
-//   fetch_status VARCHAR(50) [not null, note: 'Status: PENDING, SUCCESS, FAILURE']
-//   error_message TEXT [null, note: 'Error details if fetch failed']
-//
-//   duration_ms INTEGER [null, note: 'API call duration in milliseconds']
-//
-//   created_date TIMESTAMP [not null, note: "indexed"]
-//   modified_date TIMESTAMP [not null, note: "indexed"]
-//   deleted BOOLEAN [default: false, note: "indexed"]
-//
-//   created_by_id INTEGER [null, note: 'FK to care_user.id - user who triggered the fetch']
-//   updated_by_id INTEGER [null]
-//
-//   history JSON [default: '{}']
-//   meta JSON [default: 'null', null]
-//
-//   indexes {
-//     institute_id
-//     endpoint
-//     fetch_status
-//     created_date
-//     deleted
-//   }
-// }
+Table dvdms_outward_record_order {
+  id INTEGER [pk, increment]
+  external_id UUID [unique, not null, note: 'Exposed via API as id']
 
-// Ref api_log_institute: dvdms_api_fetch_log.institute_id ?> dvdms_institute.id
-// Ref api_log_created_by: dvdms_api_fetch_log.created_by_id ?> care_user.id
-// Ref api_log_updated_by: dvdms_api_fetch_log.updated_by_id ?> care_user.id
+  record_order_id INTEGER [not null, unique, note: 'FK to dvdms_record_order.id (1:1)']
+  status VARCHAR(20) [not null, default: 'created', note: 'Outwards record status: created, submitted, cancelled']
+  eaushadhi_indent_no VARCHAR(255) [null, note: 'e-Aushadhi indent number']
+  eaushadhi_indent_status VARCHAR(255) [null, note: 'Current status of the e-Aushadhi indent']
+  sync_log_id INTEGER [null, note: 'FK to dvdms_sync_log.id. ON DELETE SET NULL']
+
+  created_date TIMESTAMP [not null, note: "indexed"]
+  modified_date TIMESTAMP [not null, note: "indexed"]
+  deleted BOOLEAN [default: false, note: "indexed"]
+
+  created_by_id INTEGER [null]
+  updated_by_id INTEGER [null]
+
+  history JSON [default: '{}']
+  meta JSON [default: 'null', null]
+
+  indexes {
+    record_order_id
+    sync_log_id
+    deleted
+  }
+}
+
+Ref outward_record_order_record_order: dvdms_outward_record_order.record_order_id - dvdms_record_order.id
+Ref outward_record_order_sync_log: dvdms_outward_record_order.sync_log_id ?> dvdms_sync_log.id
+Ref outward_record_order_created_by: dvdms_outward_record_order.created_by_id ?> care_user.id
+Ref outward_record_order_updated_by: dvdms_outward_record_order.updated_by_id ?> care_user.id
 
 // ============================================================================
 // CARE MODELS - External References

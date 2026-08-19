@@ -6,6 +6,14 @@ from care_dvdms.models.dvdms_store import DVDMSStore
 from care_dvdms.models.dvdms_supplier import DVDMSSupplier
 
 
+class DVDMSRecordOrderStatus(models.TextChoices):
+    draft = "draft"
+    pending = "pending"
+    approved = "approved"
+    rejected = "rejected"
+    completed = "completed"
+
+
 class DVDMSRecordOrder(EMRBaseModel):
     institute = models.ForeignKey(
         DVDMSInstitute,
@@ -13,10 +21,10 @@ class DVDMSRecordOrder(EMRBaseModel):
         related_name="record_orders",
     )
     name = models.CharField(max_length=255)
-    order = models.ForeignKey(
+    order = models.OneToOneField(
         "emr.RequestOrder",
         on_delete=models.PROTECT,
-        related_name="dvdms_record_orders",
+        related_name="dvdms_record_order",
     )
     institute_store = models.ForeignKey(
         DVDMSStore,
@@ -28,7 +36,11 @@ class DVDMSRecordOrder(EMRBaseModel):
         on_delete=models.PROTECT,
         related_name="record_orders",
     )
-    status = models.CharField(max_length=20, default="draft")
+    status = models.CharField(
+        max_length=20,
+        choices=DVDMSRecordOrderStatus.choices,
+        default=DVDMSRecordOrderStatus.draft,
+    )
 
     class Meta:
         verbose_name_plural = "DVDMS Record Orders"

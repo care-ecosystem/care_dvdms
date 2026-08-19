@@ -31,10 +31,10 @@ class DVDMSRecordItemOrder(EMRBaseModel):
         on_delete=models.CASCADE,
         related_name="item_orders",
     )
-    supply_request = models.ForeignKey(
+    supply_request = models.OneToOneField(
         "emr.SupplyRequest",
         on_delete=models.PROTECT,
-        related_name="dvdms_record_item_orders",
+        related_name="dvdms_record_item_order",
     )
     drug = models.OneToOneField(
         DVDMSDrug,

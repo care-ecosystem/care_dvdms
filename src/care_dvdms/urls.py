@@ -3,6 +3,9 @@ from django.urls import path, re_path
 
 from care_dvdms.api.viewsets.dvdms_institute import DVDMSInstituteViewSet
 from care_dvdms.api.viewsets.dvdms_lookup import DVDMSLookupViewSet
+from care_dvdms.api.viewsets.dvdms_outward_record_order import (
+    DVDMSOutwardRecordOrderViewSet,
+)
 from care_dvdms.api.viewsets.dvdms_record_item_order import (
     DVDMSRecordItemOrderViewSet,
 )
@@ -130,5 +133,15 @@ urlpatterns = [
             }
         ),
         name="dvdms-record-item-order-detail",
+    ),
+    re_path(
+        r"^institute/(?P<institute_id>[^/.]+)/record_order/(?P<record_order_id>[^/.]+)/outward/$",
+        DVDMSOutwardRecordOrderViewSet.as_view({"get": "list"}),
+        name="dvdms-outward-record-order-list",
+    ),
+    re_path(
+        r"^institute/(?P<institute_id>[^/.]+)/record_order/(?P<record_order_id>[^/.]+)/outward/fetch-inwards/$",
+        DVDMSOutwardRecordOrderViewSet.as_view({"post": "fetch_inwards"}),
+        name="dvdms-outward-record-order-fetch-inwards",
     ),
 ]
