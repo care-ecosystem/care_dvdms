@@ -42,7 +42,7 @@ def save_indent_task(self, institute_id, record_order_id, user_id):
     )
 
     institute = get_object_or_404(DVDMSInstitute, external_id=institute_id)
-    record_order = get_object_or_404(DVDMSRecordOrder, external_id=record_order_id)
+    record_order = get_object_or_404(DVDMSRecordOrder, external_id=record_order_id, institute=institute)
     user = get_object_or_404(User, external_id=user_id)
 
     payload = build_save_indent_payload(record_order)

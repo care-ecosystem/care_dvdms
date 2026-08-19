@@ -151,22 +151,27 @@ class DVDMSSupplierViewSet(EMRBaseViewSet):
                     status=status.HTTP_409_CONFLICT,
                 )
 
+        update_fields = ["updated_by", "modified_date"]
         if spec.supplier is not None:
             supplier, error = self._resolve_supplier(institute, spec.supplier, exclude_pk=supplier_mapping.pk)
             if error:
                 return error
             supplier_mapping.supplier = supplier
+            update_fields.append("supplier")
         if spec.eaushadhi_warehouse_id is not None:
             supplier_mapping.eaushadhi_warehouse_id = spec.eaushadhi_warehouse_id
+            update_fields.append("eaushadhi_warehouse_id")
         if spec.eaushadhi_warehouse_name is not None:
             supplier_mapping.eaushadhi_warehouse_name = spec.eaushadhi_warehouse_name
+            update_fields.append("eaushadhi_warehouse_name")
         if spec.is_default is not None:
             supplier_mapping.is_default = spec.is_default
+            update_fields.append("is_default")
         supplier_mapping.updated_by = request.user
 
         try:
             with transaction.atomic():
-                supplier_mapping.save()
+                supplier_mapping.save(update_fields=update_fields)
         except IntegrityError as exc:
             if "uniq_default_supplier_per_institute" in str(exc):
                 return Response(

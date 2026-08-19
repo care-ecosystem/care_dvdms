@@ -154,10 +154,20 @@ class DVDMSRecordItemOrderViewSet(EMRBaseViewSet):
             drug.sub_group_id = spec.drug.sub_group_id
             drug.unit_id = spec.drug.unit_id
             drug.drug_category = spec.drug.drug_category
-            drug.save()
+            drug.save(
+                update_fields=[
+                    "drug_id",
+                    "name",
+                    "brand_id",
+                    "group_id",
+                    "sub_group_id",
+                    "unit_id",
+                    "drug_category",
+                ]
+            )
 
         item_order.updated_by = request.user
-        item_order.save()
+        item_order.save(update_fields=["updated_by", "modified_date"])
 
         result = DVDMSRecordItemOrderListSpec.serialize(item_order)
         return Response(result.to_json(), status=status.HTTP_200_OK)

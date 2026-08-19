@@ -155,22 +155,27 @@ class DVDMSStoreViewSet(EMRBaseViewSet):
                     status=status.HTTP_409_CONFLICT,
                 )
 
+        update_fields = ["updated_by", "modified_date"]
         if spec.store is not None:
             location, error = self._resolve_location(institute, spec.store, exclude_pk=store_mapping.pk)
             if error:
                 return error
             store_mapping.location = location
+            update_fields.append("location")
         if spec.eaushadhi_store_id is not None:
             store_mapping.eaushadhi_store_id = spec.eaushadhi_store_id
+            update_fields.append("eaushadhi_store_id")
         if spec.eaushadhi_store_name is not None:
             store_mapping.eaushadhi_store_name = spec.eaushadhi_store_name
+            update_fields.append("eaushadhi_store_name")
         if spec.is_default is not None:
             store_mapping.is_default = spec.is_default
+            update_fields.append("is_default")
         store_mapping.updated_by = request.user
 
         try:
             with transaction.atomic():
-                store_mapping.save()
+                store_mapping.save(update_fields=update_fields)
         except IntegrityError as exc:
             if "uniq_default_store_per_institute" in str(exc):
                 return Response(

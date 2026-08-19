@@ -65,7 +65,7 @@ def build_save_indent_payload(record_order):
         "gstrRemarks": str(record_order.external_id),
         "hstnumUrgentFlag": urgent_flag,
         "draftFlag": 0,
-        "hospitalCode": record_order.institute_store.eaushadhi_institute_id,
+        "hospitalCode": record_order.institute.eaushadhi_institute_id,
         "strSelectedParamValues": _build_selected_param_values(record_order),
     }
 

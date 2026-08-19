@@ -15,7 +15,7 @@ from care_dvdms.api.specs.dvdms_record_order import (
     DVDMSRecordOrderUpdateSpec,
 )
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
-from care_dvdms.models.dvdms_record_order import DVDMSRecordOrder
+from care_dvdms.models.dvdms_record_order import DVDMSRecordOrder, DVDMSRecordOrderStatus
 from care_dvdms.models.dvdms_store import DVDMSStore
 from care_dvdms.models.dvdms_supplier import DVDMSSupplier
 from care_dvdms.tasks import save_indent_task
@@ -114,12 +114,6 @@ class DVDMSRecordOrderViewSet(EMRBaseViewSet):
                 status=status.HTTP_409_CONFLICT,
             )
 
-        save_indent_task.delay(
-            institute_id=str(institute.external_id),
-            record_order_id=str(record_order.external_id),
-            user_id=str(request.user.external_id),
-        )
-
         result = DVDMSRecordOrderListSpec.serialize(record_order)
         return Response(result.to_json(), status=status.HTTP_201_CREATED)
 
@@ -146,10 +140,23 @@ class DVDMSRecordOrderViewSet(EMRBaseViewSet):
         )
 
         spec = DVDMSRecordOrderUpdateSpec(**request.data)
+        newly_approved = (
+            spec.status == DVDMSRecordOrderStatus.approved
+            and record_order.status != DVDMSRecordOrderStatus.approved
+        )
+        update_fields = ["updated_by", "modified_date"]
         if spec.status is not None:
             record_order.status = spec.status
+            update_fields.append("status")
         record_order.updated_by = request.user
-        record_order.save()
+        record_order.save(update_fields=update_fields)
+
+        if newly_approved:
+            save_indent_task.delay(
+                institute_id=str(institute.external_id),
+                record_order_id=str(record_order.external_id),
+                user_id=str(request.user.external_id),
+            )
 
         result = DVDMSRecordOrderListSpec.serialize(record_order)
         return Response(result.to_json(), status=status.HTTP_200_OK)
