@@ -16,7 +16,7 @@ from care_dvdms.api.specs.dvdms_record_item_order import (
 )
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
 from care_dvdms.models.dvdms_record_item_order import DVDMSDrug, DVDMSRecordItemOrder
-from care_dvdms.models.dvdms_record_order import DVDMSRecordOrder
+from care_dvdms.models.dvdms_record_order import DVDMSRecordOrder, DVDMSRecordOrderStatus
 
 SELECT_RELATED_FIELDS = (
     "institute",
@@ -71,6 +71,14 @@ class DVDMSRecordItemOrderViewSet(EMRBaseViewSet):
         if not AuthorizationController.call("can_manage_dvdms_integration", self.request.user, institute.facility):
             raise PermissionDenied("You are not authorized to manage DVDMS plugin for this facility")
 
+    def _check_mutable(self, record_order):
+        if record_order.status == DVDMSRecordOrderStatus.approved:
+            return Response(
+                {"error": "This order has already been approved and its items are locked"},
+                status=status.HTTP_409_CONFLICT,
+            )
+        return None
+
     def get_queryset(self):
         institute = self.get_institute()
         self._authorize_facility(institute)
@@ -92,6 +100,10 @@ class DVDMSRecordItemOrderViewSet(EMRBaseViewSet):
         institute = self.get_institute()
         self._authorize_manage_facility(institute)
         record_order = self.get_record_order(institute)
+
+        error = self._check_mutable(record_order)
+        if error:
+            return error
 
         spec = DVDMSRecordItemOrderCreateSpec(**request.data)
 
@@ -134,6 +146,10 @@ class DVDMSRecordItemOrderViewSet(EMRBaseViewSet):
         institute = self.get_institute()
         self._authorize_manage_facility(institute)
         record_order = self.get_record_order(institute)
+
+        error = self._check_mutable(record_order)
+        if error:
+            return error
 
         item_order_id = self.kwargs.get(self.lookup_field)
         item_order = get_object_or_404(

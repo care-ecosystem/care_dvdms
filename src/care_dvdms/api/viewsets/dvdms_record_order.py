@@ -144,6 +144,11 @@ class DVDMSRecordOrderViewSet(EMRBaseViewSet):
             spec.status == DVDMSRecordOrderStatus.approved
             and record_order.status != DVDMSRecordOrderStatus.approved
         )
+        if newly_approved and not record_order.item_orders.filter(deleted=False).exists():
+            return Response(
+                {"error": "Cannot approve an order with no items"},
+                status=status.HTTP_409_CONFLICT,
+            )
         update_fields = ["updated_by", "modified_date"]
         if spec.status is not None:
             record_order.status = spec.status
