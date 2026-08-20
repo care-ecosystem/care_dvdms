@@ -3,6 +3,7 @@ from care_dvdms.models.dvdms_institute import DVDMSInstitute  # noqa: F401
 from care_dvdms.models.dvdms_outward_record_order import (  # noqa: F401
     DVDMSOutwardRecordOrder,
 )
+from care_dvdms.models.dvdms_product_mapping import DVDMSProductMapping  # noqa: F401
 from care_dvdms.models.dvdms_record_item_order import (  # noqa: F401
     DVDMSRecordItemOrder,
 )

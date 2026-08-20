@@ -97,7 +97,6 @@ class DVDMSRecordOrderUpdateSpec(EMRResource):
     __exclude__ = [
         "id",
         "institute",
-        "name",
         "order",
         "institute_store",
         "institute_supplier",
@@ -110,4 +109,6 @@ class DVDMSRecordOrderUpdateSpec(EMRResource):
         "history",
     ]
 
+    name: str | None = None
+    institute_supplier: UUID4 | None = None
     status: DVDMSRecordOrderStatus | None = None
