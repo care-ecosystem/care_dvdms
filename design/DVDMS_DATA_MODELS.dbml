@@ -128,7 +128,7 @@ Table dvdms_record_order {
   name VARCHAR(255) [not null, note: 'Order name (e.g., "eaushadhi")']
 
   status VARCHAR(20) [not null, default: 'draft',
-    note: 'Order status: draft, pending, approved, rejected, completed']
+    note: 'Order status: draft, pending, approved, rejected, completed, failed']
 
   created_date TIMESTAMP [not null, note: "indexed"]
   modified_date TIMESTAMP [not null, note: "indexed"]
@@ -259,7 +259,7 @@ Table dvdms_outward_record_order {
   external_id UUID [unique, not null, note: 'Exposed via API as id']
 
   record_order_id INTEGER [not null, unique, note: 'FK to dvdms_record_order.id (1:1)']
-  status VARCHAR(20) [not null, default: 'created', note: 'Outwards record status: created, submitted, cancelled']
+  status VARCHAR(20) [not null, default: 'created', note: 'Outwards record status: created, submitted, cancelled, failed']
   eaushadhi_indent_no VARCHAR(255) [null, note: 'e-Aushadhi indent number']
   eaushadhi_indent_status VARCHAR(255) [null, note: 'Current status of the e-Aushadhi indent']
   sync_log_id INTEGER [null, note: 'FK to dvdms_sync_log.id. ON DELETE SET NULL']

@@ -14,8 +14,9 @@ from care_dvdms.api.specs.dvdms_record_item_order import (
     DVDMSRecordItemOrderListSpec,
     DVDMSRecordItemOrderUpdateSpec,
 )
+from care_dvdms.models.dvdms_drug import DVDMSDrug
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
-from care_dvdms.models.dvdms_record_item_order import DVDMSDrug, DVDMSRecordItemOrder
+from care_dvdms.models.dvdms_record_item_order import DVDMSRecordItemOrder
 from care_dvdms.models.dvdms_record_order import DVDMSRecordOrder, DVDMSRecordOrderStatus
 
 SELECT_RELATED_FIELDS = (
