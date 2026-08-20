@@ -216,7 +216,8 @@ class DVDMSProductMappingViewSet(EMRBaseViewSet):
                     setattr(drug, model_field, getattr(details, field))
                     drug_update_fields.append(model_field)
                 if drug_update_fields:
-                    drug.save(update_fields=drug_update_fields)
+                    drug.updated_by = request.user
+                    drug.save(update_fields=[*drug_update_fields, "updated_by", "modified_date"])
 
                 if "id" in provided:
                     product_mapping.eaushadhi_drug_id = new_drug_id

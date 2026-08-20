@@ -162,6 +162,7 @@ Ref record_order_updated_by: dvdms_record_order.updated_by_id ?> care_user.id
 // ============================================================================
 Table dvdms_drug {
   id INTEGER [pk, increment]
+  external_id UUID [unique, not null, note: 'Exposed via API as id']
 
   drug_id VARCHAR(50) [not null, note: 'DVDMS item ID']
   name VARCHAR(255) [not null, note: 'Drug name']
@@ -170,7 +171,20 @@ Table dvdms_drug {
   sub_group_id VARCHAR(50) [default: '', note: 'DVDMS subgroup ID']
   unit_id VARCHAR(50) [default: '', note: 'DVDMS unit ID']
   drug_category VARCHAR(50) [default: '', note: 'Drug category']
+
+  created_date TIMESTAMP [not null, note: "indexed"]
+  modified_date TIMESTAMP [not null, note: "indexed"]
+  deleted BOOLEAN [default: false, note: "indexed"]
+
+  created_by_id INTEGER [null]
+  updated_by_id INTEGER [null]
+
+  history JSON [default: '{}']
+  meta JSON [default: 'null', null]
 }
+
+Ref drug_created_by: dvdms_drug.created_by_id ?> care_user.id
+Ref drug_updated_by: dvdms_drug.updated_by_id ?> care_user.id
 
 // ============================================================================
 // RECORD ITEM ORDER - Line Items in DVDMS Orders (N:1 relationship)

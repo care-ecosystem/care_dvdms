@@ -136,6 +136,8 @@ class DVDMSRecordItemOrderViewSet(EMRBaseViewSet):
                     sub_group_id=spec.drug.sub_group_id,
                     unit_id=spec.drug.unit_id,
                     drug_category=spec.drug.drug_category,
+                    created_by=request.user,
+                    updated_by=request.user,
                 )
                 item_order = DVDMSRecordItemOrder.objects.create(
                     institute=institute,
@@ -186,6 +188,7 @@ class DVDMSRecordItemOrderViewSet(EMRBaseViewSet):
                 drug.sub_group_id = spec.drug.sub_group_id
                 drug.unit_id = spec.drug.unit_id
                 drug.drug_category = spec.drug.drug_category
+                drug.updated_by = request.user
                 drug.save(
                     update_fields=[
                         "drug_id",
@@ -195,6 +198,8 @@ class DVDMSRecordItemOrderViewSet(EMRBaseViewSet):
                         "sub_group_id",
                         "unit_id",
                         "drug_category",
+                        "updated_by",
+                        "modified_date",
                     ]
                 )
 
