@@ -1,10 +1,14 @@
 import requests
 from care.emr.api.viewsets.base import EMRBaseViewSet
 from care.emr.models.product_knowledge import ProductKnowledge
+from care.emr.resources.inventory.product_knowledge.spec import (
+    ProductKnowledgeStatusOptions,
+)
 from care.security.authorization.base import AuthorizationController
 from care.utils.shortcuts import get_object_or_404
 from django.core.cache import cache
-from django.db import transaction
+from django.db import IntegrityError, transaction
+from django.db.models import Q
 from django_filters import rest_framework as filters
 from rest_framework import status
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
@@ -60,9 +64,14 @@ class DVDMSProductMappingViewSet(EMRBaseViewSet):
         if not AuthorizationController.call("can_manage_dvdms_integration", self.request.user, institute.facility):
             raise PermissionDenied("You are not authorized to manage DVDMS plugin for this facility")
 
-    def _get_active_product_knowledge(self, product_knowledge_id):
-        product_knowledge = get_object_or_404(ProductKnowledge, external_id=product_knowledge_id)
-        if product_knowledge.status != "active":
+    def _get_active_product_knowledge(self, institute, product_knowledge_id):
+        product_knowledge = get_object_or_404(
+            ProductKnowledge.objects.filter(
+                Q(facility__isnull=True) | Q(facility=institute.facility)
+            ),
+            external_id=product_knowledge_id,
+        )
+        if product_knowledge.status != ProductKnowledgeStatusOptions.active.value:
             raise ValidationError(
                 f"ProductKnowledge is not active. Current status: {product_knowledge.status}"
             )
@@ -115,7 +124,7 @@ class DVDMSProductMappingViewSet(EMRBaseViewSet):
         self._authorize_manage_facility(institute)
 
         spec = DVDMSProductMappingCreateSpec(**request.data)
-        product_knowledge = self._get_active_product_knowledge(spec.product_knowledge_id)
+        product_knowledge = self._get_active_product_knowledge(institute, spec.product_knowledge_id)
 
         error = self._check_drug_id_valid(institute, spec.eaushadhi_drug_details.id)
         if error:
@@ -125,7 +134,7 @@ class DVDMSProductMappingViewSet(EMRBaseViewSet):
             institute = DVDMSInstitute.objects.select_for_update().get(pk=institute.pk)
 
             if DVDMSProductMapping.objects.filter(
-                institute=institute, drug__drug_id=spec.eaushadhi_drug_details.id, deleted=False
+                institute=institute, eaushadhi_drug_id=spec.eaushadhi_drug_details.id, deleted=False
             ).exists():
                 return Response(
                     {"error": "Product mapping already exists for this drug"},
@@ -141,13 +150,20 @@ class DVDMSProductMappingViewSet(EMRBaseViewSet):
                 unit_id=spec.eaushadhi_drug_details.unit_id,
                 drug_category=spec.eaushadhi_drug_details.drug_category,
             )
-            product_mapping = DVDMSProductMapping.objects.create(
-                institute=institute,
-                drug=drug,
-                product_knowledge=product_knowledge,
-                created_by=request.user,
-                updated_by=request.user,
-            )
+            try:
+                product_mapping = DVDMSProductMapping.objects.create(
+                    institute=institute,
+                    drug=drug,
+                    eaushadhi_drug_id=spec.eaushadhi_drug_details.id,
+                    product_knowledge=product_knowledge,
+                    created_by=request.user,
+                    updated_by=request.user,
+                )
+            except IntegrityError:
+                return Response(
+                    {"error": "Product mapping already exists for this drug"},
+                    status=status.HTTP_409_CONFLICT,
+                )
 
         result = DVDMSProductMappingListSpec.serialize(product_mapping)
         return Response(result.to_json(), status=status.HTTP_201_CREATED)
@@ -175,11 +191,15 @@ class DVDMSProductMappingViewSet(EMRBaseViewSet):
                 deleted=False,
             )
 
+            update_fields = ["updated_by", "modified_date"]
+
             if spec.eaushadhi_drug_details is not None:
-                new_drug_id = spec.eaushadhi_drug_details.id
+                details = spec.eaushadhi_drug_details
+                provided = details.model_fields_set
+                new_drug_id = details.id if "id" in provided else product_mapping.drug.drug_id
                 if new_drug_id != product_mapping.drug.drug_id:
                     conflict = DVDMSProductMapping.objects.filter(
-                        institute=institute, drug__drug_id=new_drug_id, deleted=False
+                        institute=institute, eaushadhi_drug_id=new_drug_id, deleted=False
                     ).exclude(pk=product_mapping.pk)
                     if conflict.exists():
                         return Response(
@@ -188,32 +208,34 @@ class DVDMSProductMappingViewSet(EMRBaseViewSet):
                         )
 
                 drug = product_mapping.drug
-                drug.drug_id = new_drug_id
-                drug.name = spec.eaushadhi_drug_details.name
-                drug.brand_id = spec.eaushadhi_drug_details.brand_id
-                drug.group_id = spec.eaushadhi_drug_details.group_id
-                drug.sub_group_id = spec.eaushadhi_drug_details.sub_group_id
-                drug.unit_id = spec.eaushadhi_drug_details.unit_id
-                drug.drug_category = spec.eaushadhi_drug_details.drug_category
-                drug.save(
-                    update_fields=[
-                        "drug_id",
-                        "name",
-                        "brand_id",
-                        "group_id",
-                        "sub_group_id",
-                        "unit_id",
-                        "drug_category",
-                    ]
-                )
+                drug_update_fields = []
+                for field in ("id", "name", "brand_id", "group_id", "sub_group_id", "unit_id", "drug_category"):
+                    if field not in provided:
+                        continue
+                    model_field = "drug_id" if field == "id" else field
+                    setattr(drug, model_field, getattr(details, field))
+                    drug_update_fields.append(model_field)
+                if drug_update_fields:
+                    drug.save(update_fields=drug_update_fields)
 
-            update_fields = ["updated_by", "modified_date"]
+                if "id" in provided:
+                    product_mapping.eaushadhi_drug_id = new_drug_id
+                    update_fields.append("eaushadhi_drug_id")
+
             if spec.product_knowledge_id is not None:
-                product_mapping.product_knowledge = self._get_active_product_knowledge(spec.product_knowledge_id)
+                product_mapping.product_knowledge = self._get_active_product_knowledge(
+                    institute, spec.product_knowledge_id
+                )
                 update_fields.append("product_knowledge")
 
             product_mapping.updated_by = request.user
-            product_mapping.save(update_fields=update_fields)
+            try:
+                product_mapping.save(update_fields=update_fields)
+            except IntegrityError:
+                return Response(
+                    {"error": "Product mapping already exists for this drug"},
+                    status=status.HTTP_409_CONFLICT,
+                )
 
         result = DVDMSProductMappingListSpec.serialize(product_mapping)
         return Response(result.to_json(), status=status.HTTP_200_OK)

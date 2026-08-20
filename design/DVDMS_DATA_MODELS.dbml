@@ -295,6 +295,7 @@ Table dvdms_product_mapping {
 
   institute_id INTEGER [not null, note: 'FK to dvdms_institute.id']
   drug_id INTEGER [not null, unique, note: 'FK to dvdms_drug.id (1:1) - the DVDMS drug snapshot being mapped. ON DELETE PROTECT']
+  eaushadhi_drug_id VARCHAR(50) [not null, note: 'Denormalized copy of drug.drug_id - DVDMSDrug.drug_id is not unique, so this is what the (institute, eaushadhi_drug_id) uniqueness constraint is enforced on']
   product_knowledge_id INTEGER [not null, note: 'FK to care_product_knowledge.id - many drugs can map to the same product. ON DELETE PROTECT']
 
   mapping_type VARCHAR(20) [not null, default: 'manual_mapping', note: 'default_mapping, manual_mapping']
@@ -316,6 +317,7 @@ Table dvdms_product_mapping {
     product_knowledge_id
     mapping_type
     deleted
+    (institute_id, eaushadhi_drug_id) [unique, note: 'Partial unique index where deleted=false']
   }
 }
 

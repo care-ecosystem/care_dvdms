@@ -95,6 +95,8 @@ class DVDMSRecordOrderViewSet(EMRBaseViewSet):
             external_id=spec.institute_supplier,
             institute=institute,
             deleted=False,
+            supplier__deleted=False,
+            supplier__org_type="product_supplier",
         )
 
         try:
@@ -178,6 +180,8 @@ class DVDMSRecordOrderViewSet(EMRBaseViewSet):
                     external_id=spec.institute_supplier,
                     institute=institute,
                     deleted=False,
+                    supplier__deleted=False,
+                    supplier__org_type="product_supplier",
                 )
                 update_fields.append("institute_supplier")
             if spec.status is not None:

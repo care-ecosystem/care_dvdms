@@ -22,6 +22,7 @@ class DVDMSProductMapping(EMRBaseModel):
         on_delete=models.PROTECT,
         related_name="product_mapping",
     )
+    eaushadhi_drug_id = models.CharField(max_length=50)
     product_knowledge = models.ForeignKey(
         ProductKnowledge,
         on_delete=models.PROTECT,
@@ -38,6 +39,13 @@ class DVDMSProductMapping(EMRBaseModel):
 
     class Meta:
         verbose_name_plural = "DVDMS Product Mappings"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["institute", "eaushadhi_drug_id"],
+                condition=models.Q(deleted=False),
+                name="uniq_institute_eaushadhi_drug_id",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.drug} -> {self.product_knowledge_id}"
