@@ -14,8 +14,9 @@ from care_dvdms.api.specs.dvdms_record_item_order import (
     DVDMSRecordItemOrderListSpec,
     DVDMSRecordItemOrderUpdateSpec,
 )
+from care_dvdms.models.dvdms_drug import DVDMSDrug
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
-from care_dvdms.models.dvdms_record_item_order import DVDMSDrug, DVDMSRecordItemOrder
+from care_dvdms.models.dvdms_record_item_order import DVDMSRecordItemOrder
 from care_dvdms.models.dvdms_record_order import DVDMSRecordOrder, DVDMSRecordOrderStatus
 
 SELECT_RELATED_FIELDS = (
@@ -135,6 +136,8 @@ class DVDMSRecordItemOrderViewSet(EMRBaseViewSet):
                     sub_group_id=spec.drug.sub_group_id,
                     unit_id=spec.drug.unit_id,
                     drug_category=spec.drug.drug_category,
+                    created_by=request.user,
+                    updated_by=request.user,
                 )
                 item_order = DVDMSRecordItemOrder.objects.create(
                     institute=institute,
@@ -185,6 +188,7 @@ class DVDMSRecordItemOrderViewSet(EMRBaseViewSet):
                 drug.sub_group_id = spec.drug.sub_group_id
                 drug.unit_id = spec.drug.unit_id
                 drug.drug_category = spec.drug.drug_category
+                drug.updated_by = request.user
                 drug.save(
                     update_fields=[
                         "drug_id",
@@ -194,6 +198,8 @@ class DVDMSRecordItemOrderViewSet(EMRBaseViewSet):
                         "sub_group_id",
                         "unit_id",
                         "drug_category",
+                        "updated_by",
+                        "modified_date",
                     ]
                 )
 

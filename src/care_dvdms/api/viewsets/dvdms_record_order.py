@@ -95,6 +95,8 @@ class DVDMSRecordOrderViewSet(EMRBaseViewSet):
             external_id=spec.institute_supplier,
             institute=institute,
             deleted=False,
+            supplier__deleted=False,
+            supplier__org_type="product_supplier",
         )
 
         try:
@@ -142,6 +144,23 @@ class DVDMSRecordOrderViewSet(EMRBaseViewSet):
                 deleted=False,
             )
 
+            if (
+                spec.status == DVDMSRecordOrderStatus.cancelled
+                and record_order.status != DVDMSRecordOrderStatus.draft
+            ):
+                return Response(
+                    {"error": "Only a draft record order can be cancelled"},
+                    status=status.HTTP_409_CONFLICT,
+                )
+
+            if (
+                spec.name is not None or spec.institute_supplier is not None
+            ) and record_order.status != DVDMSRecordOrderStatus.draft:
+                return Response(
+                    {"error": "Name and supplier can only be changed while the record order is in draft"},
+                    status=status.HTTP_409_CONFLICT,
+                )
+
             newly_approved = (
                 spec.status == DVDMSRecordOrderStatus.approved
                 and record_order.status != DVDMSRecordOrderStatus.approved
@@ -152,6 +171,19 @@ class DVDMSRecordOrderViewSet(EMRBaseViewSet):
                     status=status.HTTP_409_CONFLICT,
                 )
             update_fields = ["updated_by", "modified_date"]
+            if spec.name is not None:
+                record_order.name = spec.name
+                update_fields.append("name")
+            if spec.institute_supplier is not None:
+                record_order.institute_supplier = get_object_or_404(
+                    DVDMSSupplier.objects.select_related("supplier"),
+                    external_id=spec.institute_supplier,
+                    institute=institute,
+                    deleted=False,
+                    supplier__deleted=False,
+                    supplier__org_type="product_supplier",
+                )
+                update_fields.append("institute_supplier")
             if spec.status is not None:
                 record_order.status = spec.status
                 update_fields.append("status")

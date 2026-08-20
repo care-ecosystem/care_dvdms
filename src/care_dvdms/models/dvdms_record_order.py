@@ -13,6 +13,7 @@ class DVDMSRecordOrderStatus(models.TextChoices):
     rejected = "rejected"
     completed = "completed"
     failed = "failed"
+    cancelled = "cancelled"
 
 
 class DVDMSRecordOrder(EMRBaseModel):

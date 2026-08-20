@@ -128,7 +128,7 @@ Table dvdms_record_order {
   name VARCHAR(255) [not null, note: 'Order name (e.g., "eaushadhi")']
 
   status VARCHAR(20) [not null, default: 'draft',
-    note: 'Order status: draft, pending, approved, rejected, completed']
+    note: 'Order status: draft, pending, approved, rejected, completed, failed, cancelled']
 
   created_date TIMESTAMP [not null, note: "indexed"]
   modified_date TIMESTAMP [not null, note: "indexed"]
@@ -162,6 +162,7 @@ Ref record_order_updated_by: dvdms_record_order.updated_by_id ?> care_user.id
 // ============================================================================
 Table dvdms_drug {
   id INTEGER [pk, increment]
+  external_id UUID [unique, not null, note: 'Exposed via API as id']
 
   drug_id VARCHAR(50) [not null, note: 'DVDMS item ID']
   name VARCHAR(255) [not null, note: 'Drug name']
@@ -170,7 +171,20 @@ Table dvdms_drug {
   sub_group_id VARCHAR(50) [default: '', note: 'DVDMS subgroup ID']
   unit_id VARCHAR(50) [default: '', note: 'DVDMS unit ID']
   drug_category VARCHAR(50) [default: '', note: 'Drug category']
+
+  created_date TIMESTAMP [not null, note: "indexed"]
+  modified_date TIMESTAMP [not null, note: "indexed"]
+  deleted BOOLEAN [default: false, note: "indexed"]
+
+  created_by_id INTEGER [null]
+  updated_by_id INTEGER [null]
+
+  history JSON [default: '{}']
+  meta JSON [default: 'null', null]
 }
+
+Ref drug_created_by: dvdms_drug.created_by_id ?> care_user.id
+Ref drug_updated_by: dvdms_drug.updated_by_id ?> care_user.id
 
 // ============================================================================
 // RECORD ITEM ORDER - Line Items in DVDMS Orders (N:1 relationship)
@@ -259,7 +273,7 @@ Table dvdms_outward_record_order {
   external_id UUID [unique, not null, note: 'Exposed via API as id']
 
   record_order_id INTEGER [not null, unique, note: 'FK to dvdms_record_order.id (1:1)']
-  status VARCHAR(20) [not null, default: 'created', note: 'Outwards record status: created, submitted, cancelled']
+  status VARCHAR(20) [not null, default: 'created', note: 'Outwards record status: created, submitted, cancelled, failed']
   eaushadhi_indent_no VARCHAR(255) [null, note: 'e-Aushadhi indent number']
   eaushadhi_indent_status VARCHAR(255) [null, note: 'Current status of the e-Aushadhi indent']
   sync_log_id INTEGER [null, note: 'FK to dvdms_sync_log.id. ON DELETE SET NULL']
@@ -285,6 +299,47 @@ Ref outward_record_order_record_order: dvdms_outward_record_order.record_order_i
 Ref outward_record_order_sync_log: dvdms_outward_record_order.sync_log_id ?> dvdms_sync_log.id
 Ref outward_record_order_created_by: dvdms_outward_record_order.created_by_id ?> care_user.id
 Ref outward_record_order_updated_by: dvdms_outward_record_order.updated_by_id ?> care_user.id
+
+// ============================================================================
+// PRODUCT MAPPING - DVDMS drug snapshot to CARE ProductKnowledge (1:1 drug side)
+// ============================================================================
+Table dvdms_product_mapping {
+  id INTEGER [pk, increment]
+  external_id UUID [unique, not null, note: 'Exposed via API as id']
+
+  institute_id INTEGER [not null, note: 'FK to dvdms_institute.id']
+  drug_id INTEGER [not null, unique, note: 'FK to dvdms_drug.id (1:1) - the DVDMS drug snapshot being mapped. ON DELETE PROTECT']
+  eaushadhi_drug_id VARCHAR(50) [not null, note: 'Denormalized copy of drug.drug_id - DVDMSDrug.drug_id is not unique, so this is what the (institute, eaushadhi_drug_id) uniqueness constraint is enforced on']
+  product_knowledge_id INTEGER [not null, note: 'FK to care_product_knowledge.id - many drugs can map to the same product. ON DELETE PROTECT']
+
+  mapping_type VARCHAR(20) [not null, default: 'manual_mapping', note: 'default_mapping, manual_mapping']
+  usage_count INTEGER [not null, default: 0]
+  last_used_date TIMESTAMP [null]
+
+  created_date TIMESTAMP [not null, note: "indexed"]
+  modified_date TIMESTAMP [not null, note: "indexed"]
+  deleted BOOLEAN [default: false, note: "indexed"]
+
+  created_by_id INTEGER [null]
+  updated_by_id INTEGER [null]
+
+  history JSON [default: '{}']
+  meta JSON [default: 'null', null]
+
+  indexes {
+    institute_id
+    product_knowledge_id
+    mapping_type
+    deleted
+    (institute_id, eaushadhi_drug_id) [unique, note: 'Partial unique index where deleted=false']
+  }
+}
+
+Ref product_mapping_institute: dvdms_product_mapping.institute_id ?> dvdms_institute.id
+Ref product_mapping_drug: dvdms_product_mapping.drug_id - dvdms_drug.id
+Ref product_mapping_product_knowledge: dvdms_product_mapping.product_knowledge_id ?> care_product_knowledge.id
+Ref product_mapping_created_by: dvdms_product_mapping.created_by_id ?> care_user.id
+Ref product_mapping_updated_by: dvdms_product_mapping.updated_by_id ?> care_user.id
 
 // ============================================================================
 // CARE MODELS - External References

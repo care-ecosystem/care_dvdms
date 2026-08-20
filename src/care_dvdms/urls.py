@@ -6,6 +6,10 @@ from care_dvdms.api.viewsets.dvdms_lookup import DVDMSLookupViewSet
 from care_dvdms.api.viewsets.dvdms_outward_record_order import (
     DVDMSOutwardRecordOrderViewSet,
 )
+from care_dvdms.api.viewsets.dvdms_product_mapping import (
+    DVDMSProductMappingViewSet,
+    DVDMSRecordOrderProductMappingViewSet,
+)
 from care_dvdms.api.viewsets.dvdms_record_item_order import (
     DVDMSRecordItemOrderViewSet,
 )
@@ -143,5 +147,29 @@ urlpatterns = [
         r"^institute/(?P<institute_id>[^/.]+)/record_order/(?P<record_order_id>[^/.]+)/outward/fetch-inwards/$",
         DVDMSOutwardRecordOrderViewSet.as_view({"post": "fetch_inwards"}),
         name="dvdms-outward-record-order-fetch-inwards",
+    ),
+    re_path(
+        r"^institute/(?P<institute_id>[^/.]+)/product-mappings/$",
+        DVDMSProductMappingViewSet.as_view(
+            {
+                "get": "list",
+                "post": "create",
+            }
+        ),
+        name="dvdms-product-mapping-list",
+    ),
+    re_path(
+        r"^institute/(?P<institute_id>[^/.]+)/product-mappings/(?P<external_id>[^/.]+)/$",
+        DVDMSProductMappingViewSet.as_view(
+            {
+                "patch": "partial_update",
+            }
+        ),
+        name="dvdms-product-mapping-detail",
+    ),
+    re_path(
+        r"^institute/(?P<institute_id>[^/.]+)/record_order/(?P<record_order_id>[^/.]+)/product_mappings/$",
+        DVDMSRecordOrderProductMappingViewSet.as_view({"get": "list"}),
+        name="dvdms-record-order-product-mappings",
     ),
 ]
