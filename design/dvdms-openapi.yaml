@@ -4336,7 +4336,8 @@ components:
               readOnly: true
               description: |
                 CARE-generated unique indent number, sent to DVDMS as hstnumCareIndentNo.
-                Format: {financial_year}{facility_id, 3-digit zero-padded}{sequence, 4-digit zero-padded}
+                Format: {financial_year}{facility_id, 3-digit zero-padded}{sequence, min 4-digit zero-padded}.
+                4 digits is a minimum width, not a hard cap - the sequence grows past 9999 rather than failing.
               example: "2026270010001"
             created_by:
               allOf:
