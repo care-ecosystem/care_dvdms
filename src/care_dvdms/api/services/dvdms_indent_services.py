@@ -5,7 +5,9 @@ from care_dvdms.api.services.constants import (
     DVDMS_DRUG_ITEM_CAT_NO,
     DVDMS_INDENT_NO_PATTERN,
     DVDMS_SAVE_INDENT_PATH,
+    DVDMS_SAVE_INDENT_SUCCESS_STATUS,
     DVDMS_TRACK_INDENT_PATH,
+    DVDMS_TRACK_INDENT_SUCCESS_STATUS,
     DVDMS_URGENT_PRIORITIES,
 )
 from care_dvdms.api.services.dvdms_client import dvdms_get_full, dvdms_post_full
@@ -31,7 +33,7 @@ def _build_selected_param_values(record_order):
     values = []
     for item_order in record_order.item_orders.select_related("drug", "supply_request"):
         drug = item_order.drug
-        quantity = item_order.supply_request.quantity or 0
+        quantity = int(item_order.supply_request.quantity or 0)
         values.append(
             "#".join(
                 str(v)
@@ -78,7 +80,7 @@ def build_save_indent_payload(record_order):
 
 def save_indent(payload):
     """Call the DVDMS save-indent API. Returns (indent_no, raw_response, http_status_code)."""
-    response, http_status_code = dvdms_post_full(DVDMS_SAVE_INDENT_PATH, payload)
+    response, http_status_code = dvdms_post_full(DVDMS_SAVE_INDENT_PATH, DVDMS_SAVE_INDENT_SUCCESS_STATUS, payload)
     match = INDENT_NO_PATTERN.search(response.get("message", ""))
     indent_no = match.group(1) if match else None
     return indent_no, response, http_status_code
@@ -94,4 +96,4 @@ def build_track_indent_params(outward_record):
 
 def track_indent(params):
     """Call the DVDMS track-indent API. Returns (raw_response, http_status_code)."""
-    return dvdms_get_full(DVDMS_TRACK_INDENT_PATH, params=params)
+    return dvdms_get_full(DVDMS_TRACK_INDENT_PATH, DVDMS_TRACK_INDENT_SUCCESS_STATUS, params=params)

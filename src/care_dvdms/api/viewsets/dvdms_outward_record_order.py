@@ -136,8 +136,9 @@ class DVDMSOutwardRecordOrderViewSet(EMRBaseViewSet):
         sync_log.save(update_fields=["request_status", "response_payload", "http_status_code", "modified_date"])
 
         outward_record.sync_log = sync_log
+        outward_record.eaushadhi_indent_status = response.get("data", {}).get("indentStatus")
         outward_record.updated_by = request.user
-        outward_record.save(update_fields=["sync_log", "updated_by", "modified_date"])
+        outward_record.save(update_fields=["sync_log", "eaushadhi_indent_status", "updated_by", "modified_date"])
 
         result = DVDMSOutwardRecordOrderListSpec.serialize(outward_record)
         return Response(result.to_json(), status=status.HTTP_200_OK)
