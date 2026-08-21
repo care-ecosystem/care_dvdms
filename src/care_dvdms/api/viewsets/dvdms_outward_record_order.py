@@ -6,13 +6,20 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 
-from care_dvdms.api.services.dvdms_indent_services import track_indent
+from care_dvdms.api.services.dvdms_client import get_status_code
+from care_dvdms.api.services.dvdms_indent_services import build_track_indent_params, track_indent
 from care_dvdms.api.specs.dvdms_outward_record_order import (
     DVDMSOutwardRecordOrderListSpec,
 )
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
 from care_dvdms.models.dvdms_outward_record_order import DVDMSOutwardRecordOrder
 from care_dvdms.models.dvdms_record_order import DVDMSRecordOrder
+from care_dvdms.models.dvdms_sync_log import (
+    DVDMSSyncLog,
+    DVDMSSyncRequestStatus,
+    DVDMSSyncTriggeredBy,
+    DVDMSSyncType,
+)
 
 SELECT_RELATED_FIELDS = (
     "record_order",
@@ -94,7 +101,44 @@ class DVDMSOutwardRecordOrderViewSet(EMRBaseViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # outward_record = track_indent(institute, outward_record, request.user)
+        if not outward_record.eaushadhi_indent_no:
+            return Response(
+                {
+                    "error": "Cannot fetch inwards: indent has not been saved to DVDMS yet",
+                    "code": "INDENT_NOT_SAVED",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        params = build_track_indent_params(outward_record)
+        sync_log = DVDMSSyncLog.objects.create(
+            institute=institute,
+            triggered_by=DVDMSSyncTriggeredBy.user,
+            sync_type=DVDMSSyncType.track_indent,
+            request_status=DVDMSSyncRequestStatus.pending,
+            request_payload=params,
+            created_by=request.user,
+            updated_by=request.user,
+        )
+
+        try:
+            response, http_status_code = track_indent(params)
+        except Exception as exc:
+            sync_log.request_status = DVDMSSyncRequestStatus.failure
+            sync_log.error_detail = str(exc)
+            sync_log.http_status_code = get_status_code(exc)
+            sync_log.save(update_fields=["request_status", "error_detail", "http_status_code", "modified_date"])
+            raise
+
+        sync_log.request_status = DVDMSSyncRequestStatus.success
+        sync_log.response_payload = response
+        sync_log.http_status_code = http_status_code
+        sync_log.save(update_fields=["request_status", "response_payload", "http_status_code", "modified_date"])
+
+        outward_record.sync_log = sync_log
+        outward_record.eaushadhi_indent_status = response.get("data", {}).get("indentStatus")
+        outward_record.updated_by = request.user
+        outward_record.save(update_fields=["sync_log", "eaushadhi_indent_status", "updated_by", "modified_date"])
 
         result = DVDMSOutwardRecordOrderListSpec.serialize(outward_record)
         return Response(result.to_json(), status=status.HTTP_200_OK)

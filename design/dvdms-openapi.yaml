@@ -1330,6 +1330,7 @@ paths:
                     id: "5aa85d4e-3456-41fb-aee2-8076f07cb91b"
                     name: "Medplus"
                     org_type: "product_supplier"
+                care_indent_no: "2026270010001"
                 status: "draft"
                 created_by:
                   id: "uuid"
@@ -1451,6 +1452,7 @@ paths:
                         id: "5aa85d4e-3456-41fb-aee2-8076f07cb91b"
                         name: "Medplus"
                         org_type: "product_supplier"
+                    care_indent_no: "2026270010001"
                     status: "draft"
                     created_by:
                       id: "uuid"
@@ -1540,6 +1542,7 @@ paths:
                     id: "5aa85d4e-3456-41fb-aee2-8076f07cb91b"
                     name: "Medplus"
                     org_type: "product_supplier"
+                care_indent_no: "2026270010001"
                 status: "approved"
                 created_by:
                   id: "uuid"
@@ -4328,6 +4331,14 @@ components:
                 - $ref: '#/components/schemas/InstituteSupplierSummary'
               readOnly: true
               description: Institute supplier mapping details (expanded in response)
+            care_indent_no:
+              type: string
+              readOnly: true
+              description: |
+                CARE-generated unique indent number, sent to DVDMS as hstnumCareIndentNo.
+                Format: {financial_year}{facility_id, 3-digit zero-padded}{sequence, min 4-digit zero-padded}.
+                4 digits is a minimum width, not a hard cap - the sequence grows past 9999 rather than failing.
+              example: "2026270010001"
             created_by:
               allOf:
                 - $ref: '#/components/schemas/UserSummary'

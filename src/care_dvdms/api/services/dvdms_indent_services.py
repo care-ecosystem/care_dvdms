@@ -1,32 +1,26 @@
-import datetime
 import re
 
-from care_dvdms.api.services.constants import DVDMS_DRUG_ITEM_CAT_NO, DVDMS_SAVE_INDENT_PATH
-from care_dvdms.api.services.dvdms_client import dvdms_post_full
+from care_dvdms.api.services.constants import (
+    DVDMS_DRUG_ITEM_CAT_NO,
+    DVDMS_INDENT_NO_PATTERN,
+    DVDMS_SAVE_INDENT_PATH,
+    DVDMS_SAVE_INDENT_SUCCESS_STATUS,
+    DVDMS_TRACK_INDENT_PATH,
+    DVDMS_TRACK_INDENT_SUCCESS_STATUS,
+    DVDMS_URGENT_PRIORITIES,
+)
+from care_dvdms.api.services.dvdms_client import dvdms_get_full, dvdms_post_full
+from care_dvdms.utils.financial_year import financial_year_range_from_digits
 
-URGENT_PRIORITIES = {"urgent", "asap", "stat"}
-INDENT_NO_PATTERN = re.compile(r"Intent NO:\s*(\S+)")
-
-
-def _current_financial_year():
-    today = datetime.date.today()
-    start_year = today.year if today.month >= 4 else today.year - 1
-    return f"{start_year}-{start_year + 1}"
+INDENT_NO_PATTERN = re.compile(DVDMS_INDENT_NO_PATTERN, re.IGNORECASE)
 
 
 def _build_selected_param_values(record_order):
-    """
-    Build the "#"-joined per-item strings DVDMS expects:
-    ItemId#ItembrandId#ReqQty#GroupId#SubGroupId#Rate#RateUnitId#IndentQtyUnitid#
-    InHandQty#InhandQtyUnitId#Availableqty#IssueqtyUnitid#ReorderLevel
-
-    Rate/InHandQty/Availableqty/ReorderLevel aren't tracked anywhere in
-    our models yet (they're live DVDMS stock/pricing data) - sent as 0 for now.
-    """
+    # Rate/InHandQty/Availableqty/ReorderLevel aren't tracked in our models yet, sent as 0.
     values = []
     for item_order in record_order.item_orders.select_related("drug", "supply_request"):
         drug = item_order.drug
-        quantity = item_order.supply_request.quantity or 0
+        quantity = int(item_order.supply_request.quantity or 0)
         values.append(
             "#".join(
                 str(v)
@@ -52,13 +46,14 @@ def _build_selected_param_values(record_order):
 
 def build_save_indent_payload(record_order):
     """Build the DVDMS save-indent request payload for a record order."""
-    financial_year = _current_financial_year()
-    urgent_flag = 1 if record_order.order.priority in URGENT_PRIORITIES else 0
+    financial_year = financial_year_range_from_digits(record_order.care_indent_no)
+    urgent_flag = 1 if record_order.order.priority in DVDMS_URGENT_PRIORITIES else 0
 
     return {
         "isModify": 0,
         "hststrFinancialYear": financial_year,
         "hstnumStoreId": record_order.institute_store.eaushadhi_store_id,
+        "hstnumCareIndentNo": record_order.care_indent_no,
         "hstnumTostoreId": record_order.institute_supplier.eaushadhi_warehouse_id,
         "sstnumItemCatNo": DVDMS_DRUG_ITEM_CAT_NO,
         "hststrIndentPeriodValue": financial_year,
@@ -72,11 +67,20 @@ def build_save_indent_payload(record_order):
 
 def save_indent(payload):
     """Call the DVDMS save-indent API. Returns (indent_no, raw_response, http_status_code)."""
-    response, http_status_code = dvdms_post_full(DVDMS_SAVE_INDENT_PATH, payload)
+    response, http_status_code = dvdms_post_full(DVDMS_SAVE_INDENT_PATH, DVDMS_SAVE_INDENT_SUCCESS_STATUS, payload)
     match = INDENT_NO_PATTERN.search(response.get("message", ""))
     indent_no = match.group(1) if match else None
     return indent_no, response, http_status_code
 
 
-def track_indent(institute, outward_record, user):
-    """Track an indent's status in DVDMS for an outward record."""
+def build_track_indent_params(outward_record):
+    """Build the DVDMS track-indent query params for an outward record."""
+    return {
+        "storeId": outward_record.record_order.institute_store.eaushadhi_store_id,
+        "indentNo": outward_record.eaushadhi_indent_no,
+    }
+
+
+def track_indent(params):
+    """Call the DVDMS track-indent API. Returns (raw_response, http_status_code)."""
+    return dvdms_get_full(DVDMS_TRACK_INDENT_PATH, DVDMS_TRACK_INDENT_SUCCESS_STATUS, params=params)
