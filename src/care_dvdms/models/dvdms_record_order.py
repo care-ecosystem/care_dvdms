@@ -1,21 +1,29 @@
 from care.emr.models.base import EMRBaseModel
 from django.db import connection, models
-from django.utils import timezone
 
-from care_dvdms.api.services.constants import (
-    CARE_INDENT_NO_FACILITY_WIDTH,
-    CARE_INDENT_NO_SEQ_WIDTH,
-    CARE_INDENT_NO_SEQUENCE,
-)
+from care_dvdms.api.services.constants import CARE_INDENT_NO_FACILITY_WIDTH, CARE_INDENT_NO_SEQ_WIDTH
+from care_dvdms.models.dvdms_care_indent_sequence import DVDMSCareIndentSequence
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
 from care_dvdms.models.dvdms_store import DVDMSStore
 from care_dvdms.models.dvdms_supplier import DVDMSSupplier
+from care_dvdms.utils.financial_year import current_financial_year_digits
 
 
-def _current_financial_year_digits() -> str:
-    today = timezone.now().date()
-    start_year = today.year if today.month >= 4 else today.year - 1
-    return f"{start_year}{str(start_year + 1)[-2:]}"
+def _next_care_indent_sequence(institute, financial_year):
+    # Atomic upsert - Postgres row lock on the ON CONFLICT branch prevents concurrent collisions.
+    table = DVDMSCareIndentSequence._meta.db_table  # noqa: SLF001
+    with connection.cursor() as cursor:
+        cursor.execute(
+            f"""
+            INSERT INTO {table} (institute_id, financial_year, last_value)
+            VALUES (%s, %s, 1)
+            ON CONFLICT (institute_id, financial_year)
+            DO UPDATE SET last_value = {table}.last_value + 1
+            RETURNING last_value
+            """,  # noqa: S608
+            [institute.pk, financial_year],
+        )
+        return cursor.fetchone()[0]
 
 
 class DVDMSRecordOrderStatus(models.TextChoices):
@@ -65,10 +73,8 @@ class DVDMSRecordOrder(EMRBaseModel):
 
     def save(self, *args, **kwargs):
         if not self.care_indent_no:
-            with connection.cursor() as cursor:
-                cursor.execute(f"SELECT nextval('{CARE_INDENT_NO_SEQUENCE}')")  # noqa: S608
-                seq_no = cursor.fetchone()[0]
-            fy_digits = _current_financial_year_digits()
+            fy_digits = current_financial_year_digits()
+            seq_no = _next_care_indent_sequence(self.institute, fy_digits)
             facility_digits = f"{self.institute.facility_id:0{CARE_INDENT_NO_FACILITY_WIDTH}d}"
             seq_digits = f"{seq_no:0{CARE_INDENT_NO_SEQ_WIDTH}d}"
             self.care_indent_no = f"{fy_digits}{facility_digits}{seq_digits}"

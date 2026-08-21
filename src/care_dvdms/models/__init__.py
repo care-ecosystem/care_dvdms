@@ -1,3 +1,4 @@
+from care_dvdms.models.dvdms_care_indent_sequence import DVDMSCareIndentSequence  # noqa: F401
 from care_dvdms.models.dvdms_drug import DVDMSDrug  # noqa: F401
 from care_dvdms.models.dvdms_institute import DVDMSInstitute  # noqa: F401
 from care_dvdms.models.dvdms_outward_record_order import (  # noqa: F401

@@ -126,7 +126,7 @@ Table dvdms_record_order {
   institute_supplier_id INTEGER [not null, note: 'FK to dvdms_supplier.id - source warehouse. ON DELETE PROTECT']
 
   name VARCHAR(255) [not null, note: 'Order name (e.g., "eaushadhi")']
-  care_indent_no VARCHAR(32) [not null, unique, note: 'CARE-generated unique indent number sent to DVDMS as hstnumCareIndentNo. Format: {financial_year}{facility_id, 3-digit zero-padded}{sequence, 4-digit zero-padded}, e.g. 2026270010001']
+  care_indent_no VARCHAR(32) [not null, unique, note: 'CARE-generated unique indent number sent to DVDMS as hstnumCareIndentNo. Format: {financial_year}{facility_id, 3-digit zero-padded}{sequence, 4-digit zero-padded}, e.g. 2026270010001. Sequence portion comes from dvdms_care_indent_sequence, scoped per (institute, financial_year)']
 
   status VARCHAR(20) [not null, default: 'draft',
     note: 'Order status: draft, pending, approved, rejected, completed, failed, cancelled']
@@ -157,6 +157,25 @@ Ref record_order_store: dvdms_record_order.institute_store_id ?> dvdms_store.id
 Ref record_order_supplier: dvdms_record_order.institute_supplier_id ?> dvdms_supplier.id
 Ref record_order_created_by: dvdms_record_order.created_by_id ?> care_user.id
 Ref record_order_updated_by: dvdms_record_order.updated_by_id ?> care_user.id
+
+// ============================================================================
+// CARE INDENT SEQUENCE - Per-(institute, financial_year) counter (N:1 relationship)
+// Backs dvdms_record_order.care_indent_no; incremented via atomic upsert
+// (INSERT ... ON CONFLICT DO UPDATE) so concurrent creation never collides.
+// Internal bookkeeping table - not exposed via API, no soft-delete/audit fields.
+// ============================================================================
+Table dvdms_care_indent_sequence {
+  id INTEGER [pk, increment]
+  institute_id INTEGER [not null, note: 'FK to dvdms_institute.id']
+  financial_year VARCHAR(6) [not null, note: 'e.g. "202627" for FY 2026-2027']
+  last_value INTEGER [not null, default: 0, note: 'Last sequence value issued for this (institute, financial_year)']
+
+  indexes {
+    (institute_id, financial_year) [unique]
+  }
+}
+
+Ref care_indent_sequence_institute: dvdms_care_indent_sequence.institute_id ?> dvdms_institute.id
 
 // ============================================================================
 // DVDMS DRUG - Snapshot of a DVDMS drug/item (1:1 owned by a record item order)

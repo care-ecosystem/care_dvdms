@@ -23,7 +23,7 @@ class DVDMSRecordOrderListSpec(EMRResource):
     status: str | None = None
     created_by: dict | None = None
     updated_by: dict | None = None
-    created_date: datetime.datetime | None = None   
+    created_date: datetime.datetime | None = None
     modified_date: datetime.datetime | None = None
 
     def to_json(self):

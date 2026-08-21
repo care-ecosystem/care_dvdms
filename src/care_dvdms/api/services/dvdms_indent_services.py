@@ -1,4 +1,3 @@
-import datetime
 import re
 
 from care_dvdms.api.services.constants import (
@@ -11,25 +10,13 @@ from care_dvdms.api.services.constants import (
     DVDMS_URGENT_PRIORITIES,
 )
 from care_dvdms.api.services.dvdms_client import dvdms_get_full, dvdms_post_full
+from care_dvdms.utils.financial_year import current_financial_year_range
 
 INDENT_NO_PATTERN = re.compile(DVDMS_INDENT_NO_PATTERN, re.IGNORECASE)
 
 
-def _current_financial_year():
-    today = datetime.date.today()
-    start_year = today.year if today.month >= 4 else today.year - 1
-    return f"{start_year}-{start_year + 1}"
-
-
 def _build_selected_param_values(record_order):
-    """
-    Build the "#"-joined per-item strings DVDMS expects:
-    ItemId#ItembrandId#ReqQty#GroupId#SubGroupId#Rate#RateUnitId#IndentQtyUnitid#
-    InHandQty#InhandQtyUnitId#Availableqty#IssueqtyUnitid#ReorderLevel
-
-    Rate/InHandQty/Availableqty/ReorderLevel aren't tracked anywhere in
-    our models yet (they're live DVDMS stock/pricing data) - sent as 0 for now.
-    """
+    # Rate/InHandQty/Availableqty/ReorderLevel aren't tracked in our models yet, sent as 0.
     values = []
     for item_order in record_order.item_orders.select_related("drug", "supply_request"):
         drug = item_order.drug
@@ -59,7 +46,7 @@ def _build_selected_param_values(record_order):
 
 def build_save_indent_payload(record_order):
     """Build the DVDMS save-indent request payload for a record order."""
-    financial_year = _current_financial_year()
+    financial_year = current_financial_year_range()
     urgent_flag = 1 if record_order.order.priority in DVDMS_URGENT_PRIORITIES else 0
 
     return {
