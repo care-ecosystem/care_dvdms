@@ -19,10 +19,11 @@ class DVDMSRecordOrderListSpec(EMRResource):
     order: dict | None = None
     institute_store: dict | None = None
     institute_supplier: dict | None = None
+    care_indent_no: str | None = None
     status: str | None = None
     created_by: dict | None = None
     updated_by: dict | None = None
-    created_date: datetime.datetime | None = None
+    created_date: datetime.datetime | None = None   
     modified_date: datetime.datetime | None = None
 
     def to_json(self):
@@ -74,6 +75,7 @@ class DVDMSRecordOrderCreateSpec(EMRResource):
         "order",
         "institute_store",
         "institute_supplier",
+        "care_indent_no",
         "created_by",
         "updated_by",
         "created_date",
@@ -100,6 +102,7 @@ class DVDMSRecordOrderUpdateSpec(EMRResource):
         "order",
         "institute_store",
         "institute_supplier",
+        "care_indent_no",
         "created_by",
         "updated_by",
         "created_date",

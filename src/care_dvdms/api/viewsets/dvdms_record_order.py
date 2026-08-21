@@ -24,6 +24,7 @@ from care_dvdms.tasks import save_indent_task
 class DVDMSRecordOrderFilters(filters.FilterSet):
     order = filters.UUIDFilter(field_name="order__external_id")
     status = filters.CharFilter(field_name="status")
+    care_indent_no = filters.CharFilter(field_name="care_indent_no")
 
 
 class DVDMSRecordOrderViewSet(EMRBaseViewSet):
