@@ -10,7 +10,7 @@ from care_dvdms.api.services.constants import (
     DVDMS_URGENT_PRIORITIES,
 )
 from care_dvdms.api.services.dvdms_client import dvdms_get_full, dvdms_post_full
-from care_dvdms.utils.financial_year import current_financial_year_range
+from care_dvdms.utils.financial_year import financial_year_range_from_digits
 
 INDENT_NO_PATTERN = re.compile(DVDMS_INDENT_NO_PATTERN, re.IGNORECASE)
 
@@ -46,7 +46,7 @@ def _build_selected_param_values(record_order):
 
 def build_save_indent_payload(record_order):
     """Build the DVDMS save-indent request payload for a record order."""
-    financial_year = current_financial_year_range()
+    financial_year = financial_year_range_from_digits(record_order.care_indent_no)
     urgent_flag = 1 if record_order.order.priority in DVDMS_URGENT_PRIORITIES else 0
 
     return {
