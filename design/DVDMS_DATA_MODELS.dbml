@@ -126,6 +126,7 @@ Table dvdms_record_order {
   institute_supplier_id INTEGER [not null, note: 'FK to dvdms_supplier.id - source warehouse. ON DELETE PROTECT']
 
   name VARCHAR(255) [not null, note: 'Order name (e.g., "eaushadhi")']
+  care_indent_no VARCHAR(32) [not null, unique, note: 'CARE-generated unique indent number sent to DVDMS as hstnumCareIndentNo. Format: {financial_year}{facility_id, 3-digit zero-padded}{sequence, 4-digit zero-padded}, e.g. 2026270010001']
 
   status VARCHAR(20) [not null, default: 'draft',
     note: 'Order status: draft, pending, approved, rejected, completed, failed, cancelled']
