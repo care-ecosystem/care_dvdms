@@ -1,17 +1,21 @@
-import re
-
 from care.emr.models.base import EMRBaseModel
 from django.db import connection, models
 from django.utils import timezone
 
-from care_dvdms.api.services.constants import CARE_INDENT_NO_SEQ_WIDTH, CARE_INDENT_NO_SEQUENCE
+from care_dvdms.api.services.constants import (
+    CARE_INDENT_NO_FACILITY_WIDTH,
+    CARE_INDENT_NO_SEQ_WIDTH,
+    CARE_INDENT_NO_SEQUENCE,
+)
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
 from care_dvdms.models.dvdms_store import DVDMSStore
 from care_dvdms.models.dvdms_supplier import DVDMSSupplier
 
 
-def _normalized_value(value: str, length: int = 3) -> str:
-    return re.sub(r"[^A-Za-z0-9]", "", value).upper()[:length]
+def _current_financial_year_digits() -> str:
+    today = timezone.now().date()
+    start_year = today.year if today.month >= 4 else today.year - 1
+    return f"{start_year}{str(start_year + 1)[-2:]}"
 
 
 class DVDMSRecordOrderStatus(models.TextChoices):
@@ -64,7 +68,8 @@ class DVDMSRecordOrder(EMRBaseModel):
             with connection.cursor() as cursor:
                 cursor.execute(f"SELECT nextval('{CARE_INDENT_NO_SEQUENCE}')")  # noqa: S608
                 seq_no = cursor.fetchone()[0]
-            facility_prefix = _normalized_value(self.institute.facility.name)
-            year_suffix = str(timezone.now().year)[-2:]
-            self.care_indent_no = f"{facility_prefix}-{year_suffix}-{seq_no:0{CARE_INDENT_NO_SEQ_WIDTH}d}"
+            fy_digits = _current_financial_year_digits()
+            facility_digits = f"{self.institute.facility_id:0{CARE_INDENT_NO_FACILITY_WIDTH}d}"
+            seq_digits = f"{seq_no:0{CARE_INDENT_NO_SEQ_WIDTH}d}"
+            self.care_indent_no = f"{fy_digits}{facility_digits}{seq_digits}"
         super().save(*args, **kwargs)

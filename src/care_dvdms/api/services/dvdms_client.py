@@ -28,9 +28,14 @@ def _dvdms_request(method, path, **kwargs):
     return body, response.status_code
 
 
-def dvdms_get(path):
-    body, _ = _dvdms_request("GET", path)
+def dvdms_get(path, params=None):
+    body, _ = _dvdms_request("GET", path, params=params)
     return body.get("data", [])
+
+
+def dvdms_get_full(path, params=None):
+    """Like dvdms_get, but returns the full response body and HTTP status code."""
+    return _dvdms_request("GET", path, params=params)
 
 
 def dvdms_post(path, payload=None):

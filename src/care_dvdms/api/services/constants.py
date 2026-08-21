@@ -4,6 +4,7 @@ DVDMS_UNIT_LIST_PATH = "/unitMst/list"
 DVDMS_DRUG_LIST_PATH = "/drug/list"
 DVDMS_STORE_LIST_PATH = "/getStoreDetailsForCare/list"
 DVDMS_SAVE_INDENT_PATH = "/save/indent"
+DVDMS_TRACK_INDENT_PATH = "/getIndentStatus"
 
 DVDMS_GROUPS_CACHE_KEY = "dvdms:lookup:groups"
 DVDMS_SUBGROUPS_CACHE_KEY = "dvdms:lookup:subgroups"
@@ -17,4 +18,5 @@ DVDMS_URGENT_PRIORITIES = {"urgent", "asap", "stat"}
 DVDMS_INDENT_NO_PATTERN = r"Intent NO:\s*(\S+)"
 
 CARE_INDENT_NO_SEQUENCE = "care_dvdms_dvdmsrecordorder_care_indent_no_seq"
+CARE_INDENT_NO_FACILITY_WIDTH = 3
 CARE_INDENT_NO_SEQ_WIDTH = 4

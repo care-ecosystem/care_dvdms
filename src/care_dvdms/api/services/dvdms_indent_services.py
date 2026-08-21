@@ -5,9 +5,10 @@ from care_dvdms.api.services.constants import (
     DVDMS_DRUG_ITEM_CAT_NO,
     DVDMS_INDENT_NO_PATTERN,
     DVDMS_SAVE_INDENT_PATH,
+    DVDMS_TRACK_INDENT_PATH,
     DVDMS_URGENT_PRIORITIES,
 )
-from care_dvdms.api.services.dvdms_client import dvdms_post_full
+from care_dvdms.api.services.dvdms_client import dvdms_get_full, dvdms_post_full
 
 INDENT_NO_PATTERN = re.compile(DVDMS_INDENT_NO_PATTERN, re.IGNORECASE)
 
@@ -83,5 +84,14 @@ def save_indent(payload):
     return indent_no, response, http_status_code
 
 
-def track_indent(institute, outward_record, user):
-    """Track an indent's status in DVDMS for an outward record."""
+def build_track_indent_params(outward_record):
+    """Build the DVDMS track-indent query params for an outward record."""
+    return {
+        "storeId": outward_record.record_order.institute_store.eaushadhi_store_id,
+        "indentNo": outward_record.eaushadhi_indent_no,
+    }
+
+
+def track_indent(params):
+    """Call the DVDMS track-indent API. Returns (raw_response, http_status_code)."""
+    return dvdms_get_full(DVDMS_TRACK_INDENT_PATH, params=params)
