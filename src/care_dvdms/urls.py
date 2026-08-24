@@ -2,6 +2,7 @@ from django.shortcuts import HttpResponse
 from django.urls import path, re_path
 
 from care_dvdms.api.viewsets.dvdms_institute import DVDMSInstituteViewSet
+from care_dvdms.api.viewsets.dvdms_inward_record import DVDMSInwardRecordViewSet
 from care_dvdms.api.viewsets.dvdms_lookup import DVDMSLookupViewSet
 from care_dvdms.api.viewsets.dvdms_outward_record_order import (
     DVDMSOutwardRecordOrderViewSet,
@@ -147,6 +148,21 @@ urlpatterns = [
         r"^institute/(?P<institute_id>[^/.]+)/record_order/(?P<record_order_id>[^/.]+)/outward/fetch-inwards/$",
         DVDMSOutwardRecordOrderViewSet.as_view({"post": "fetch_inwards"}),
         name="dvdms-outward-record-order-fetch-inwards",
+    ),
+    re_path(
+        r"^institute/(?P<institute_id>[^/.]+)/record_inwards/$",
+        DVDMSInwardRecordViewSet.as_view(
+            {
+                "get": "list",
+                "post": "create",
+            }
+        ),
+        name="dvdms-inward-record-list",
+    ),
+    re_path(
+        r"^institute/(?P<institute_id>[^/.]+)/record_inwards/(?P<external_id>[^/.]+)/$",
+        DVDMSInwardRecordViewSet.as_view({"get": "retrieve"}),
+        name="dvdms-inward-record-detail",
     ),
     re_path(
         r"^institute/(?P<institute_id>[^/.]+)/product-mappings/$",

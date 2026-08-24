@@ -1760,7 +1760,6 @@ paths:
             example:
               eaushadhi_issue_no: "ISS-2026-005678"
               outward_record: "outwards-uuid-1"
-              eaushadhi_indent_no: "IND-2026-001234"
       responses:
         '201':
           description: Inwards record created
@@ -4445,11 +4444,6 @@ components:
           format: uuid
           description: Reference to outward record UUID
           example: "outwards-uuid-1"
-        eaushadhi_indent_no:
-          type: string
-          nullable: true
-          description: eAushadhi/DVDMS indent number
-          example: "IND-2026-001234"
 
     DvdmsInwardsRecord:
       allOf:
@@ -4471,6 +4465,12 @@ components:
               format: date-time
               description: Inwards record creation timestamp
               example: "2026-08-13T08:55:23.802Z"
+            eaushadhi_indent_no:
+              type: string
+              nullable: true
+              readOnly: true
+              description: eAushadhi/DVDMS indent number. Not accepted on create - derived from the linked outward_record.
+              example: "IND-2026-001234"
             eaushadhi_issue_status:
               type: string
               enum: [draft, pending, received, partially_received, completed, cancelled]
