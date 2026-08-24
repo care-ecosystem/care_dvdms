@@ -1779,6 +1779,24 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Outward record not found for this institute
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "No DvdmsOutwardRecordOrder matches the given query."
+                code: "not_found"
+        '409':
+          description: Conflict - this issue number is already recorded for the outward record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "This issue number is already recorded for this outward record"
+                code: "ISSUE_NO_EXISTS"
         '500':
           $ref: '#/components/responses/InternalServerError'
 

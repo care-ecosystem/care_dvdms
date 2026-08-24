@@ -1,6 +1,7 @@
 from care.emr.api.viewsets.base import EMRBaseViewSet
 from care.security.authorization.base import AuthorizationController
 from care.utils.shortcuts import get_object_or_404
+from django.db import IntegrityError
 from rest_framework import status
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.filters import OrderingFilter
@@ -85,12 +86,21 @@ class DVDMSInwardRecordViewSet(EMRBaseViewSet):
             deleted=False,
         )
 
-        inward_record = DVDMSInwardRecord.objects.create(
-            outward_record=outward_record,
-            eaushadhi_issue_no=spec.eaushadhi_issue_no,
-            created_by=request.user,
-            updated_by=request.user,
-        )
+        try:
+            inward_record = DVDMSInwardRecord.objects.create(
+                outward_record=outward_record,
+                eaushadhi_issue_no=spec.eaushadhi_issue_no,
+                created_by=request.user,
+                updated_by=request.user,
+            )
+        except IntegrityError:
+            return Response(
+                {
+                    "error": "This issue number is already recorded for this outward record",
+                    "code": "ISSUE_NO_EXISTS",
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
 
         result = DVDMSInwardRecordListSpec.serialize(inward_record)
         return Response(result.to_json(), status=status.HTTP_201_CREATED)
