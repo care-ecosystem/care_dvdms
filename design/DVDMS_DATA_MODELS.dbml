@@ -321,6 +321,87 @@ Ref outward_record_order_created_by: dvdms_outward_record_order.created_by_id ?>
 Ref outward_record_order_updated_by: dvdms_outward_record_order.updated_by_id ?> care_user.id
 
 // ============================================================================
+// INWARD RECORD - e-Aushadhi Issue/Receipt tracking (N:1 owned by an outward record)
+// A single outward indent can be issued/received in multiple batches
+// ============================================================================
+Table dvdms_inward_record {
+  id INTEGER [pk, increment]
+  external_id UUID [unique, not null, note: 'Exposed via API as id']
+
+  outward_record_id INTEGER [not null, note: 'FK to dvdms_outward_record_order.id. ON DELETE CASCADE. Indent number is read via outward_record.eaushadhi_indent_no, not duplicated here']
+  eaushadhi_issue_no VARCHAR(255) [not null, note: 'e-Aushadhi issue number']
+  eaushadhi_issue_status VARCHAR(20) [not null, default: 'draft',
+    note: 'Issue status: draft, pending, received, partially_received, completed, cancelled']
+  sync_log_id INTEGER [null, note: 'FK to dvdms_sync_log.id. ON DELETE SET NULL']
+
+  created_date TIMESTAMP [not null, note: "indexed"]
+  modified_date TIMESTAMP [not null, note: "indexed"]
+  deleted BOOLEAN [default: false, note: "indexed"]
+
+  created_by_id INTEGER [null]
+  updated_by_id INTEGER [null]
+
+  history JSON [default: '{}']
+  meta JSON [default: 'null', null]
+
+  indexes {
+    outward_record_id
+    sync_log_id
+    deleted
+    (outward_record_id, eaushadhi_issue_no) [unique, note: 'Partial unique index where deleted=false']
+  }
+}
+
+Ref inward_record_outward_record: dvdms_inward_record.outward_record_id ?> dvdms_outward_record_order.id
+Ref inward_record_sync_log: dvdms_inward_record.sync_log_id ?> dvdms_sync_log.id
+Ref inward_record_created_by: dvdms_inward_record.created_by_id ?> care_user.id
+Ref inward_record_updated_by: dvdms_inward_record.updated_by_id ?> care_user.id
+
+// ============================================================================
+// INWARD ITEM RECORD - Line Items Received Against an Inward Record (N:1)
+// Drug fields are a point-in-time snapshot of what was actually received,
+// independent of the ordered drug - received drug/batch/brand can differ
+// ============================================================================
+Table dvdms_inward_item_record {
+  id INTEGER [pk, increment]
+  external_id UUID [unique, not null, note: 'Exposed via API as id']
+
+  inward_record_id INTEGER [not null, note: 'FK to dvdms_inward_record.id. ON DELETE CASCADE']
+  record_order_item_id INTEGER [null, note: 'FK to dvdms_record_item_order.id. ON DELETE PROTECT. Link-only back to the requested line; null when DVDMS returns an item with no matching ordered line (unmatched/substituted receipt) - sync layer should log this via dvdms_sync_log rather than silently dropping it']
+
+  drug_id VARCHAR(50) [not null, note: 'DVDMS item ID as received']
+  drug_name VARCHAR(500) [not null, note: 'Drug name as received']
+  brand_id VARCHAR(50) [null, note: 'DVDMS brand ID as received']
+  batch VARCHAR(255) [null, note: 'Batch number as received']
+  manufacturer VARCHAR(255) [null, note: 'Manufacturer as received']
+  received_quantity DECIMAL(12,2) [not null, note: 'Quantity received']
+  status VARCHAR(20) [not null, default: 'pending',
+    note: 'Item status: pending, received, partially_received, rejected, damaged']
+
+  created_date TIMESTAMP [not null, note: "indexed"]
+  modified_date TIMESTAMP [not null, note: "indexed"]
+  deleted BOOLEAN [default: false, note: "indexed"]
+
+  created_by_id INTEGER [null]
+  updated_by_id INTEGER [null]
+
+  history JSON [default: '{}']
+  meta JSON [default: 'null', null]
+
+  indexes {
+    inward_record_id
+    record_order_item_id
+    deleted
+    (inward_record_id, record_order_item_id) [note: 'IMPLEMENTATION: PostgreSQL partial unique index WHERE deleted=false. NULL record_order_item_id values are naturally exempt from uniqueness, so multiple unmatched receipts per inward record are allowed.']
+  }
+}
+
+Ref inward_item_record_inward_record: dvdms_inward_item_record.inward_record_id ?> dvdms_inward_record.id
+Ref inward_item_record_order_item: dvdms_inward_item_record.record_order_item_id ?> dvdms_record_item_order.id
+Ref inward_item_record_created_by: dvdms_inward_item_record.created_by_id ?> care_user.id
+Ref inward_item_record_updated_by: dvdms_inward_item_record.updated_by_id ?> care_user.id
+
+// ============================================================================
 // PRODUCT MAPPING - DVDMS drug snapshot to CARE ProductKnowledge (1:1 drug side)
 // ============================================================================
 Table dvdms_product_mapping {
