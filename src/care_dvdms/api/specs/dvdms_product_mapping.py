@@ -1,6 +1,7 @@
 import datetime
 
 from care.emr.resources.base import EMRResource
+from care.emr.resources.inventory.product_knowledge.spec import ProductKnowledgeReadSpec
 from pydantic import UUID4
 
 from care_dvdms.api.specs.dvdms_record_item_order import DVDMSDrugSpec
@@ -40,16 +41,7 @@ class DVDMSProductMappingListSpec(EMRResource):
             "drug_category": obj.drug.drug_category,
         }
         mapping["product_knowledge"] = (
-            {
-                "id": obj.product_knowledge.external_id,
-                "name": obj.product_knowledge.name,
-                "slug": obj.product_knowledge.parse_slug(obj.product_knowledge.slug)[
-                    "slug_value"
-                ],
-                "category": obj.product_knowledge.category.title
-                if obj.product_knowledge.category
-                else None,
-            }
+            ProductKnowledgeReadSpec.serialize(obj.product_knowledge).to_json()
             if obj.product_knowledge
             else None
         )

@@ -2040,9 +2040,27 @@ paths:
                   drug_category: "10"
                 product_knowledge:
                   id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                  alternate_identifier: null
+                  status: "active"
+                  product_type: "medication"
+                  code: null
+                  base_unit:
+                    code: "mg"
+                    display: "milligram"
+                    system: "care/ucum"
                   name: "Paracetamol 500mg tablet"
-                  slug: "paracetamol-500mg-tablet"
-                  category: "Analgesics"
+                  names: []
+                  storage_guidelines: []
+                  definitional: null
+                  is_instance_level: false
+                  category:
+                    id: "8a1b2c3d-4e5f-6789-a0b1-c2d3e4f5a6b7"
+                    title: "Analgesics"
+                    slug: "analgesics"
+                  slug_config:
+                    facility: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                    slug_value: "paracetamol-500mg-tablet"
+                  slug: "f-3fa85f64-5717-4562-b3fc-2c963f66afa6-paracetamol-500mg-tablet"
                 usage_count: 0
                 created_by:
                   id: "uuid"
@@ -2149,9 +2167,27 @@ paths:
                       drug_category: "10"
                     product_knowledge:
                       id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                      alternate_identifier: null
+                      status: "active"
+                      product_type: "medication"
+                      code: null
+                      base_unit:
+                        code: "mg"
+                        display: "milligram"
+                        system: "care/ucum"
                       name: "Paracetamol 500mg tablet"
-                      slug: "paracetamol-500mg-tablet"
-                      category: "Analgesics"
+                      names: []
+                      storage_guidelines: []
+                      definitional: null
+                      is_instance_level: false
+                      category:
+                        id: "8a1b2c3d-4e5f-6789-a0b1-c2d3e4f5a6b7"
+                        title: "Analgesics"
+                        slug: "analgesics"
+                      slug_config:
+                        facility: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                        slug_value: "paracetamol-500mg-tablet"
+                      slug: "f-3fa85f64-5717-4562-b3fc-2c963f66afa6-paracetamol-500mg-tablet"
                     usage_count: 15
                     created_by:
                       id: "uuid"
@@ -2173,9 +2209,23 @@ paths:
                       drug_category: "10"
                     product_knowledge:
                       id: "4fa85f64-5717-4562-b3fc-2c963f66afa7"
+                      alternate_identifier: null
+                      status: "active"
+                      product_type: "medication"
+                      code: null
+                      base_unit:
+                        code: "mg"
+                        display: "milligram"
+                        system: "care/ucum"
                       name: "Amoxicillin 250mg capsule"
-                      slug: "amoxicillin-250mg-capsule"
+                      names: []
+                      storage_guidelines: []
+                      definitional: null
+                      is_instance_level: true
                       category: null
+                      slug_config:
+                        slug_value: "amoxicillin-250mg-capsule"
+                      slug: "i-amoxicillin-250mg-capsule"
                     usage_count: 0
                     created_by:
                       id: "uuid"
@@ -2249,9 +2299,27 @@ paths:
                   drug_category: "10"
                 product_knowledge:
                   id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                  alternate_identifier: null
+                  status: "active"
+                  product_type: "medication"
+                  code: null
+                  base_unit:
+                    code: "mg"
+                    display: "milligram"
+                    system: "care/ucum"
                   name: "Paracetamol 500mg tablet"
-                  slug: "paracetamol-500mg-tablet"
-                  category: "Analgesics"
+                  names: []
+                  storage_guidelines: []
+                  definitional: null
+                  is_instance_level: false
+                  category:
+                    id: "8a1b2c3d-4e5f-6789-a0b1-c2d3e4f5a6b7"
+                    title: "Analgesics"
+                    slug: "analgesics"
+                  slug_config:
+                    facility: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                    slug_value: "paracetamol-500mg-tablet"
+                  slug: "f-3fa85f64-5717-4562-b3fc-2c963f66afa6-paracetamol-500mg-tablet"
                 usage_count: 15
                 created_by:
                   id: "uuid"
@@ -2392,9 +2460,27 @@ paths:
                         drug_category: "10"
                       product_knowledge:
                         id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                        alternate_identifier: null
+                        status: "active"
+                        product_type: "medication"
+                        code: null
+                        base_unit:
+                          code: "mg"
+                          display: "milligram"
+                          system: "care/ucum"
                         name: "Paracetamol 500mg tablet"
-                        slug: "paracetamol-500mg-tablet"
-                        category: "Analgesics"
+                        names: []
+                        storage_guidelines: []
+                        definitional: null
+                        is_instance_level: false
+                        category:
+                          id: "8a1b2c3d-4e5f-6789-a0b1-c2d3e4f5a6b7"
+                          title: "Analgesics"
+                          slug: "analgesics"
+                        slug_config:
+                          facility: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                          slug_value: "paracetamol-500mg-tablet"
+                        slug: "f-3fa85f64-5717-4562-b3fc-2c963f66afa6-paracetamol-500mg-tablet"
                       usage_count: 5
                       created_by:
                         id: "uuid"
@@ -4984,9 +5070,11 @@ components:
           description: FK to CARE product_knowledge
           example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
 
-    ProductMappingProductKnowledgeSummary:
+    ProductKnowledgeRead:
       type: object
-      description: Basic details of the mapped CARE product knowledge
+      description: |
+        The mapped CARE product knowledge, in the same shape returned by
+        GET /api/v1/product_knowledge/{slug}/
       nullable: true
       properties:
         id:
@@ -4994,19 +5082,76 @@ components:
           format: uuid
           description: Product knowledge external_id
           example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        alternate_identifier:
+          type: string
+          nullable: true
+          example: null
+        status:
+          type: string
+          enum: [draft, active, retired, unknown]
+          example: "active"
+        product_type:
+          type: string
+          enum: [medication, nutritional_product, consumable]
+          example: "medication"
+        code:
+          type: object
+          nullable: true
+          additionalProperties: true
+          example: null
+        base_unit:
+          type: object
+          additionalProperties: true
+          example:
+            code: "mg"
+            display: "milligram"
+            system: "care/ucum"
         name:
           type: string
           description: Product knowledge name
           example: "Paracetamol 500mg tablet"
+        names:
+          type: array
+          nullable: true
+          items:
+            type: object
+            additionalProperties: true
+          example: []
+        storage_guidelines:
+          type: array
+          nullable: true
+          items:
+            type: object
+            additionalProperties: true
+          example: []
+        definitional:
+          type: object
+          nullable: true
+          additionalProperties: true
+          example: null
+        is_instance_level:
+          type: boolean
+          description: True when the product knowledge is not scoped to a facility
+          example: false
+        category:
+          type: object
+          nullable: true
+          additionalProperties: true
+          example:
+            id: "8a1b2c3d-4e5f-6789-a0b1-c2d3e4f5a6b7"
+            title: "Analgesics"
+            slug: "analgesics"
+        slug_config:
+          type: object
+          additionalProperties: true
+          description: Parsed slug (facility/instance scope and user-provided slug value)
+          example:
+            facility: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+            slug_value: "paracetamol-500mg-tablet"
         slug:
           type: string
-          description: User-provided slug value (excludes the facility/instance scope prefix)
-          example: "paracetamol-500mg-tablet"
-        category:
-          type: string
-          nullable: true
-          description: Title of the product knowledge's resource category, if any
-          example: "Analgesics"
+          description: Full computed slug (scope-prefixed); not the raw user-typed value
+          example: "f-3fa85f64-5717-4562-b3fc-2c963f66afa6-paracetamol-500mg-tablet"
 
     ProductMapping:
       type: object
@@ -5030,10 +5175,10 @@ components:
           description: eAushadhi/DVDMS drug details
         product_knowledge:
           allOf:
-            - $ref: '#/components/schemas/ProductMappingProductKnowledgeSummary'
+            - $ref: '#/components/schemas/ProductKnowledgeRead'
           nullable: true
           readOnly: true
-          description: Basic details of the mapped CARE product knowledge
+          description: The mapped CARE product knowledge
         usage_count:
           type: integer
           description: Number of times this mapping has been used
