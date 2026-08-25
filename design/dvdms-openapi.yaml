@@ -32,6 +32,14 @@ tags:
     description: Manage individual items in DVDMS record orders
   - name: DVDMS Outwards Record
     description: Manage outwards records for DVDMS indent creation and sync status
+  - name: DVDMS Inwards Record
+    description: Manage inwards/issue records received from DVDMS for a record order
+  - name: Product Mapping
+    description: Manage mappings between eAushadhi/DVDMS drugs and CARE products
+  - name: Record Deliveries
+    description: Manage deliveries recorded against DVDMS inward records
+  - name: Record Item Deliveries
+    description: Manage item-level delivery details within a record delivery
 
 security:
   - BearerAuth: []
@@ -4991,7 +4999,7 @@ components:
           example: "Paracetamol 500mg tablet"
         slug:
           type: string
-          description: Product knowledge slug
+          description: User-provided slug value (excludes the facility/instance scope prefix)
           example: "paracetamol-500mg-tablet"
         category:
           type: string

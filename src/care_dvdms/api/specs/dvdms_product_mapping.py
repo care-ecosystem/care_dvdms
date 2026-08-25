@@ -43,7 +43,9 @@ class DVDMSProductMappingListSpec(EMRResource):
             {
                 "id": obj.product_knowledge.external_id,
                 "name": obj.product_knowledge.name,
-                "slug": obj.product_knowledge.slug,
+                "slug": obj.product_knowledge.parse_slug(obj.product_knowledge.slug)[
+                    "slug_value"
+                ],
                 "category": obj.product_knowledge.category.title
                 if obj.product_knowledge.category
                 else None,
