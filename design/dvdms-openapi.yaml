@@ -976,8 +976,9 @@ paths:
       description: |
         Fetch the list of available drugs/items directly from the DVDMS system
         for this institute.
-        Requires hstnum_group_id and hstnum_subgroup_id query parameters to filter results.
-        Optionally filter by item name with hststr_item_name (partial, case-insensitive match).
+        Requires hstnum_group_id query parameter to filter results.
+        Optionally filter by subgroup with hstnum_subgroup_id, and by item name with
+        hststr_item_name (partial, case-insensitive match).
         Uses the institute's credentials to query DVDMS API.
       operationId: getDvdmsDrugs
       parameters:
@@ -997,7 +998,7 @@ paths:
           example: 101047
         - name: hstnum_subgroup_id
           in: query
-          required: true
+          required: false
           description: Filter by subgroup ID
           schema:
             type: integer
@@ -1043,13 +1044,13 @@ paths:
                   hststr_cpa_code: "0"
                   hstnum_itembrand_id: 10103406
         '400':
-          description: Bad Request - hstnum_group_id and hstnum_subgroup_id are required
+          description: Bad Request - hstnum_group_id is required
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                error: "hstnum_group_id and hstnum_subgroup_id query parameters are required"
+                error: "hstnum_group_id query parameter is required"
                 code: "MISSING_PARAMETER"
         '401':
           $ref: '#/components/responses/Unauthorized'
