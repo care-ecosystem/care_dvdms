@@ -29,7 +29,14 @@ from care_dvdms.models.dvdms_record_item_order import DVDMSRecordItemOrder
 from care_dvdms.models.dvdms_record_order import DVDMSRecordOrder
 from care_dvdms.settings import plugin_settings as settings
 
-SELECT_RELATED_FIELDS = ("institute", "drug", "product_knowledge", "created_by", "updated_by")
+SELECT_RELATED_FIELDS = (
+    "institute",
+    "drug",
+    "product_knowledge",
+    "product_knowledge__category",
+    "created_by",
+    "updated_by",
+)
 
 
 class DVDMSProductMappingFilters(filters.FilterSet):
