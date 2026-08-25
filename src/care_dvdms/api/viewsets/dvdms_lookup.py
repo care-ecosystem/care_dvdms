@@ -102,10 +102,10 @@ class DVDMSLookupViewSet(ViewSet):
     def drugs(self, request, *args, **kwargs):
         hstnum_group_id = request.query_params.get("hstnum_group_id")
         hstnum_subgroup_id = request.query_params.get("hstnum_subgroup_id")
-        if not hstnum_group_id or not hstnum_subgroup_id:
+        if not hstnum_group_id:
             return Response(
                 {
-                    "error": "hstnum_group_id and hstnum_subgroup_id query parameters are required",
+                    "error": "hstnum_group_id query parameter is required",
                     "code": "MISSING_PARAMETER",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -139,7 +139,7 @@ class DVDMSLookupViewSet(ViewSet):
             and str(drug.get("gnum_seatid")) == institute.eaushadhi_user_ref_id
             and str(drug.get("sstnum_item_cat_no")) == DVDMS_DRUG_ITEM_CAT_NO
             and str(drug.get("hstnum_group_id")) == hstnum_group_id
-            and str(drug.get("hstnum_subgroup_id")) == hstnum_subgroup_id
+            and (not hstnum_subgroup_id or str(drug.get("hstnum_subgroup_id")) == hstnum_subgroup_id)
             and (not item_name or item_name.lower() in str(drug.get("hststr_item_name", "")).lower())
         ]
 

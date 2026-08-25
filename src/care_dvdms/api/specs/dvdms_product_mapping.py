@@ -1,6 +1,7 @@
 import datetime
 
 from care.emr.resources.base import EMRResource
+from care.emr.resources.inventory.product_knowledge.spec import ProductKnowledgeReadSpec
 from pydantic import UUID4
 
 from care_dvdms.api.specs.dvdms_record_item_order import DVDMSDrugSpec
@@ -14,7 +15,7 @@ class DVDMSProductMappingListSpec(EMRResource):
     id: UUID4 | None = None
     institute_id: UUID4 | None = None
     eaushadhi_drug_details: dict | None = None
-    product_knowledge_id: UUID4 | None = None
+    product_knowledge: dict | None = None
     mapping_type: str | None = None
     usage_count: int | None = None
     last_used_date: datetime.datetime | None = None
@@ -39,8 +40,10 @@ class DVDMSProductMappingListSpec(EMRResource):
             "unit_id": obj.drug.unit_id,
             "drug_category": obj.drug.drug_category,
         }
-        mapping["product_knowledge_id"] = (
-            obj.product_knowledge.external_id if obj.product_knowledge else None
+        mapping["product_knowledge"] = (
+            ProductKnowledgeReadSpec.serialize(obj.product_knowledge).to_json()
+            if obj.product_knowledge
+            else None
         )
         cls.serialize_audit_users(mapping, obj)
 
