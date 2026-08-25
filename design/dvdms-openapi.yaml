@@ -2029,7 +2029,11 @@ paths:
                   sub_group_id: "0"
                   unit_id: "630001"
                   drug_category: "10"
-                product_knowledge_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                product_knowledge:
+                  id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                  name: "Paracetamol 500mg tablet"
+                  slug: "paracetamol-500mg-tablet"
+                  category: "Analgesics"
                 usage_count: 0
                 created_by:
                   id: "uuid"
@@ -2134,7 +2138,11 @@ paths:
                       sub_group_id: "0"
                       unit_id: "630001"
                       drug_category: "10"
-                    product_knowledge_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                    product_knowledge:
+                      id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                      name: "Paracetamol 500mg tablet"
+                      slug: "paracetamol-500mg-tablet"
+                      category: "Analgesics"
                     usage_count: 15
                     created_by:
                       id: "uuid"
@@ -2154,7 +2162,11 @@ paths:
                       sub_group_id: "0"
                       unit_id: "630001"
                       drug_category: "10"
-                    product_knowledge_id: "4fa85f64-5717-4562-b3fc-2c963f66afa7"
+                    product_knowledge:
+                      id: "4fa85f64-5717-4562-b3fc-2c963f66afa7"
+                      name: "Amoxicillin 250mg capsule"
+                      slug: "amoxicillin-250mg-capsule"
+                      category: null
                     usage_count: 0
                     created_by:
                       id: "uuid"
@@ -2226,7 +2238,11 @@ paths:
                   sub_group_id: "0"
                   unit_id: "630001"
                   drug_category: "10"
-                product_knowledge_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                product_knowledge:
+                  id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                  name: "Paracetamol 500mg tablet"
+                  slug: "paracetamol-500mg-tablet"
+                  category: "Analgesics"
                 usage_count: 15
                 created_by:
                   id: "uuid"
@@ -2365,7 +2381,11 @@ paths:
                         sub_group_id: "0"
                         unit_id: "630001"
                         drug_category: "10"
-                      product_knowledge_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                      product_knowledge:
+                        id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                        name: "Paracetamol 500mg tablet"
+                        slug: "paracetamol-500mg-tablet"
+                        category: "Analgesics"
                       usage_count: 5
                       created_by:
                         id: "uuid"
@@ -4955,46 +4975,79 @@ components:
           description: FK to CARE product_knowledge
           example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
 
+    ProductKnowledgeSummary:
+      type: object
+      description: Basic details of the mapped CARE product knowledge
+      nullable: true
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Product knowledge external_id
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        name:
+          type: string
+          description: Product knowledge name
+          example: "Paracetamol 500mg tablet"
+        slug:
+          type: string
+          description: Product knowledge slug
+          example: "paracetamol-500mg-tablet"
+        category:
+          type: string
+          nullable: true
+          description: Title of the product knowledge's resource category, if any
+          example: "Analgesics"
+
     ProductMapping:
-      allOf:
-        - $ref: '#/components/schemas/ProductMappingCreate'
-        - type: object
-          description: Mapping between eAushadhi/DVDMS drugs and CARE products
-          required:
-            - id
-            - usage_count
-            - created_date
-            - modified_date
-          properties:
-            id:
-              type: string
-              format: uuid
-              readOnly: true
-              description: Product mapping external_id
-              example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-            usage_count:
-              type: integer
-              description: Number of times this mapping has been used
-              example: 15
-            created_by:
-              allOf:
-                - $ref: '#/components/schemas/UserSummary'
-              readOnly: true
-            updated_by:
-              allOf:
-                - $ref: '#/components/schemas/UserSummary'
-              nullable: true
-              readOnly: true
-            created_date:
-              type: string
-              format: date-time
-              readOnly: true
-              example: "2026-08-13T08:55:23.802Z"
-            modified_date:
-              type: string
-              format: date-time
-              readOnly: true
-              example: "2026-08-13T08:55:23.802Z"
+      type: object
+      description: Mapping between eAushadhi/DVDMS drugs and CARE products
+      required:
+        - id
+        - eaushadhi_drug_details
+        - product_knowledge
+        - usage_count
+        - created_date
+        - modified_date
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: Product mapping external_id
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        eaushadhi_drug_details:
+          $ref: '#/components/schemas/EaushadhiDrugDetails'
+          description: eAushadhi/DVDMS drug details
+        product_knowledge:
+          allOf:
+            - $ref: '#/components/schemas/ProductKnowledgeSummary'
+          nullable: true
+          readOnly: true
+          description: Basic details of the mapped CARE product knowledge
+        usage_count:
+          type: integer
+          description: Number of times this mapping has been used
+          example: 15
+        created_by:
+          allOf:
+            - $ref: '#/components/schemas/UserSummary'
+          readOnly: true
+        updated_by:
+          allOf:
+            - $ref: '#/components/schemas/UserSummary'
+          nullable: true
+          readOnly: true
+        created_date:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2026-08-13T08:55:23.802Z"
+        modified_date:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2026-08-13T08:55:23.802Z"
 
     ProductMappingUpdate:
       type: object
