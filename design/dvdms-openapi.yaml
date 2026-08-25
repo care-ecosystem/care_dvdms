@@ -4975,7 +4975,7 @@ components:
           description: FK to CARE product_knowledge
           example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
 
-    ProductKnowledgeSummary:
+    ProductMappingProductKnowledgeSummary:
       type: object
       description: Basic details of the mapped CARE product knowledge
       nullable: true
@@ -5021,7 +5021,7 @@ components:
           description: eAushadhi/DVDMS drug details
         product_knowledge:
           allOf:
-            - $ref: '#/components/schemas/ProductKnowledgeSummary'
+            - $ref: '#/components/schemas/ProductMappingProductKnowledgeSummary'
           nullable: true
           readOnly: true
           description: Basic details of the mapped CARE product knowledge
