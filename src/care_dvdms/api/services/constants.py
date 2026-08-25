@@ -4,6 +4,7 @@ DVDMS_UNIT_LIST_PATH = "/unitMst/list"
 DVDMS_DRUG_LIST_PATH = "/drug/list"
 DVDMS_STORE_LIST_PATH = "/getStoreDetailsForCare/list"
 DVDMS_SAVE_INDENT_PATH = "/save/indent"
+DVDMS_TRACK_INDENT_PATH = "/getIndentStatus"
 
 DVDMS_GROUPS_CACHE_KEY = "dvdms:lookup:groups"
 DVDMS_SUBGROUPS_CACHE_KEY = "dvdms:lookup:subgroups"
@@ -12,3 +13,17 @@ DVDMS_DRUGS_CACHE_KEY = "dvdms:lookup:drugs"
 DVDMS_STORES_CACHE_KEY = "dvdms:lookup:stores"
 
 DVDMS_DRUG_ITEM_CAT_NO = "10"  # Drug Item Category Number for DVDMS for medical drugs
+
+DVDMS_URGENT_PRIORITIES = {"urgent", "asap", "stat"}
+DVDMS_INDENT_NO_PATTERN = r"Intent NO:\s*(\S+)"
+
+DVDMS_GROUP_LIST_SUCCESS_STATUS = 1
+DVDMS_SUBGROUP_LIST_SUCCESS_STATUS = 1
+DVDMS_UNIT_LIST_SUCCESS_STATUS = 1
+DVDMS_DRUG_LIST_SUCCESS_STATUS = 1
+DVDMS_STORE_LIST_SUCCESS_STATUS = 1
+DVDMS_SAVE_INDENT_SUCCESS_STATUS = 200
+DVDMS_TRACK_INDENT_SUCCESS_STATUS = 1
+
+CARE_INDENT_NO_FACILITY_WIDTH = 3
+CARE_INDENT_NO_SEQ_WIDTH = 4  # minimum width, not a hard cap - grows past 9999 rather than failing
