@@ -443,6 +443,87 @@ Ref product_mapping_created_by: dvdms_product_mapping.created_by_id ?> care_user
 Ref product_mapping_updated_by: dvdms_product_mapping.updated_by_id ?> care_user.id
 
 // ============================================================================
+// RECORD DELIVERY - Links an Inward Record to a CARE Delivery Order (1:1 both sides)
+// Business rule: one inward record has exactly one delivery
+// ============================================================================
+Table dvdms_record_delivery {
+  id INTEGER [pk, increment]
+  external_id UUID [unique, not null, note: 'Exposed via API as id']
+
+  inward_record_id INTEGER [not null, unique, note: 'FK to dvdms_inward_record.id (1:1) - one delivery per inward record. ON DELETE CASCADE']
+  record_order_id INTEGER [not null, note: 'FK to dvdms_record_order.id. ON DELETE CASCADE']
+  delivery_order_id INTEGER [not null, unique, note: 'FK to care_delivery_order.id (1:1). ON DELETE PROTECT']
+
+  status VARCHAR(20) [not null, default: 'pending', note: 'Delivery status: pending, in_progress, completed, cancelled']
+
+  created_date TIMESTAMP [not null, note: "indexed"]
+  modified_date TIMESTAMP [not null, note: "indexed"]
+  deleted BOOLEAN [default: false, note: "indexed"]
+
+  created_by_id INTEGER [null]
+  updated_by_id INTEGER [null]
+
+  history JSON [default: '{}']
+  meta JSON [default: 'null', null]
+
+  indexes {
+    inward_record_id
+    record_order_id
+    delivery_order_id
+    deleted
+  }
+}
+
+Ref record_delivery_inward_record: dvdms_record_delivery.inward_record_id - dvdms_inward_record.id
+Ref record_delivery_record_order: dvdms_record_delivery.record_order_id ?> dvdms_record_order.id
+Ref record_delivery_delivery_order: dvdms_record_delivery.delivery_order_id - care_delivery_order.id
+Ref record_delivery_created_by: dvdms_record_delivery.created_by_id ?> care_user.id
+Ref record_delivery_updated_by: dvdms_record_delivery.updated_by_id ?> care_user.id
+
+// ============================================================================
+// RECORD ITEM DELIVERY - Line-level Delivery Details Within a Record Delivery (N:1)
+// Phase 1 assumes one delivery per inward item record (1:1 on inward_record_item_id)
+// ============================================================================
+Table dvdms_record_item_delivery {
+  id INTEGER [pk, increment]
+  external_id UUID [unique, not null, note: 'Exposed via API as id']
+
+  record_delivery_id INTEGER [not null, note: 'FK to dvdms_record_delivery.id. ON DELETE CASCADE']
+  inward_record_item_id INTEGER [not null, unique, note: 'FK to dvdms_inward_item_record.id (1:1) - Phase 1 assumes one delivery per item. ON DELETE PROTECT']
+  supply_delivery_id INTEGER [not null, unique, note: 'FK to care_supply_delivery.id (1:1). ON DELETE PROTECT']
+
+  quantity_dispatched DECIMAL(12,2) [not null, note: 'Quantity dispatched as per eAushadhi/DVDMS system']
+  quantity_accepted DECIMAL(12,2) [not null, note: 'Quantity accepted/received in good condition']
+  quantity_damaged DECIMAL(12,2) [not null, note: 'Quantity received but damaged']
+  quantity_short DECIMAL(12,2) [not null, note: 'Quantity short/missing (not received)']
+
+  status VARCHAR(20) [not null, default: 'draft', note: 'Item delivery status: draft, ACTIVE, REVERSED']
+
+  created_date TIMESTAMP [not null, note: "indexed"]
+  modified_date TIMESTAMP [not null, note: "indexed"]
+  deleted BOOLEAN [default: false, note: "indexed"]
+
+  created_by_id INTEGER [null]
+  updated_by_id INTEGER [null]
+
+  history JSON [default: '{}']
+  meta JSON [default: 'null', null]
+
+  indexes {
+    record_delivery_id
+    inward_record_item_id
+    supply_delivery_id
+    deleted
+  }
+}
+
+Ref item_delivery_record_delivery: dvdms_record_item_delivery.record_delivery_id ?> dvdms_record_delivery.id
+Ref item_delivery_inward_record_item: dvdms_record_item_delivery.inward_record_item_id - dvdms_inward_item_record.id
+Ref item_delivery_supply_delivery: dvdms_record_item_delivery.supply_delivery_id - care_supply_delivery.id
+Ref item_delivery_created_by: dvdms_record_item_delivery.created_by_id ?> care_user.id
+Ref item_delivery_updated_by: dvdms_record_item_delivery.updated_by_id ?> care_user.id
+
+// ============================================================================
 // CARE MODELS - External References
 // ============================================================================
 
@@ -499,3 +580,34 @@ Table care_supply_request {
 
 Ref supply_request_order: care_supply_request.order_id ?> care_request_order.id
 Ref supply_request_item: care_supply_request.item_id ?> care_product_knowledge.id
+
+Table care_delivery_order {
+  id INTEGER [pk, increment]
+  external_id UUID [unique, not null]
+
+  destination_id INTEGER [not null, note: "FK to care_location"]
+  supplier_id INTEGER [null, note: "FK to care_organization"]
+}
+
+Ref delivery_order_destination: care_delivery_order.destination_id ?> care_location.id
+Ref delivery_order_supplier: care_delivery_order.supplier_id ?> care_organization.id
+
+Table care_product {
+  id INTEGER [pk, increment]
+  external_id UUID [unique, not null]
+
+  product_knowledge_id INTEGER [not null, note: "FK to care_product_knowledge"]
+}
+
+Ref product_product_knowledge: care_product.product_knowledge_id ?> care_product_knowledge.id
+
+Table care_supply_delivery {
+  id INTEGER [pk, increment]
+  external_id UUID [unique, not null]
+
+  order_id INTEGER [null, note: "FK to care_delivery_order"]
+  supplied_item_id INTEGER [null, note: "FK to care_product"]
+}
+
+Ref supply_delivery_order: care_supply_delivery.order_id ?> care_delivery_order.id
+Ref supply_delivery_product: care_supply_delivery.supplied_item_id ?> care_product.id

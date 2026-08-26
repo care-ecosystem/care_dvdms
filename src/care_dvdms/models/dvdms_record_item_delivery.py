@@ -2,6 +2,7 @@ from care.emr.models.base import EMRBaseModel
 from django.db import models
 
 from care_dvdms.models.dvdms_inward_item_record import DVDMSInwardItemRecord
+from care_dvdms.models.dvdms_record_delivery import DVDMSRecordDelivery
 
 
 class DVDMSRecordItemDeliveryStatus(models.TextChoices):
@@ -11,6 +12,11 @@ class DVDMSRecordItemDeliveryStatus(models.TextChoices):
 
 
 class DVDMSRecordItemDelivery(EMRBaseModel):
+    record_delivery = models.ForeignKey(
+        DVDMSRecordDelivery,
+        on_delete=models.CASCADE,
+        related_name="item_deliveries",
+    )
     inward_record_item = models.OneToOneField(
         DVDMSInwardItemRecord,
         on_delete=models.PROTECT,
