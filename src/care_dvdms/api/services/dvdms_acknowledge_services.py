@@ -5,8 +5,10 @@ from care_dvdms.api.services.constants import (
     DVDMS_ACKNOWLEDGE_DETAILS_SUCCESS_STATUS,
     DVDMS_ACKNOWLEDGE_PENDING_LIST_PATH,
     DVDMS_ACKNOWLEDGE_PENDING_LIST_SUCCESS_STATUS,
+    DVDMS_ISSUE_SAVE_PATH,
+    DVDMS_ISSUE_SAVE_SUCCESS_STATUS,
 )
-from care_dvdms.api.services.dvdms_client import dvdms_get
+from care_dvdms.api.services.dvdms_client import dvdms_get, dvdms_post_full
 
 # Record shape: storeId@issueNo@type@typeStatus^_^storeName^issueNo^date^indentNoAndDate^_
 # indentNoAndDate has no delimiter between the indent number and the trailing "-Mon-YYYY".
@@ -50,3 +52,8 @@ def fetch_acknowledge_details(issue_no, store_id):
         DVDMS_ACKNOWLEDGE_DETAILS_SUCCESS_STATUS,
         params={"issueNo": issue_no, "storeId": store_id},
     )
+
+
+def save_issue_acknowledgement(payload):
+    """Call the DVDMS issue-save (acknowledge) API. Returns (raw_response, http_status_code)."""
+    return dvdms_post_full(DVDMS_ISSUE_SAVE_PATH, DVDMS_ISSUE_SAVE_SUCCESS_STATUS, payload)
