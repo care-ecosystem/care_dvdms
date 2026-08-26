@@ -1,6 +1,8 @@
 import re
 
 from care_dvdms.api.services.constants import (
+    DVDMS_ACKNOWLEDGE_DETAILS_PATH,
+    DVDMS_ACKNOWLEDGE_DETAILS_SUCCESS_STATUS,
     DVDMS_ACKNOWLEDGE_PENDING_LIST_PATH,
     DVDMS_ACKNOWLEDGE_PENDING_LIST_SUCCESS_STATUS,
 )
@@ -39,3 +41,12 @@ def parse_acknowledge_pending_record(raw):
 def fetch_acknowledge_pending_records(to_store_id):
     """Fetch and parse the acknowledge-pending list for a store."""
     return [parse_acknowledge_pending_record(raw) for raw in fetch_acknowledge_pending_list(to_store_id)]
+
+
+def fetch_acknowledge_details(issue_no, store_id):
+    """Call the DVDMS acknowledge-details API. Returns the issued item list for an issue no/store."""
+    return dvdms_get(
+        DVDMS_ACKNOWLEDGE_DETAILS_PATH,
+        DVDMS_ACKNOWLEDGE_DETAILS_SUCCESS_STATUS,
+        params={"issueNo": issue_no, "storeId": store_id},
+    )
