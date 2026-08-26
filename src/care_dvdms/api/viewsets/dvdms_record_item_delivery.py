@@ -21,6 +21,14 @@ from care_dvdms.models.dvdms_record_item_delivery import DVDMSRecordItemDelivery
 
 
 def _validate_quantities(dispatched, accepted, damaged, short):
+    if any(value < 0 for value in (dispatched, accepted, damaged, short)):
+        return Response(
+            {
+                "error": "quantity_dispatched, quantity_accepted, quantity_damaged, quantity_short cannot be negative",
+                "code": "QUANTITY_NEGATIVE",
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
     if accepted + damaged + short > dispatched:
         return Response(
             {
