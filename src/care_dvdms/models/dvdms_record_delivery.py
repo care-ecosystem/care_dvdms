@@ -22,6 +22,8 @@ class DVDMSRecordDelivery(EMRBaseModel):
         DVDMSRecordOrder,
         on_delete=models.CASCADE,
         related_name="record_deliveries",
+        null=True,
+        blank=True,
     )
     delivery_order = models.OneToOneField(
         "emr.DeliveryOrder",

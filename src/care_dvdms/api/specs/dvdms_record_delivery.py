@@ -40,7 +40,9 @@ class DVDMSRecordDeliveryListSpec(EMRResource):
             "destination": obj.delivery_order.destination.name if obj.delivery_order.destination else None,
             "supplier": obj.delivery_order.supplier.name if obj.delivery_order.supplier else None,
         }
-        mapping["record_order"] = SupplyRequestOrderReadSpec.serialize(obj.record_order.order).to_json()
+        mapping["record_order"] = (
+            SupplyRequestOrderReadSpec.serialize(obj.record_order.order).to_json() if obj.record_order else None
+        )
         cls.serialize_audit_users(mapping, obj)
 
 
@@ -74,7 +76,7 @@ class DVDMSRecordDeliveryCreateSpec(EMRResource):
     ]
 
     delivery_order: UUID4
-    record_order: UUID4
+    record_order: UUID4 | None = None
     status: DVDMSRecordDeliveryStatus = DVDMSRecordDeliveryStatus.pending
 
 

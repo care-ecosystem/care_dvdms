@@ -75,7 +75,7 @@ class DVDMSRecordItemDeliveryViewSet(EMRBaseViewSet):
         return get_object_or_404(
             DVDMSInwardRecord,
             external_id=record_inward_id,
-            outward_record__record_order__institute=institute,
+            institute=institute,
             deleted=False,
         )
 

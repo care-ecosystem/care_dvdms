@@ -61,7 +61,7 @@ class DVDMSRecordDeliveryViewSet(EMRBaseViewSet):
         return get_object_or_404(
             DVDMSInwardRecord,
             external_id=record_inward_id,
-            outward_record__record_order__institute=institute,
+            institute=institute,
             deleted=False,
         )
 
@@ -112,17 +112,21 @@ class DVDMSRecordDeliveryViewSet(EMRBaseViewSet):
 
         spec = DVDMSRecordDeliveryCreateSpec(**request.data)
 
-        record_order = get_object_or_404(
-            DVDMSRecordOrder,
-            external_id=spec.record_order,
-            institute=institute,
-            deleted=False,
-        )
-        if record_order.id != inward_record.outward_record.record_order_id:
-            return Response(
-                {"error": "record_order does not match the record order for this inward record"},
-                status=status.HTTP_400_BAD_REQUEST,
+        record_order = None
+        if spec.record_order:
+            record_order = get_object_or_404(
+                DVDMSRecordOrder,
+                external_id=spec.record_order,
+                institute=institute,
+                deleted=False,
             )
+            if inward_record.outward_record is None or record_order.id != inward_record.outward_record.record_order_id:
+                return Response(
+                    {"error": "record_order does not match the record order for this inward record"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        elif inward_record.outward_record is not None:
+            record_order = inward_record.outward_record.record_order
         delivery_order = get_object_or_404(
             DeliveryOrder,
             external_id=spec.delivery_order,

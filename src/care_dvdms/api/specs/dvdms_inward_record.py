@@ -74,6 +74,7 @@ class DVDMSInwardRecordCreateSpec(EMRResource):
     __model__ = DVDMSInwardRecord
     __exclude__ = [
         "id",
+        "institute",
         "outward_record",
         "eaushadhi_issue_status",
         "sync_log",
@@ -87,4 +88,4 @@ class DVDMSInwardRecordCreateSpec(EMRResource):
     ]
 
     eaushadhi_issue_no: str
-    outward_record: UUID4
+    outward_record: UUID4 | None = None
