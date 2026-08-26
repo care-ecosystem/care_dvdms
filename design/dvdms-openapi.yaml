@@ -1751,6 +1751,9 @@ paths:
       summary: Create an inwards record
       description: |
         Create a new inwards/issue record for an institute. The record is created with draft status.
+        `outward_record` is optional - omit it when the inward record is created from an item
+        issuance that has no originating order/indent. `eaushadhi_issue_no` must be unique per
+        institute regardless of whether an outward_record is linked.
       operationId: createInwardsRecord
       parameters:
         - name: institute_id
@@ -1766,9 +1769,16 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/DvdmsInwardsRecordCreate'
-            example:
-              eaushadhi_issue_no: "ISS-2026-005678"
-              outward_record: "outwards-uuid-1"
+            examples:
+              with_order:
+                summary: Inward record for an issued order
+                value:
+                  eaushadhi_issue_no: "ISS-2026-005678"
+                  outward_record: "outwards-uuid-1"
+              order_less:
+                summary: Inward record from an item issuance with no order
+                value:
+                  eaushadhi_issue_no: "ISS-2026-005678"
       responses:
         '201':
           description: Inwards record created
@@ -1789,7 +1799,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
-          description: Outward record not found for this institute
+          description: Outward record not found for this institute (only when outward_record is supplied)
           content:
             application/json:
               schema:
@@ -1798,13 +1808,13 @@ paths:
                 error: "No DvdmsOutwardRecordOrder matches the given query."
                 code: "not_found"
         '409':
-          description: Conflict - this issue number is already recorded for the outward record
+          description: Conflict - this issue number is already recorded for this institute
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                error: "This issue number is already recorded for this outward record"
+                error: "This issue number is already recorded for this institute"
                 code: "ISSUE_NO_EXISTS"
         '500':
           $ref: '#/components/responses/InternalServerError'
@@ -2542,10 +2552,18 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/RecordDeliveryCreate'
-            example:
-              delivery_order: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
-              record_order: "4df37546-7b7b-4e5b-b135-9179838a6962"
-              status: "draft"
+            examples:
+              with_order:
+                summary: Delivery against an ordered inward record
+                value:
+                  delivery_order: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
+                  record_order: "4df37546-7b7b-4e5b-b135-9179838a6962"
+                  status: "draft"
+              order_less:
+                summary: Delivery against an inward record with no originating order
+                value:
+                  delivery_order: "9c0d11ee-aabb-44cc-aa11-bb22cc33dd44"
+                  status: "draft"
       responses:
         '201':
           description: Record delivery created
@@ -4566,7 +4584,6 @@ components:
       description: Input for creating a new inwards record
       required:
         - eaushadhi_issue_no
-        - outward_record
       properties:
         eaushadhi_issue_no:
           type: string
@@ -4575,7 +4592,11 @@ components:
         outward_record:
           type: string
           format: uuid
-          description: Reference to outward record UUID
+          nullable: true
+          description: |
+            Reference to outward record UUID. Optional - omit when the inward
+            record is created from an item issuance that has no originating
+            order/indent.
           example: "outwards-uuid-1"
 
     DvdmsInwardsRecord:
@@ -4627,7 +4648,6 @@ components:
       type: object
       required:
         - id
-        - record_order_item
         - drug_id
         - drug_name
         - received_quantity
@@ -4642,7 +4662,11 @@ components:
         record_order_item:
           type: string
           format: uuid
-          description: Reference to record order item UUID
+          nullable: true
+          description: |
+            Reference to record order item UUID. Null when the received item
+            doesn't match any ordered line (unmatched/substituted receipt, or
+            the inward record has no originating order).
           example: "record-item-order-uuid-1"
         drug_id:
           type: string
@@ -4902,7 +4926,6 @@ components:
       description: Input for creating a record_delivery link between inward_record and delivery_order.
       required:
         - delivery_order
-        - record_order
       properties:
         delivery_order:
           type: string
@@ -4911,7 +4934,12 @@ components:
         record_order:
           type: string
           format: uuid
-          description: FK to record_order
+          nullable: true
+          description: |
+            FK to record_order. Optional - if omitted, it is auto-derived from
+            the inward record's outward_record.record_order when one exists.
+            Left null when the inward record has no originating order. If
+            provided, it must match the inward record's own order.
         status:
           type: string
           enum: [pending, in_progress, completed, cancelled]
@@ -4970,7 +4998,8 @@ components:
               allOf:
                 - $ref: '#/components/schemas/OrderSummary'
               readOnly: true
-              description: Record order details (expanded in response)
+              nullable: true
+              description: Record order details (expanded in response). Null when the inward record has no originating order.
             status:
               type: string
               enum: [pending, in_progress, completed, cancelled]

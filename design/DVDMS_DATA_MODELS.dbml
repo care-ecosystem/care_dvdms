@@ -321,14 +321,15 @@ Ref outward_record_order_created_by: dvdms_outward_record_order.created_by_id ?>
 Ref outward_record_order_updated_by: dvdms_outward_record_order.updated_by_id ?> care_user.id
 
 // ============================================================================
-// INWARD RECORD - e-Aushadhi Issue/Receipt tracking (N:1 owned by an outward record)
+// INWARD RECORD - e-Aushadhi Issue/Receipt tracking (N:1 owned by an institute)
 // A single outward indent can be issued/received in multiple batches
 // ============================================================================
 Table dvdms_inward_record {
   id INTEGER [pk, increment]
   external_id UUID [unique, not null, note: 'Exposed via API as id']
 
-  outward_record_id INTEGER [not null, note: 'FK to dvdms_outward_record_order.id. ON DELETE CASCADE. Indent number is read via outward_record.eaushadhi_indent_no, not duplicated here']
+  institute_id INTEGER [not null, note: 'FK to dvdms_institute.id. ON DELETE CASCADE. Always set, independent of order lineage - the scoping/uniqueness anchor even when there is no order']
+  outward_record_id INTEGER [null, note: 'FK to dvdms_outward_record_order.id. ON DELETE CASCADE. Null when the inward record originates from an item issuance with no originating order. Indent number is read via outward_record.eaushadhi_indent_no, not duplicated here']
   eaushadhi_issue_no VARCHAR(255) [not null, note: 'e-Aushadhi issue number']
   eaushadhi_issue_status VARCHAR(20) [not null, default: 'draft',
     note: 'Issue status: draft, pending, received, partially_received, completed, cancelled']
@@ -345,13 +346,15 @@ Table dvdms_inward_record {
   meta JSON [default: 'null', null]
 
   indexes {
+    institute_id
     outward_record_id
     sync_log_id
     deleted
-    (outward_record_id, eaushadhi_issue_no) [unique, note: 'Partial unique index where deleted=false']
+    (institute_id, eaushadhi_issue_no) [unique, note: 'Partial unique index where deleted=false. Scoped to institute (not outward_record) so order-less inward records are covered too']
   }
 }
 
+Ref inward_record_institute: dvdms_inward_record.institute_id ?> dvdms_institute.id
 Ref inward_record_outward_record: dvdms_inward_record.outward_record_id ?> dvdms_outward_record_order.id
 Ref inward_record_sync_log: dvdms_inward_record.sync_log_id ?> dvdms_sync_log.id
 Ref inward_record_created_by: dvdms_inward_record.created_by_id ?> care_user.id
@@ -451,7 +454,7 @@ Table dvdms_record_delivery {
   external_id UUID [unique, not null, note: 'Exposed via API as id']
 
   inward_record_id INTEGER [not null, unique, note: 'FK to dvdms_inward_record.id (1:1) - one delivery per inward record. ON DELETE CASCADE']
-  record_order_id INTEGER [not null, note: 'FK to dvdms_record_order.id. ON DELETE CASCADE']
+  record_order_id INTEGER [null, note: 'FK to dvdms_record_order.id. ON DELETE CASCADE. Null when the linked inward record has no originating order']
   delivery_order_id INTEGER [not null, unique, note: 'FK to care_delivery_order.id (1:1). ON DELETE PROTECT']
 
   status VARCHAR(20) [not null, default: 'pending', note: 'Delivery status: pending, in_progress, completed, cancelled']
