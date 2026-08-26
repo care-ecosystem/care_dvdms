@@ -19,6 +19,19 @@ from care_dvdms.models.dvdms_inward_record import DVDMSInwardRecord
 from care_dvdms.models.dvdms_record_delivery import DVDMSRecordDelivery
 from care_dvdms.models.dvdms_record_item_delivery import DVDMSRecordItemDelivery
 
+
+def _validate_quantities(dispatched, accepted, damaged, short):
+    if accepted + damaged + short > dispatched:
+        return Response(
+            {
+                "error": "quantity_accepted + quantity_damaged + quantity_short cannot exceed quantity_dispatched",
+                "code": "QUANTITY_OVERFLOW",
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    return None
+
+
 SELECT_RELATED_FIELDS = (
     "record_delivery",
     "inward_record_item",
@@ -95,6 +108,12 @@ class DVDMSRecordItemDeliveryViewSet(EMRBaseViewSet):
 
         spec = DVDMSRecordItemDeliveryCreateSpec(**request.data)
 
+        error = _validate_quantities(
+            spec.quantity_dispatched, spec.quantity_accepted, spec.quantity_damaged, spec.quantity_short
+        )
+        if error:
+            return error
+
         inward_record_item = get_object_or_404(
             DVDMSInwardItemRecord,
             external_id=spec.inward_record_item,
@@ -157,6 +176,16 @@ class DVDMSRecordItemDeliveryViewSet(EMRBaseViewSet):
         if spec.status is not None:
             item_delivery.status = spec.status
             update_fields.append("status")
+
+        error = _validate_quantities(
+            item_delivery.quantity_dispatched,
+            item_delivery.quantity_accepted,
+            item_delivery.quantity_damaged,
+            item_delivery.quantity_short,
+        )
+        if error:
+            return error
+
         item_delivery.updated_by = request.user
         item_delivery.save(update_fields=update_fields)
 

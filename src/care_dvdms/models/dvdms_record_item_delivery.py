@@ -39,6 +39,24 @@ class DVDMSRecordItemDelivery(EMRBaseModel):
 
     class Meta:
         verbose_name_plural = "DVDMS Record Item Deliveries"
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(quantity_dispatched__gte=0),
+                name="record_item_delivery_quantity_dispatched_gte_0",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(quantity_accepted__gte=0),
+                name="record_item_delivery_quantity_accepted_gte_0",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(quantity_damaged__gte=0),
+                name="record_item_delivery_quantity_damaged_gte_0",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(quantity_short__gte=0),
+                name="record_item_delivery_quantity_short_gte_0",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.inward_record_item} - {self.status}"
