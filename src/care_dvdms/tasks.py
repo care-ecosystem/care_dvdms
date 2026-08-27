@@ -105,6 +105,4 @@ def save_indent_task(self, institute_id, record_order_id, user_id):
     record_order.status = DVDMSRecordOrderStatus.approved
     record_order.save(update_fields=["status", "modified_date"])
 
-    _upsert_outward_record(
-        record_order, sync_log, user, DVDMSOutwardRecordOrderStatus.created, indent_no=indent_no
-    )
+    _upsert_outward_record(record_order, sync_log, user, DVDMSOutwardRecordOrderStatus.submitted, indent_no=indent_no)

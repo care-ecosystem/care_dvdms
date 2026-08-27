@@ -15,6 +15,7 @@ from care_dvdms.api.specs.dvdms_record_order import (
     DVDMSRecordOrderUpdateSpec,
 )
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
+from care_dvdms.models.dvdms_outward_record_order import DVDMSOutwardRecordOrder, DVDMSOutwardRecordOrderStatus
 from care_dvdms.models.dvdms_record_order import DVDMSRecordOrder, DVDMSRecordOrderStatus
 from care_dvdms.models.dvdms_store import DVDMSStore
 from care_dvdms.models.dvdms_supplier import DVDMSSupplier
@@ -82,9 +83,7 @@ class DVDMSRecordOrderViewSet(EMRBaseViewSet):
 
         spec = DVDMSRecordOrderCreateSpec(**request.data)
 
-        order = get_object_or_404(
-            RequestOrder, external_id=spec.order, destination__facility=institute.facility
-        )
+        order = get_object_or_404(RequestOrder, external_id=spec.order, destination__facility=institute.facility)
         institute_store = get_object_or_404(
             DVDMSStore.objects.select_related("location"),
             external_id=spec.institute_store,
@@ -145,10 +144,7 @@ class DVDMSRecordOrderViewSet(EMRBaseViewSet):
                 deleted=False,
             )
 
-            if (
-                spec.status == DVDMSRecordOrderStatus.cancelled
-                and record_order.status != DVDMSRecordOrderStatus.draft
-            ):
+            if spec.status == DVDMSRecordOrderStatus.cancelled and record_order.status != DVDMSRecordOrderStatus.draft:
                 return Response(
                     {"error": "Only a draft record order can be cancelled"},
                     status=status.HTTP_409_CONFLICT,
@@ -192,11 +188,22 @@ class DVDMSRecordOrderViewSet(EMRBaseViewSet):
             record_order.save(update_fields=update_fields)
 
             if newly_approved:
+                DVDMSOutwardRecordOrder.objects.get_or_create(
+                    record_order=record_order,
+                    defaults={
+                        "status": DVDMSOutwardRecordOrderStatus.created,
+                        "created_by": request.user,
+                        "updated_by": request.user,
+                    },
+                )
+                approved_institute_id = str(institute.external_id)
+                approved_record_order_id = str(record_order.external_id)
+                approved_by_user_id = str(request.user.external_id)
                 transaction.on_commit(
                     lambda: save_indent_task.delay(
-                        institute_id=str(institute.external_id),
-                        record_order_id=str(record_order.external_id),
-                        user_id=str(request.user.external_id),
+                        institute_id=approved_institute_id,
+                        record_order_id=approved_record_order_id,
+                        user_id=approved_by_user_id,
                     )
                 )
 
