@@ -43,7 +43,7 @@ class DVDMSRecordOrder(EMRBaseModel):
         related_name="record_orders",
     )
     name = models.CharField(max_length=255)
-    order = models.OneToOneField(
+    order = models.ForeignKey(
         "emr.RequestOrder",
         on_delete=models.PROTECT,
         related_name="dvdms_record_order",
@@ -67,6 +67,20 @@ class DVDMSRecordOrder(EMRBaseModel):
 
     class Meta:
         verbose_name_plural = "DVDMS Record Orders"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["order"],
+                condition=models.Q(deleted=False)
+                & ~models.Q(
+                    status__in=[
+                        DVDMSRecordOrderStatus.cancelled,
+                        DVDMSRecordOrderStatus.rejected,
+                        DVDMSRecordOrderStatus.failed,
+                    ]
+                ),
+                name="uniq_order_active_record_order",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.institute} - {self.name}"
