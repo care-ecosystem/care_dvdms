@@ -135,9 +135,12 @@ def _upsert_inward_item_record(inward_record, item_order, user, drug_id, brand_i
         "manufacturer": item.get("mfgName"),
         "received_quantity": item.get("issueQyt") or 0,
     }
+    lookup = {"inward_record": inward_record, "record_order_item": item_order}
+    if item_order is None:
+        lookup["drug_id"] = drug_id
+        lookup["batch"] = item.get("batchNo")
     item_record, _ = DVDMSInwardItemRecord.objects.update_or_create(
-        inward_record=inward_record,
-        record_order_item=item_order,
+        **lookup,
         defaults={**fields, "updated_by": user},
         create_defaults={**fields, "created_by": user, "updated_by": user},
     )
@@ -170,11 +173,12 @@ def prefill_inward_record_task(self, institute_id, outward_record_id, user_id):
     user = get_object_or_404(User, external_id=user_id)
 
     to_store_id = outward_record.record_order.institute_store.eaushadhi_store_id
-    pending_records = fetch_acknowledge_pending_records(to_store_id, outward_record.eaushadhi_indent_no)
+    care_indent_no = outward_record.record_order.care_indent_no
+    pending_records = fetch_acknowledge_pending_records(to_store_id, care_indent_no)
     if not pending_records:
         logger.info(
-            "prefill_inward_record_task: no acknowledge-pending entry yet for indent_no=%s",
-            outward_record.eaushadhi_indent_no,
+            "prefill_inward_record_task: no acknowledge-pending entry for indent_no=%s",
+            care_indent_no,
         )
         return
 
