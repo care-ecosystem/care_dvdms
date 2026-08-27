@@ -19,7 +19,6 @@ DVDMS_DRUG_ITEM_CAT_NO = "10"  # Drug Item Category Number for DVDMS for medical
 
 DVDMS_URGENT_PRIORITIES = {"urgent", "asap", "stat"}
 DVDMS_INDENT_NO_PATTERN = r"Intent NO:\s*(\S+)"
-DVDMS_ACKNOWLEDGE_INDENT_NO_PATTERN = r"(\d+)-[A-Za-z]{3}-\d{4}$"
 
 DVDMS_GROUP_LIST_SUCCESS_STATUS = 1
 DVDMS_SUBGROUP_LIST_SUCCESS_STATUS = 1
