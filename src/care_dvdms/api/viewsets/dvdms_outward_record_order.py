@@ -1,6 +1,7 @@
 from care.emr.api.viewsets.base import EMRBaseViewSet
 from care.security.authorization.base import AuthorizationController
 from care.utils.shortcuts import get_object_or_404
+from django.db import transaction
 from rest_framework import status
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.filters import OrderingFilter
@@ -20,6 +21,7 @@ from care_dvdms.models.dvdms_sync_log import (
     DVDMSSyncTriggeredBy,
     DVDMSSyncType,
 )
+from care_dvdms.tasks import prefill_inward_record_task
 
 SELECT_RELATED_FIELDS = (
     "record_order",
@@ -135,10 +137,23 @@ class DVDMSOutwardRecordOrderViewSet(EMRBaseViewSet):
         sync_log.http_status_code = http_status_code
         sync_log.save(update_fields=["request_status", "response_payload", "http_status_code", "modified_date"])
 
+        previous_status = outward_record.eaushadhi_indent_status
         outward_record.sync_log = sync_log
         outward_record.eaushadhi_indent_status = response.get("data", {}).get("indentStatus")
         outward_record.updated_by = request.user
         outward_record.save(update_fields=["sync_log", "eaushadhi_indent_status", "updated_by", "modified_date"])
+
+        if outward_record.eaushadhi_indent_status == "Issued" and previous_status != "Issued":
+            institute_id = str(institute.external_id)
+            outward_record_id = str(outward_record.external_id)
+            user_id = str(request.user.external_id)
+            transaction.on_commit(
+                lambda: prefill_inward_record_task.delay(
+                    institute_id=institute_id,
+                    outward_record_id=outward_record_id,
+                    user_id=user_id,
+                )
+            )
 
         result = DVDMSOutwardRecordOrderListSpec.serialize(outward_record)
         return Response(result.to_json(), status=status.HTTP_200_OK)
