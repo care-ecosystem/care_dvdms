@@ -51,9 +51,9 @@ class DVDMSInwardRecordViewSet(EMRBaseViewSet):
     def get_queryset(self):
         institute = self.get_institute()
         self._authorize_facility(institute)
-        return DVDMSInwardRecord.objects.filter(
-            outward_record__record_order__institute=institute, deleted=False
-        ).select_related(*SELECT_RELATED_FIELDS)
+        return DVDMSInwardRecord.objects.filter(institute=institute, deleted=False).select_related(
+            *SELECT_RELATED_FIELDS
+        )
 
     def list(self, request, *args, **kwargs):
         """GET .../record_inwards/ - List inwards records for an institute"""
@@ -79,15 +79,18 @@ class DVDMSInwardRecordViewSet(EMRBaseViewSet):
 
         spec = DVDMSInwardRecordCreateSpec(**request.data)
 
-        outward_record = get_object_or_404(
-            DVDMSOutwardRecordOrder,
-            external_id=spec.outward_record,
-            record_order__institute=institute,
-            deleted=False,
-        )
+        outward_record = None
+        if spec.outward_record:
+            outward_record = get_object_or_404(
+                DVDMSOutwardRecordOrder,
+                external_id=spec.outward_record,
+                record_order__institute=institute,
+                deleted=False,
+            )
 
         try:
             inward_record = DVDMSInwardRecord.objects.create(
+                institute=institute,
                 outward_record=outward_record,
                 eaushadhi_issue_no=spec.eaushadhi_issue_no,
                 created_by=request.user,
@@ -96,7 +99,7 @@ class DVDMSInwardRecordViewSet(EMRBaseViewSet):
         except IntegrityError:
             return Response(
                 {
-                    "error": "This issue number is already recorded for this outward record",
+                    "error": "This issue number is already recorded for this institute",
                     "code": "ISSUE_NO_EXISTS",
                 },
                 status=status.HTTP_409_CONFLICT,

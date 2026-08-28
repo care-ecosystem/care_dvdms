@@ -11,6 +11,10 @@ from care_dvdms.api.viewsets.dvdms_product_mapping import (
     DVDMSProductMappingViewSet,
     DVDMSRecordOrderProductMappingViewSet,
 )
+from care_dvdms.api.viewsets.dvdms_record_delivery import DVDMSRecordDeliveryViewSet
+from care_dvdms.api.viewsets.dvdms_record_item_delivery import (
+    DVDMSRecordItemDeliveryViewSet,
+)
 from care_dvdms.api.viewsets.dvdms_record_item_order import (
     DVDMSRecordItemOrderViewSet,
 )
@@ -163,6 +167,38 @@ urlpatterns = [
         r"^institute/(?P<institute_id>[^/.]+)/record_inwards/(?P<external_id>[^/.]+)/$",
         DVDMSInwardRecordViewSet.as_view({"get": "retrieve"}),
         name="dvdms-inward-record-detail",
+    ),
+    re_path(
+        r"^institute/(?P<institute_id>[^/.]+)/record_inwards/(?P<record_inward_id>[^/.]+)/delivery/$",
+        DVDMSRecordDeliveryViewSet.as_view(
+            {
+                "get": "list",
+                "post": "create",
+            }
+        ),
+        name="dvdms-record-delivery-list",
+    ),
+    re_path(
+        r"^institute/(?P<institute_id>[^/.]+)/record_inwards/(?P<record_inward_id>[^/.]+)/delivery/(?P<external_id>[^/.]+)/$",
+        DVDMSRecordDeliveryViewSet.as_view(
+            {
+                "get": "retrieve",
+                "patch": "partial_update",
+            }
+        ),
+        name="dvdms-record-delivery-detail",
+    ),
+    re_path(
+        r"^institute/(?P<institute_id>[^/.]+)/record_inwards/(?P<record_inward_id>[^/.]+)"
+        r"/delivery/(?P<record_delivery_id>[^/.]+)/items/$",
+        DVDMSRecordItemDeliveryViewSet.as_view({"post": "create"}),
+        name="dvdms-record-item-delivery-list",
+    ),
+    re_path(
+        r"^institute/(?P<institute_id>[^/.]+)/record_inwards/(?P<record_inward_id>[^/.]+)"
+        r"/delivery/(?P<record_delivery_id>[^/.]+)/items/(?P<external_id>[^/.]+)/$",
+        DVDMSRecordItemDeliveryViewSet.as_view({"patch": "partial_update"}),
+        name="dvdms-record-item-delivery-detail",
     ),
     re_path(
         r"^institute/(?P<institute_id>[^/.]+)/product-mappings/$",
