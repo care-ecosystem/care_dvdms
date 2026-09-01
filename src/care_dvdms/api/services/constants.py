@@ -7,7 +7,7 @@ DVDMS_SAVE_INDENT_PATH = "/save/indent"
 DVDMS_TRACK_INDENT_PATH = "/getIndentStatus"
 DVDMS_ACKNOWLEDGE_PENDING_LIST_PATH = "/dwh/acknowledge-pandding/list"
 DVDMS_ACKNOWLEDGE_DETAILS_PATH = "/dwh/acknowladge/datails"
-DVDMS_ISSUE_SAVE_PATH = "/dwh/issue/save"
+DVDMS_ACKNOWLEDGE_SAVE_PATH = "/dwh/acknowledge/save"
 
 DVDMS_GROUPS_CACHE_KEY = "dvdms:lookup:groups"
 DVDMS_SUBGROUPS_CACHE_KEY = "dvdms:lookup:subgroups"
@@ -16,6 +16,7 @@ DVDMS_DRUGS_CACHE_KEY = "dvdms:lookup:drugs"
 DVDMS_STORES_CACHE_KEY = "dvdms:lookup:stores"
 
 DVDMS_DRUG_ITEM_CAT_NO = "10"  # Drug Item Category Number for DVDMS for medical drugs
+DVDMS_ACKNOWLEDGE_REQUEST_TYPE = "31"  # DVDMS-side transaction type code for acknowledge-save
 
 DVDMS_URGENT_PRIORITIES = {"urgent", "asap", "stat"}
 DVDMS_INDENT_NO_PATTERN = r"Intent NO:\s*(\S+)"
@@ -29,7 +30,7 @@ DVDMS_SAVE_INDENT_SUCCESS_STATUS = 200
 DVDMS_TRACK_INDENT_SUCCESS_STATUS = 1
 DVDMS_ACKNOWLEDGE_PENDING_LIST_SUCCESS_STATUS = 1
 DVDMS_ACKNOWLEDGE_DETAILS_SUCCESS_STATUS = 1
-DVDMS_ISSUE_SAVE_SUCCESS_STATUS = 1
+DVDMS_ACKNOWLEDGE_SAVE_SUCCESS_STATUS = 200
 
 CARE_INDENT_NO_FACILITY_WIDTH = 3
 CARE_INDENT_NO_SEQ_WIDTH = 4  # minimum width, not a hard cap - grows past 9999 rather than failing

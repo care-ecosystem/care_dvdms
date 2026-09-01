@@ -3,8 +3,10 @@ from care_dvdms.api.services.constants import (
     DVDMS_ACKNOWLEDGE_DETAILS_SUCCESS_STATUS,
     DVDMS_ACKNOWLEDGE_PENDING_LIST_PATH,
     DVDMS_ACKNOWLEDGE_PENDING_LIST_SUCCESS_STATUS,
-    DVDMS_ISSUE_SAVE_PATH,
-    DVDMS_ISSUE_SAVE_SUCCESS_STATUS,
+    DVDMS_ACKNOWLEDGE_REQUEST_TYPE,
+    DVDMS_ACKNOWLEDGE_SAVE_PATH,
+    DVDMS_ACKNOWLEDGE_SAVE_SUCCESS_STATUS,
+    DVDMS_DRUG_ITEM_CAT_NO,
 )
 from care_dvdms.api.services.dvdms_client import dvdms_get, dvdms_post_full
 
@@ -43,9 +45,41 @@ def fetch_acknowledge_details(issue_no, store_id):
     )
 
 
-def save_issue_acknowledgement(payload):
-    """Call the DVDMS issue-save (acknowledge) API. Returns (raw_response, http_status_code)."""
-    return dvdms_post_full(DVDMS_ISSUE_SAVE_PATH, DVDMS_ISSUE_SAVE_SUCCESS_STATUS, payload)
+def _build_item_pk(store_id, item):
+    return "^".join([store_id, item.drug_id, item.drug_id, item.batch or "", DVDMS_DRUG_ITEM_CAT_NO, "0", "0"])
+
+
+def build_acknowledge_save_payload(inward_record):
+    """Build the DVDMS acknowledge-save request payload for an inward record."""
+    institute_store = inward_record.outward_record.record_order.institute_store
+    store_id = institute_store.eaushadhi_store_id
+    issue_no = inward_record.eaushadhi_issue_no
+    items = list(inward_record.items.select_related("item_delivery"))
+
+    return {
+        "strChk": [f"{store_id}@{issue_no}@{DVDMS_ACKNOWLEDGE_REQUEST_TYPE}@0${len(items)}"],
+        "strAckStatus": "0",
+        "strTransNo": issue_no,
+        "strStoreId": store_id,
+        "strHospitalCode": inward_record.institute.eaushadhi_institute_id,
+        "strSeatId": inward_record.institute.eaushadhi_user_ref_id,
+        "combo": f"{store_id}^0",
+        "itemList": [
+            {
+                "strPk": _build_item_pk(store_id, item),
+                "receivedQty": str(int(item.received_quantity)),
+                "acceptedQty": str(int(item.item_delivery.quantity_accepted)),
+                "breakageQty": str(int(item.item_delivery.quantity_damaged)),
+                "shortageQty": str(int(item.item_delivery.quantity_short)),
+            }
+            for item in items
+        ],
+    }
+
+
+def save_acknowledgement(payload):
+    """Call the DVDMS acknowledge-save API. Returns (raw_response, http_status_code)."""
+    return dvdms_post_full(DVDMS_ACKNOWLEDGE_SAVE_PATH, DVDMS_ACKNOWLEDGE_SAVE_SUCCESS_STATUS, payload)
 
 
 def parse_item_pk_key(pk_key):

@@ -2,7 +2,7 @@ from care.emr.api.viewsets.base import EMRBaseViewSet
 from care.emr.models.supply_delivery import SupplyDelivery
 from care.security.authorization.base import AuthorizationController
 from care.utils.shortcuts import get_object_or_404
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from rest_framework import status
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.filters import OrderingFilter
@@ -18,6 +18,7 @@ from care_dvdms.models.dvdms_inward_item_record import DVDMSInwardItemRecord
 from care_dvdms.models.dvdms_inward_record import DVDMSInwardRecord
 from care_dvdms.models.dvdms_record_delivery import DVDMSRecordDelivery
 from care_dvdms.models.dvdms_record_item_delivery import DVDMSRecordItemDelivery
+from care_dvdms.tasks import save_acknowledgement_task
 
 
 def _validate_quantities(dispatched, accepted, damaged, short):
@@ -38,6 +39,19 @@ def _validate_quantities(dispatched, accepted, damaged, short):
             status=status.HTTP_400_BAD_REQUEST,
         )
     return None
+
+
+def _dispatch_acknowledgement(institute, inward_record, user):
+    institute_id = str(institute.external_id)
+    inward_record_id = str(inward_record.external_id)
+    user_id = str(user.external_id)
+    transaction.on_commit(
+        lambda: save_acknowledgement_task.delay(
+            institute_id=institute_id,
+            inward_record_id=inward_record_id,
+            user_id=user_id,
+        )
+    )
 
 
 SELECT_RELATED_FIELDS = (
@@ -155,6 +169,8 @@ class DVDMSRecordItemDeliveryViewSet(EMRBaseViewSet):
                 status=status.HTTP_409_CONFLICT,
             )
 
+        _dispatch_acknowledgement(institute, inward_record, request.user)
+
         result = DVDMSRecordItemDeliveryListSpec.serialize(item_delivery)
         return Response(result.to_json(), status=status.HTTP_201_CREATED)
 
@@ -196,6 +212,8 @@ class DVDMSRecordItemDeliveryViewSet(EMRBaseViewSet):
 
         item_delivery.updated_by = request.user
         item_delivery.save(update_fields=update_fields)
+
+        _dispatch_acknowledgement(institute, item_delivery.inward_record_item.inward_record, request.user)
 
         result = DVDMSRecordItemDeliveryListSpec.serialize(item_delivery)
         return Response(result.to_json(), status=status.HTTP_200_OK)

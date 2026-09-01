@@ -7,17 +7,20 @@ import requests
 from care.users.models import User
 from care.utils.shortcuts import get_object_or_404
 from celery import shared_task
+from django.db import transaction
 
 from care_dvdms.api.services.dvdms_acknowledge_services import (
+    build_acknowledge_save_payload,
     fetch_acknowledge_details,
     fetch_acknowledge_pending_records,
     parse_item_pk_key,
+    save_acknowledgement,
 )
 from care_dvdms.api.services.dvdms_client import get_status_code
 from care_dvdms.api.services.dvdms_indent_services import build_save_indent_payload, save_indent
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
 from care_dvdms.models.dvdms_inward_item_record import DVDMSInwardItemRecord
-from care_dvdms.models.dvdms_inward_record import DVDMSInwardRecord
+from care_dvdms.models.dvdms_inward_record import DVDMSInwardRecord, DVDMSInwardRecordStatus
 from care_dvdms.models.dvdms_outward_record_order import (
     DVDMSOutwardRecordOrder,
     DVDMSOutwardRecordOrderStatus,
@@ -103,16 +106,18 @@ def save_indent_task(self, institute_id, record_order_id, user_id):
 
         _upsert_outward_record(record_order, sync_log, user, DVDMSOutwardRecordOrderStatus.failed)
         raise
+    else:
+        sync_log.request_status = DVDMSSyncRequestStatus.success
+        sync_log.response_payload = response
+        sync_log.http_status_code = http_status_code
+        sync_log.save(update_fields=["request_status", "response_payload", "http_status_code", "modified_date"])
 
-    sync_log.request_status = DVDMSSyncRequestStatus.success
-    sync_log.response_payload = response
-    sync_log.http_status_code = http_status_code
-    sync_log.save(update_fields=["request_status", "response_payload", "http_status_code", "modified_date"])
+        record_order.status = DVDMSRecordOrderStatus.approved
+        record_order.save(update_fields=["status", "modified_date"])
 
-    record_order.status = DVDMSRecordOrderStatus.approved
-    record_order.save(update_fields=["status", "modified_date"])
-
-    _upsert_outward_record(record_order, sync_log, user, DVDMSOutwardRecordOrderStatus.submitted, indent_no=indent_no)
+        _upsert_outward_record(
+            record_order, sync_log, user, DVDMSOutwardRecordOrderStatus.submitted, indent_no=indent_no
+        )
 
 
 def _upsert_inward_record(institute, outward_record, sync_log, user, issue_no):
@@ -193,7 +198,7 @@ def prefill_inward_record_task(self, institute_id, outward_record_id, user_id):
         sync_log = DVDMSSyncLog.objects.create(
             institute=institute,
             triggered_by=DVDMSSyncTriggeredBy.user,
-            sync_type=DVDMSSyncType.acknowledge,
+            sync_type=DVDMSSyncType.fetch_issue,
             request_status=DVDMSSyncRequestStatus.pending,
             request_payload=request_payload,
             created_by=user,
@@ -208,14 +213,93 @@ def prefill_inward_record_task(self, institute_id, outward_record_id, user_id):
             sync_log.http_status_code = get_status_code(exc)
             sync_log.save(update_fields=["request_status", "error_detail", "http_status_code", "modified_date"])
             raise
+        else:
+            sync_log.request_status = DVDMSSyncRequestStatus.success
+            sync_log.response_payload = data
+            sync_log.save(update_fields=["request_status", "response_payload", "modified_date"])
 
-        sync_log.request_status = DVDMSSyncRequestStatus.success
-        sync_log.response_payload = data
-        sync_log.save(update_fields=["request_status", "response_payload", "modified_date"])
+            inward_record = _upsert_inward_record(institute, outward_record, sync_log, user, pending_record["issue_no"])
 
-        inward_record = _upsert_inward_record(institute, outward_record, sync_log, user, pending_record["issue_no"])
+            for item in data.get("itemList", []):
+                drug_id, brand_id = parse_item_pk_key(item["pkKey"])
+                item_order = item_orders_by_drug_id.get(drug_id)
+                _upsert_inward_item_record(inward_record, item_order, user, drug_id, brand_id, item)
 
-        for item in data.get("itemList", []):
-            drug_id, brand_id = parse_item_pk_key(item["pkKey"])
-            item_order = item_orders_by_drug_id.get(drug_id)
-            _upsert_inward_item_record(inward_record, item_order, user, drug_id, brand_id, item)
+
+@shared_task(
+    bind=True,
+    name="care_dvdms.tasks.save_acknowledgement_task",
+    max_retries=int(settings.DVDMS_API_RETRY_COUNT),
+    autoretry_for=(requests.exceptions.ConnectTimeout, requests.exceptions.ReadTimeout),
+    retry_backoff=True,
+    retry_backoff_max=600,
+    retry_jitter=True,
+)
+def save_acknowledgement_task(self, institute_id, inward_record_id, user_id):
+    logger.info(
+        "Celery Task Triggered: save_acknowledgement_task | institute_id=%s inward_record_id=%s attempt=%s",
+        institute_id,
+        inward_record_id,
+        self.request.retries + 1,
+    )
+
+    institute = get_object_or_404(DVDMSInstitute, external_id=institute_id)
+    user = get_object_or_404(User, external_id=user_id)
+
+    with transaction.atomic():
+        inward_record = get_object_or_404(
+            DVDMSInwardRecord.objects.select_for_update(of=("self",))
+            .select_related("outward_record__record_order__institute_store")
+            .prefetch_related("items__item_delivery"),
+            external_id=inward_record_id,
+            institute=institute,
+        )
+
+        if inward_record.eaushadhi_issue_status == DVDMSInwardRecordStatus.completed:
+            logger.info(
+                "save_acknowledgement_task: inward_record=%s already acknowledged, skipping",
+                inward_record_id,
+            )
+            return
+
+        if any(not hasattr(item, "item_delivery") for item in inward_record.items.all()):
+            logger.info(
+                "save_acknowledgement_task: inward_record=%s has items without a delivery yet, skipping",
+                inward_record_id,
+            )
+            return
+
+        payload = build_acknowledge_save_payload(inward_record)
+
+        sync_log = DVDMSSyncLog.objects.create(
+            institute=institute,
+            triggered_by=DVDMSSyncTriggeredBy.user,
+            sync_type=DVDMSSyncType.acknowledge_issue,
+            request_status=DVDMSSyncRequestStatus.pending,
+            request_payload=payload,
+            created_by=user,
+            updated_by=user,
+        )
+
+        request_exc = None
+        try:
+            response, http_status_code = save_acknowledgement(payload)
+        except Exception as exc:
+            request_exc = exc
+            sync_log.request_status = DVDMSSyncRequestStatus.failure
+            sync_log.error_detail = str(exc)
+            sync_log.http_status_code = get_status_code(exc)
+            sync_log.save(update_fields=["request_status", "error_detail", "http_status_code", "modified_date"])
+        else:
+            sync_log.request_status = DVDMSSyncRequestStatus.success
+            sync_log.response_payload = response
+            sync_log.http_status_code = http_status_code
+            sync_log.save(update_fields=["request_status", "response_payload", "http_status_code", "modified_date"])
+
+            inward_record.eaushadhi_issue_status = DVDMSInwardRecordStatus.completed
+            inward_record.sync_log = sync_log
+            inward_record.updated_by = user
+            inward_record.save(update_fields=["eaushadhi_issue_status", "sync_log", "updated_by", "modified_date"])
+
+    if request_exc is not None:
+        raise request_exc

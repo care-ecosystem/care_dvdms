@@ -254,7 +254,7 @@ Table dvdms_sync_log {
   institute_id INTEGER [not null, note: 'FK to dvdms_institute.id']
 
   triggered_by VARCHAR(20) [not null, default: 'user', note: 'user, cron, retry']
-  sync_type VARCHAR(20) [not null, note: 'save_indent, track_indent, acknowledge']
+  sync_type VARCHAR(20) [not null, note: 'save_indent, track_indent, fetch_issue, acknowledge_issue']
   request_status VARCHAR(20) [not null, default: 'pending', note: 'pending, success, failure']
 
   http_status_code SMALLINT [null, note: 'HTTP status code received from the DVDMS API']
