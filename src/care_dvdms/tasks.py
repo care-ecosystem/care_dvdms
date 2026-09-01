@@ -25,6 +25,7 @@ from care_dvdms.models.dvdms_outward_record_order import (
     DVDMSOutwardRecordOrder,
     DVDMSOutwardRecordOrderStatus,
 )
+from care_dvdms.models.dvdms_record_delivery import DVDMSRecordDeliveryStatus
 from care_dvdms.models.dvdms_record_order import DVDMSRecordOrder, DVDMSRecordOrderStatus
 from care_dvdms.models.dvdms_sync_log import (
     DVDMSSyncLog,
@@ -126,7 +127,12 @@ def _upsert_inward_record(institute, outward_record, sync_log, user, issue_no):
         institute=institute,
         eaushadhi_issue_no=issue_no,
         defaults={**fields, "updated_by": user},
-        create_defaults={**fields, "created_by": user, "updated_by": user},
+        create_defaults={
+            **fields,
+            "eaushadhi_issue_status": DVDMSInwardRecordStatus.pending,
+            "created_by": user,
+            "updated_by": user,
+        },
     )
     return inward_record
 
@@ -235,7 +241,7 @@ def prefill_inward_record_task(self, institute_id, outward_record_id, user_id):
     retry_backoff_max=600,
     retry_jitter=True,
 )
-def save_acknowledgement_task(self, institute_id, inward_record_id, user_id):
+def save_acknowledgement_task(self, institute_id, inward_record_id, user_id, is_retry=False):
     logger.info(
         "Celery Task Triggered: save_acknowledgement_task | institute_id=%s inward_record_id=%s attempt=%s",
         institute_id,
@@ -249,15 +255,31 @@ def save_acknowledgement_task(self, institute_id, inward_record_id, user_id):
     with transaction.atomic():
         inward_record = get_object_or_404(
             DVDMSInwardRecord.objects.select_for_update(of=("self",))
-            .select_related("outward_record__record_order__institute_store")
+            .select_related("outward_record__record_order__institute_store", "record_delivery", "sync_log")
             .prefetch_related("items__item_delivery"),
             external_id=inward_record_id,
             institute=institute,
         )
+        record_delivery = inward_record.record_delivery
 
-        if inward_record.eaushadhi_issue_status == DVDMSInwardRecordStatus.completed:
+        if record_delivery.status == DVDMSRecordDeliveryStatus.completed:
             logger.info(
                 "save_acknowledgement_task: inward_record=%s already acknowledged, skipping",
+                inward_record_id,
+            )
+            return
+
+        last_sync_log = inward_record.sync_log
+        if (
+            not is_retry
+            and self.request.retries == 0
+            and last_sync_log is not None
+            and last_sync_log.sync_type == DVDMSSyncType.acknowledge_issue
+            and last_sync_log.request_status == DVDMSSyncRequestStatus.failure
+        ):
+            logger.info(
+                "save_acknowledgement_task: inward_record=%s previous acknowledgement failed, "
+                "not auto-retrying - use retry_acknowledgement to force another attempt",
                 inward_record_id,
             )
             return
@@ -296,10 +318,20 @@ def save_acknowledgement_task(self, institute_id, inward_record_id, user_id):
             sync_log.http_status_code = http_status_code
             sync_log.save(update_fields=["request_status", "response_payload", "http_status_code", "modified_date"])
 
+            record_delivery.status = DVDMSRecordDeliveryStatus.completed
+            record_delivery.updated_by = user
+            record_delivery.save(update_fields=["status", "updated_by", "modified_date"])
+
+            record_order = inward_record.outward_record.record_order
+            record_order.status = DVDMSRecordOrderStatus.completed
+            record_order.updated_by = user
+            record_order.save(update_fields=["status", "updated_by", "modified_date"])
+
             inward_record.eaushadhi_issue_status = DVDMSInwardRecordStatus.completed
-            inward_record.sync_log = sync_log
-            inward_record.updated_by = user
-            inward_record.save(update_fields=["eaushadhi_issue_status", "sync_log", "updated_by", "modified_date"])
+
+        inward_record.sync_log = sync_log
+        inward_record.updated_by = user
+        inward_record.save(update_fields=["eaushadhi_issue_status", "sync_log", "updated_by", "modified_date"])
 
     if request_exc is not None:
         raise request_exc

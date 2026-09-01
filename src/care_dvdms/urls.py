@@ -190,6 +190,12 @@ urlpatterns = [
     ),
     re_path(
         r"^institute/(?P<institute_id>[^/.]+)/record_inwards/(?P<record_inward_id>[^/.]+)"
+        r"/delivery/(?P<external_id>[^/.]+)/retry-acknowledgement/$",
+        DVDMSRecordDeliveryViewSet.as_view({"post": "retry_acknowledgement"}),
+        name="dvdms-record-delivery-retry-acknowledgement",
+    ),
+    re_path(
+        r"^institute/(?P<institute_id>[^/.]+)/record_inwards/(?P<record_inward_id>[^/.]+)"
         r"/delivery/(?P<record_delivery_id>[^/.]+)/items/$",
         DVDMSRecordItemDeliveryViewSet.as_view({"post": "create"}),
         name="dvdms-record-item-delivery-list",

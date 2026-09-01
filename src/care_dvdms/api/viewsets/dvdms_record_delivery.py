@@ -15,6 +15,7 @@ from care_dvdms.api.specs.dvdms_record_delivery import (
     DVDMSRecordDeliveryListSpec,
     DVDMSRecordDeliveryUpdateSpec,
 )
+from care_dvdms.api.viewsets.dvdms_record_item_delivery import _dispatch_acknowledgement
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
 from care_dvdms.models.dvdms_inward_record import DVDMSInwardRecord
 from care_dvdms.models.dvdms_record_delivery import DVDMSRecordDelivery
@@ -172,3 +173,15 @@ class DVDMSRecordDeliveryViewSet(EMRBaseViewSet):
 
         result = DVDMSRecordDeliveryListSpec.serialize(record_delivery)
         return Response(result.to_json(), status=status.HTTP_200_OK)
+
+    def retry_acknowledgement(self, request, *args, **kwargs):
+        """POST .../delivery/{record_delivery_id}/retry-acknowledgement/ - Retry sending the acknowledgement to DVDMS"""
+        institute = self.get_institute()
+        self._authorize_manage_facility(institute)
+        inward_record = self.get_inward_record(institute)
+
+        get_object_or_404(self.get_queryset(), external_id=self.kwargs.get(self.lookup_field))
+
+        _dispatch_acknowledgement(institute, inward_record, request.user, is_retry=True)
+
+        return Response(status=status.HTTP_202_ACCEPTED)

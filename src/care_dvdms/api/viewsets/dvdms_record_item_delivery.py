@@ -14,9 +14,9 @@ from care_dvdms.api.specs.dvdms_record_item_delivery import (
     DVDMSRecordItemDeliveryUpdateSpec,
 )
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
-from care_dvdms.models.dvdms_inward_item_record import DVDMSInwardItemRecord
-from care_dvdms.models.dvdms_inward_record import DVDMSInwardRecord
-from care_dvdms.models.dvdms_record_delivery import DVDMSRecordDelivery
+from care_dvdms.models.dvdms_inward_item_record import DVDMSInwardItemRecord, DVDMSInwardItemRecordStatus
+from care_dvdms.models.dvdms_inward_record import DVDMSInwardRecord, DVDMSInwardRecordStatus
+from care_dvdms.models.dvdms_record_delivery import DVDMSRecordDelivery, DVDMSRecordDeliveryStatus
 from care_dvdms.models.dvdms_record_item_delivery import DVDMSRecordItemDelivery
 from care_dvdms.tasks import save_acknowledgement_task
 
@@ -41,7 +41,48 @@ def _validate_quantities(dispatched, accepted, damaged, short):
     return None
 
 
-def _dispatch_acknowledgement(institute, inward_record, user):
+def _derive_inward_item_status(dispatched, accepted, damaged, short):
+    if accepted == dispatched and damaged == 0 and short == 0:
+        return DVDMSInwardItemRecordStatus.received
+    if accepted == 0 and damaged == 0:
+        return DVDMSInwardItemRecordStatus.rejected
+    if damaged == dispatched:
+        return DVDMSInwardItemRecordStatus.damaged
+    return DVDMSInwardItemRecordStatus.partially_received
+
+
+def _sync_inward_item_status(item_delivery):
+    inward_record_item = item_delivery.inward_record_item
+    inward_record_item.status = _derive_inward_item_status(
+        item_delivery.quantity_dispatched,
+        item_delivery.quantity_accepted,
+        item_delivery.quantity_damaged,
+        item_delivery.quantity_short,
+    )
+    inward_record_item.save(update_fields=["status", "modified_date"])
+    _sync_inward_record_status(inward_record_item.inward_record)
+
+
+def _sync_inward_record_status(inward_record):
+    if inward_record.eaushadhi_issue_status == DVDMSInwardRecordStatus.completed:
+        return
+
+    items = inward_record.items.all()
+    if not items or items.filter(item_delivery__isnull=True).exists():
+        return
+
+    item_statuses = items.values_list("status", flat=True)
+    if all(item_status == DVDMSInwardItemRecordStatus.received for item_status in item_statuses):
+        new_status = DVDMSInwardRecordStatus.received
+    else:
+        new_status = DVDMSInwardRecordStatus.partially_received
+
+    if inward_record.eaushadhi_issue_status != new_status:
+        inward_record.eaushadhi_issue_status = new_status
+        inward_record.save(update_fields=["eaushadhi_issue_status", "modified_date"])
+
+
+def _dispatch_acknowledgement(institute, inward_record, user, is_retry=False):
     institute_id = str(institute.external_id)
     inward_record_id = str(inward_record.external_id)
     user_id = str(user.external_id)
@@ -50,6 +91,7 @@ def _dispatch_acknowledgement(institute, inward_record, user):
             institute_id=institute_id,
             inward_record_id=inward_record_id,
             user_id=user_id,
+            is_retry=is_retry,
         )
     )
 
@@ -169,6 +211,13 @@ class DVDMSRecordItemDeliveryViewSet(EMRBaseViewSet):
                 status=status.HTTP_409_CONFLICT,
             )
 
+        _sync_inward_item_status(item_delivery)
+
+        if record_delivery.status == DVDMSRecordDeliveryStatus.pending:
+            record_delivery.status = DVDMSRecordDeliveryStatus.in_progress
+            record_delivery.updated_by = request.user
+            record_delivery.save(update_fields=["status", "updated_by", "modified_date"])
+
         _dispatch_acknowledgement(institute, inward_record, request.user)
 
         result = DVDMSRecordItemDeliveryListSpec.serialize(item_delivery)
@@ -212,6 +261,8 @@ class DVDMSRecordItemDeliveryViewSet(EMRBaseViewSet):
 
         item_delivery.updated_by = request.user
         item_delivery.save(update_fields=update_fields)
+
+        _sync_inward_item_status(item_delivery)
 
         _dispatch_acknowledgement(institute, item_delivery.inward_record_item.inward_record, request.user)
 

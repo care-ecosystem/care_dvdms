@@ -1,3 +1,4 @@
+import requests
 from care.emr.api.viewsets.base import EMRBaseViewSet
 from care.security.authorization.base import AuthorizationController
 from care.utils.shortcuts import get_object_or_404
@@ -125,17 +126,45 @@ class DVDMSOutwardRecordOrderViewSet(EMRBaseViewSet):
 
         try:
             response, http_status_code = track_indent(params)
-        except Exception as exc:
+        except requests.exceptions.Timeout as exc:
             sync_log.request_status = DVDMSSyncRequestStatus.failure
             sync_log.error_detail = str(exc)
             sync_log.http_status_code = get_status_code(exc)
             sync_log.save(update_fields=["request_status", "error_detail", "http_status_code", "modified_date"])
+            return Response(
+                {"error": "DVDMS did not respond in time. Please try again.", "code": "DVDMS_TIMEOUT"},
+                status=status.HTTP_504_GATEWAY_TIMEOUT,
+            )
+        except requests.exceptions.RequestException as exc:
+            sync_log.request_status = DVDMSSyncRequestStatus.failure
+            sync_log.error_detail = str(exc)
+            failed_status_code = get_status_code(exc)
+            sync_log.http_status_code = failed_status_code
+            sync_log.save(update_fields=["request_status", "error_detail", "http_status_code", "modified_date"])
+            if failed_status_code in (401, 403):
+                return Response(
+                    {"error": "DVDMS rejected the request credentials.", "code": "DVDMS_AUTH_FAILED"},
+                    status=status.HTTP_502_BAD_GATEWAY,
+                )
+            if failed_status_code is not None and failed_status_code >= 500:
+                return Response(
+                    {"error": "DVDMS is currently unavailable. Please try again later.", "code": "DVDMS_UNAVAILABLE"},
+                    status=status.HTTP_502_BAD_GATEWAY,
+                )
             return Response(
                 {
                     "error": "DVDMS could not find this indent. Check the store ID and indent number.",
                     "code": "INDENT_NOT_FOUND",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception as exc:
+            sync_log.request_status = DVDMSSyncRequestStatus.failure
+            sync_log.error_detail = str(exc)
+            sync_log.save(update_fields=["request_status", "error_detail", "modified_date"])
+            return Response(
+                {"error": "Unexpected error while contacting DVDMS.", "code": "DVDMS_UNEXPECTED_ERROR"},
+                status=status.HTTP_502_BAD_GATEWAY,
             )
         else:
             sync_log.request_status = DVDMSSyncRequestStatus.success
