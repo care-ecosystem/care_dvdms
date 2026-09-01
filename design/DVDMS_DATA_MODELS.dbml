@@ -396,6 +396,7 @@ Table dvdms_inward_item_record {
     record_order_item_id
     deleted
     (inward_record_id, record_order_item_id) [note: 'IMPLEMENTATION: PostgreSQL partial unique index WHERE deleted=false. NULL record_order_item_id values are naturally exempt from uniqueness, so multiple unmatched receipts per inward record are allowed.']
+    (inward_record_id, drug_id, brand_id, batch) [note: 'IMPLEMENTATION: PostgreSQL partial unique index WHERE deleted=false AND record_order_item_id IS NULL. Identifies unmatched/substituted receipt lines by drug+brand+batch so distinct items are not collapsed into one row.']
   }
 }
 

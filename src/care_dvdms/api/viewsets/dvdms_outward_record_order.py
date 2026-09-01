@@ -130,7 +130,13 @@ class DVDMSOutwardRecordOrderViewSet(EMRBaseViewSet):
             sync_log.error_detail = str(exc)
             sync_log.http_status_code = get_status_code(exc)
             sync_log.save(update_fields=["request_status", "error_detail", "http_status_code", "modified_date"])
-            raise
+            return Response(
+                {
+                    "error": "DVDMS could not find this indent. Check the store ID and indent number.",
+                    "code": "INDENT_NOT_FOUND",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         sync_log.request_status = DVDMSSyncRequestStatus.success
         sync_log.response_payload = response

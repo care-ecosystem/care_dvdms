@@ -77,7 +77,7 @@ def build_track_indent_params(outward_record):
     """Build the DVDMS track-indent query params for an outward record."""
     return {
         "storeId": outward_record.record_order.institute_store.eaushadhi_store_id,
-        "indentNo": outward_record.record_order.care_indent_no,
+        "indentNo": outward_record.eaushadhi_indent_no,
     }
 
 
