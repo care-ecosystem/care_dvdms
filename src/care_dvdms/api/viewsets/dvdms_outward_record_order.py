@@ -1,6 +1,8 @@
+import requests
 from care.emr.api.viewsets.base import EMRBaseViewSet
 from care.security.authorization.base import AuthorizationController
 from care.utils.shortcuts import get_object_or_404
+from django.db import transaction
 from rest_framework import status
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.filters import OrderingFilter
@@ -20,6 +22,7 @@ from care_dvdms.models.dvdms_sync_log import (
     DVDMSSyncTriggeredBy,
     DVDMSSyncType,
 )
+from care_dvdms.tasks import prefill_inward_record_task
 
 SELECT_RELATED_FIELDS = (
     "record_order",
@@ -123,22 +126,69 @@ class DVDMSOutwardRecordOrderViewSet(EMRBaseViewSet):
 
         try:
             response, http_status_code = track_indent(params)
-        except Exception as exc:
+        except requests.exceptions.Timeout as exc:
             sync_log.request_status = DVDMSSyncRequestStatus.failure
             sync_log.error_detail = str(exc)
             sync_log.http_status_code = get_status_code(exc)
             sync_log.save(update_fields=["request_status", "error_detail", "http_status_code", "modified_date"])
-            raise
+            return Response(
+                {"error": "DVDMS did not respond in time. Please try again.", "code": "DVDMS_TIMEOUT"},
+                status=status.HTTP_504_GATEWAY_TIMEOUT,
+            )
+        except requests.exceptions.RequestException as exc:
+            sync_log.request_status = DVDMSSyncRequestStatus.failure
+            sync_log.error_detail = str(exc)
+            failed_status_code = get_status_code(exc)
+            sync_log.http_status_code = failed_status_code
+            sync_log.save(update_fields=["request_status", "error_detail", "http_status_code", "modified_date"])
+            if failed_status_code in (401, 403):
+                return Response(
+                    {"error": "DVDMS rejected the request credentials.", "code": "DVDMS_AUTH_FAILED"},
+                    status=status.HTTP_502_BAD_GATEWAY,
+                )
+            if failed_status_code is not None and failed_status_code >= 500:
+                return Response(
+                    {"error": "DVDMS is currently unavailable. Please try again later.", "code": "DVDMS_UNAVAILABLE"},
+                    status=status.HTTP_502_BAD_GATEWAY,
+                )
+            return Response(
+                {
+                    "error": "DVDMS could not find this indent. Check the store ID and indent number.",
+                    "code": "INDENT_NOT_FOUND",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception as exc:
+            sync_log.request_status = DVDMSSyncRequestStatus.failure
+            sync_log.error_detail = str(exc)
+            sync_log.save(update_fields=["request_status", "error_detail", "modified_date"])
+            return Response(
+                {"error": "Unexpected error while contacting DVDMS.", "code": "DVDMS_UNEXPECTED_ERROR"},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+        else:
+            sync_log.request_status = DVDMSSyncRequestStatus.success
+            sync_log.response_payload = response
+            sync_log.http_status_code = http_status_code
+            sync_log.save(update_fields=["request_status", "response_payload", "http_status_code", "modified_date"])
 
-        sync_log.request_status = DVDMSSyncRequestStatus.success
-        sync_log.response_payload = response
-        sync_log.http_status_code = http_status_code
-        sync_log.save(update_fields=["request_status", "response_payload", "http_status_code", "modified_date"])
+            previous_status = outward_record.eaushadhi_indent_status
+            outward_record.sync_log = sync_log
+            outward_record.eaushadhi_indent_status = response.get("data", {}).get("indentStatus")
+            outward_record.updated_by = request.user
+            outward_record.save(update_fields=["sync_log", "eaushadhi_indent_status", "updated_by", "modified_date"])
 
-        outward_record.sync_log = sync_log
-        outward_record.eaushadhi_indent_status = response.get("data", {}).get("indentStatus")
-        outward_record.updated_by = request.user
-        outward_record.save(update_fields=["sync_log", "eaushadhi_indent_status", "updated_by", "modified_date"])
+            if outward_record.eaushadhi_indent_status == "Issued" and previous_status != "Issued":
+                institute_id = str(institute.external_id)
+                outward_record_id = str(outward_record.external_id)
+                user_id = str(request.user.external_id)
+                transaction.on_commit(
+                    lambda: prefill_inward_record_task.delay(
+                        institute_id=institute_id,
+                        outward_record_id=outward_record_id,
+                        user_id=user_id,
+                    )
+                )
 
-        result = DVDMSOutwardRecordOrderListSpec.serialize(outward_record)
-        return Response(result.to_json(), status=status.HTTP_200_OK)
+            result = DVDMSOutwardRecordOrderListSpec.serialize(outward_record)
+            return Response(result.to_json(), status=status.HTTP_200_OK)

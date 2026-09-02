@@ -13,7 +13,8 @@ class DVDMSSyncTriggeredBy(models.TextChoices):
 class DVDMSSyncType(models.TextChoices):
     save_indent = "save_indent"
     track_indent = "track_indent"
-    acknowledge = "acknowledge"
+    fetch_issue = "fetch_issue"
+    acknowledge_issue = "acknowledge_issue"
 
 
 class DVDMSSyncRequestStatus(models.TextChoices):

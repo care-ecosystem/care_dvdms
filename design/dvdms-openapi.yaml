@@ -3023,6 +3023,54 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+  /institute/{institute_id}/record_inwards/{record_inward_id}/delivery/{record_delivery_id}/retry-acknowledgement/:
+    post:
+      tags:
+        - Record Deliveries
+      summary: Retry sending the acknowledgement to DVDMS
+      description: |
+        Manually re-dispatch the acknowledge-save call to DVDMS for this record delivery.
+        Use this after a previous automatic acknowledgement attempt has failed (e.g. due to
+        a transient DVDMS/network failure) and automatic retries have been exhausted or
+        backed off. Safe to call even if the delivery was already acknowledged successfully -
+        the underlying task no-ops in that case.
+      operationId: retryRecordDeliveryAcknowledgement
+      parameters:
+        - name: institute_id
+          in: path
+          required: true
+          description: Institute UUID
+          schema:
+            type: string
+            format: uuid
+        - name: record_inward_id
+          in: path
+          required: true
+          description: Inward Record UUID
+          schema:
+            type: string
+            format: uuid
+        - name: record_delivery_id
+          in: path
+          required: true
+          description: Record Delivery UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '202':
+          description: Acknowledgement retry accepted and queued for processing
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Record delivery not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   # ---------- Record Item Deliveries ----------
   /institute/{institute_id}/record_inwards/{record_inward_id}/delivery/{record_delivery_id}/items/:
     post:
