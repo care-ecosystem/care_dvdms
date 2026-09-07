@@ -18,6 +18,7 @@ class DVDMSInwardItemRecordListSpec(EMRResource):
     brand_id: str | None = None
     batch: str | None = None
     manufacturer: str | None = None
+    expiry_date: datetime.date | None = None
     received_quantity: str | None = None
     status: str | None = None
     created_by: dict | None = None
