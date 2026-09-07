@@ -2033,6 +2033,7 @@ paths:
                 unit_id: "630001"
                 drug_category: "10"
               product_knowledge_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+              mapping_type: "manual_mapping"
       responses:
         '201':
           description: Product mapping created successfully
@@ -2073,6 +2074,7 @@ paths:
                     facility: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
                     slug_value: "paracetamol-500mg-tablet"
                   slug: "f-3fa85f64-5717-4562-b3fc-2c963f66afa6-paracetamol-500mg-tablet"
+                mapping_type: "manual_mapping"
                 usage_count: 0
                 created_by:
                   id: "uuid"
@@ -2125,6 +2127,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: mapping_type
+          in: query
+          description: Filter by mapping type
+          schema:
+            type: string
+            enum: [default_mapping, manual_mapping]
         - name: limit
           in: query
           description: Number of results to return per page
@@ -2200,6 +2208,7 @@ paths:
                         facility: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
                         slug_value: "paracetamol-500mg-tablet"
                       slug: "f-3fa85f64-5717-4562-b3fc-2c963f66afa6-paracetamol-500mg-tablet"
+                    mapping_type: "manual_mapping"
                     usage_count: 15
                     created_by:
                       id: "uuid"
@@ -2238,6 +2247,7 @@ paths:
                       slug_config:
                         slug_value: "amoxicillin-250mg-capsule"
                       slug: "i-amoxicillin-250mg-capsule"
+                    mapping_type: "default_mapping"
                     usage_count: 0
                     created_by:
                       id: "uuid"
@@ -2332,6 +2342,7 @@ paths:
                     facility: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
                     slug_value: "paracetamol-500mg-tablet"
                   slug: "f-3fa85f64-5717-4562-b3fc-2c963f66afa6-paracetamol-500mg-tablet"
+                mapping_type: "manual_mapping"
                 usage_count: 15
                 created_by:
                   id: "uuid"
@@ -2493,6 +2504,7 @@ paths:
                           facility: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
                           slug_value: "paracetamol-500mg-tablet"
                         slug: "f-3fa85f64-5717-4562-b3fc-2c963f66afa6-paracetamol-500mg-tablet"
+                      mapping_type: "manual_mapping"
                       usage_count: 5
                       created_by:
                         id: "uuid"
@@ -5154,6 +5166,12 @@ components:
           format: uuid
           description: FK to CARE product_knowledge
           example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        mapping_type:
+          type: string
+          enum: [default_mapping, manual_mapping]
+          default: manual_mapping
+          description: How this mapping was established
+          example: "manual_mapping"
 
     ProductKnowledgeRead:
       type: object
@@ -5245,6 +5263,7 @@ components:
         - id
         - eaushadhi_drug_details
         - product_knowledge
+        - mapping_type
         - usage_count
         - created_date
         - modified_date
@@ -5264,6 +5283,11 @@ components:
           nullable: true
           readOnly: true
           description: The mapped CARE product knowledge
+        mapping_type:
+          type: string
+          enum: [default_mapping, manual_mapping]
+          description: How this mapping was established
+          example: "manual_mapping"
         usage_count:
           type: integer
           description: Number of times this mapping has been used

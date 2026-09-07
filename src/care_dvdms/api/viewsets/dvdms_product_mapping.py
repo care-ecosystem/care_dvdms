@@ -163,6 +163,7 @@ class DVDMSProductMappingViewSet(EMRBaseViewSet):
                     drug=drug,
                     eaushadhi_drug_id=spec.eaushadhi_drug_details.id,
                     product_knowledge=product_knowledge,
+                    mapping_type=spec.mapping_type,
                     created_by=request.user,
                     updated_by=request.user,
                 )

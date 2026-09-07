@@ -5,7 +5,7 @@ from care.emr.resources.inventory.product_knowledge.spec import ProductKnowledge
 from pydantic import UUID4
 
 from care_dvdms.api.specs.dvdms_record_item_order import DVDMSDrugSpec
-from care_dvdms.models.dvdms_product_mapping import DVDMSProductMapping
+from care_dvdms.models.dvdms_product_mapping import DVDMSProductMapping, DVDMSProductMappingType
 
 
 class DVDMSProductMappingListSpec(EMRResource):
@@ -57,7 +57,6 @@ class DVDMSProductMappingCreateSpec(EMRResource):
         "institute",
         "drug",
         "product_knowledge",
-        "mapping_type",
         "usage_count",
         "last_used_date",
         "created_by",
@@ -71,6 +70,7 @@ class DVDMSProductMappingCreateSpec(EMRResource):
 
     eaushadhi_drug_details: DVDMSDrugSpec
     product_knowledge_id: UUID4
+    mapping_type: DVDMSProductMappingType = DVDMSProductMappingType.manual_mapping
 
 
 class DVDMSProductMappingUpdateSpec(EMRResource):
