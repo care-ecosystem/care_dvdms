@@ -1,0 +1,13 @@
+{
+    "message": "Ok",
+    "status": 1,
+    "data": {
+        "indentNo": 101726080005,
+        "requestingStoreId": 99901538,
+        "issuingStoreId": 99901108,
+        "indentDate": "27-Aug-2026",
+        "indentingStore": "Barlanga_Phc",
+        "issuingStore": "Masalia_Chc",
+        "indentStatus": "Issue in Process"
+    }
+}
