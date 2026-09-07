@@ -1958,6 +1958,7 @@ paths:
                     brand_id: "10103406"
                     batch: "BATCH-2026-001"
                     manufacturer: "ABC Pharmaceuticals Ltd."
+                    expiry_date: "2027-06-30"
                     received_quantity: "100.000000"
                     status: "received"
                     created_by:
@@ -1976,6 +1977,7 @@ paths:
                     brand_id: "10103407"
                     batch: "BATCH-2026-002"
                     manufacturer: "XYZ Pharma Inc."
+                    expiry_date: "2027-03-15"
                     received_quantity: "50.000000"
                     status: "partially_received"
                     created_by:
@@ -4739,6 +4741,12 @@ components:
           nullable: true
           description: Manufacturer name
           example: "ABC Pharmaceuticals Ltd."
+        expiry_date:
+          type: string
+          format: date
+          nullable: true
+          description: Expiry date of the received batch, as reported by DVDMS
+          example: "2027-06-30"
         received_quantity:
           type: string
           description: Quantity received

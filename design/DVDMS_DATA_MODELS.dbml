@@ -377,6 +377,7 @@ Table dvdms_inward_item_record {
   brand_id VARCHAR(50) [null, note: 'DVDMS brand ID as received']
   batch VARCHAR(255) [null, note: 'Batch number as received']
   manufacturer VARCHAR(255) [null, note: 'Manufacturer as received']
+  expiry_date DATE [null, note: 'Expiry date of the received batch, as reported by DVDMS']
   received_quantity DECIMAL(12,2) [not null, note: 'Quantity received']
   status VARCHAR(20) [not null, default: 'pending',
     note: 'Item status: pending, received, partially_received, rejected, damaged']

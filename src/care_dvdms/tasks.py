@@ -2,6 +2,7 @@
 # This file is auto-imported in apps.py ready().
 
 import logging
+from datetime import datetime
 
 import requests
 from care.users.models import User
@@ -137,6 +138,16 @@ def _upsert_inward_record(institute, outward_record, sync_log, user, issue_no):
     return inward_record
 
 
+def _parse_dvdms_date(value):
+    if not value:
+        return None
+    try:
+        return datetime.strptime(value, "%d-%b-%Y").date()
+    except ValueError:
+        logger.warning("Could not parse DVDMS date value: %s", value)
+        return None
+
+
 def _upsert_inward_item_record(inward_record, item_order, user, drug_id, brand_id, item):
     fields = {
         "drug_id": drug_id,
@@ -144,6 +155,7 @@ def _upsert_inward_item_record(inward_record, item_order, user, drug_id, brand_i
         "brand_id": brand_id,
         "batch": item.get("batchNo"),
         "manufacturer": item.get("mfgName"),
+        "expiry_date": _parse_dvdms_date(item.get("expiryDate")),
         "received_quantity": item.get("issueQyt") or 0,
     }
     lookup = {"inward_record": inward_record, "record_order_item": item_order}

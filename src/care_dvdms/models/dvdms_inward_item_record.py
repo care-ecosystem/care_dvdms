@@ -31,6 +31,7 @@ class DVDMSInwardItemRecord(EMRBaseModel):
     brand_id = models.CharField(max_length=50, null=True, blank=True)
     batch = models.CharField(max_length=255, null=True, blank=True)
     manufacturer = models.CharField(max_length=255, null=True, blank=True)
+    expiry_date = models.DateField(null=True, blank=True)
     received_quantity = models.DecimalField(max_digits=12, decimal_places=2)
     status = models.CharField(
         max_length=20,
