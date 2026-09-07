@@ -7,7 +7,7 @@ Point DVDMS_API_ENDPOINT at http://localhost:<port> in your local .env.
 import json
 import sys
 import threading
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
@@ -29,6 +29,11 @@ STORE_NAMES_BY_ID = {
 
 DRUG_NAMES_BY_ID = {
     str(drug["hstnum_item_id"]): drug["hststr_item_name"]
+    for drug in json.loads((FIXTURES_DIR / "drugMst_list.json").read_text())["data"]
+}
+
+SHELFLIFE_MONTHS_BY_DRUG_ID = {
+    str(drug["hstnum_item_id"]): drug.get("hstnum_shelflife") or 12
     for drug in json.loads((FIXTURES_DIR / "drugMst_list.json").read_text())["data"]
 }
 
@@ -140,6 +145,12 @@ def _save_acknowledgement():
     }
 
 
+def _expiry_date(drug_id):
+    shelflife_months = SHELFLIFE_MONTHS_BY_DRUG_ID.get(str(drug_id), 12)
+    expiry = datetime.now(tz=timezone.utc) + timedelta(days=shelflife_months * 30)
+    return f"{expiry:%d-%b-%Y}"
+
+
 def _acknowledge_details(issue_no, store_id):
     indent_no = _issues.get(issue_no)
     record = _indents.get(indent_no) if indent_no else None
@@ -154,7 +165,7 @@ def _acknowledge_details(issue_no, store_id):
         {
             "itemName": DRUG_NAMES_BY_ID.get(item["drug_id"], "Unknown Drug"),
             "batchNo": "MOCK-BATCH",
-            "expiryDate": date,
+            "expiryDate": _expiry_date(item["drug_id"]),
             "issueQyt": item["quantity"],
             "recQyt": "0",
             "bkgQyt": "0",
