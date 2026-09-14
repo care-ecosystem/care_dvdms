@@ -18,7 +18,7 @@ from care_dvdms.api.specs.dvdms_record_delivery import (
 from care_dvdms.api.viewsets.dvdms_record_item_delivery import _dispatch_acknowledgement
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
 from care_dvdms.models.dvdms_inward_record import DVDMSInwardRecord
-from care_dvdms.models.dvdms_record_delivery import DVDMSRecordDelivery
+from care_dvdms.models.dvdms_record_delivery import DVDMSRecordDelivery, DVDMSRecordDeliveryStatus
 from care_dvdms.models.dvdms_record_order import DVDMSRecordOrder
 
 SELECT_RELATED_FIELDS = (
@@ -167,9 +167,18 @@ class DVDMSRecordDeliveryViewSet(EMRBaseViewSet):
             self.get_queryset(),
             external_id=record_delivery_id,
         )
+
+        should_acknowledge = (
+            spec.status == DVDMSRecordDeliveryStatus.completed
+            and record_delivery.status != DVDMSRecordDeliveryStatus.completed
+        )
+
         record_delivery.status = spec.status
         record_delivery.updated_by = request.user
         record_delivery.save(update_fields=["status", "updated_by", "modified_date"])
+
+        if should_acknowledge:
+            _dispatch_acknowledgement(institute, record_delivery.inward_record, request.user)
 
         result = DVDMSRecordDeliveryListSpec.serialize(record_delivery)
         return Response(result.to_json(), status=status.HTTP_200_OK)

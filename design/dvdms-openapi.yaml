@@ -2994,6 +2994,7 @@ paths:
                       id: "inward-item-uuid-1"
                       item_name: "Paracetamol 500mg"
                       batch_number: "BATCH001"
+                      expiry_date: "2027-06-30"
                     supply_delivery:
                       id: "6b31d86b-52fa-432a-9c2c-066161166dda"
                       status: "in_progress"
@@ -3045,6 +3046,7 @@ paths:
                       id: "inward-item-uuid-2"
                       item_name: "Amoxicillin 250mg"
                       batch_number: "BATCH002"
+                      expiry_date: "2027-03-15"
                     supply_delivery:
                       id: "7c42e97c-63gb-543b-0d3d-177272277ebe"
                       status: "completed"
@@ -3298,6 +3300,7 @@ paths:
                   id: "inward-item-uuid-1"
                   item_name: "Paracetamol 500mg"
                   batch_number: "BATCH001"
+                  expiry_date: "2027-06-30"
                 supply_delivery:
                   id: "6b31d86b-52fa-432a-9c2c-066161166dda"
                   status: "in_progress"
@@ -3421,6 +3424,7 @@ paths:
                   id: "inward-item-uuid-1"
                   item_name: "Paracetamol 500mg"
                   batch_number: "BATCH001"
+                  expiry_date: "2027-06-30"
                 supply_delivery:
                   id: "6b31d86b-52fa-432a-9c2c-066161166dda"
                   status: "in_progress"
@@ -5511,6 +5515,11 @@ components:
           type: string
           description: Batch number
           example: "BATCH001"
+        expiry_date:
+          type: string
+          format: date
+          description: Expiry date of the batch, as reported by DVDMS
+          example: "2027-06-30"
 
     SupplierDeliverySummary:
       type: object

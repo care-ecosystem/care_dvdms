@@ -7,12 +7,7 @@ from care_dvdms.models.dvdms_sync_log import DVDMSSyncLog
 
 
 class DVDMSInwardRecordStatus(models.TextChoices):
-    draft = "draft"
-    pending = "pending"
-    received = "received"
-    partially_received = "partially_received"
-    completed = "completed"
-    cancelled = "cancelled"
+    fetched = "fetched"
 
 
 class DVDMSInwardRecord(EMRBaseModel):
@@ -32,7 +27,7 @@ class DVDMSInwardRecord(EMRBaseModel):
     eaushadhi_issue_status = models.CharField(
         max_length=20,
         choices=DVDMSInwardRecordStatus.choices,
-        default=DVDMSInwardRecordStatus.draft,
+        default=DVDMSInwardRecordStatus.fetched,
     )
     sync_log = models.ForeignKey(
         DVDMSSyncLog,

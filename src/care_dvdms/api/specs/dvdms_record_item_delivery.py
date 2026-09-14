@@ -41,6 +41,7 @@ class DVDMSRecordItemDeliveryListSpec(EMRResource):
             "id": obj.inward_record_item.external_id,
             "item_name": obj.inward_record_item.drug_name,
             "batch_number": obj.inward_record_item.batch,
+            "expiry_date": obj.inward_record_item.expiry_date,
         }
         supply_delivery = obj.supply_delivery
         mapping["supply_delivery"] = {
