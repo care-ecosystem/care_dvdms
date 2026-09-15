@@ -1,6 +1,7 @@
 import requests
 from care.emr.api.viewsets.base import EMRBaseViewSet
 from care.emr.models.product_knowledge import ProductKnowledge
+from care.emr.models.supply_request import SupplyRequest
 from care.emr.resources.inventory.product_knowledge.spec import (
     ProductKnowledgeStatusOptions,
 )
@@ -24,8 +25,7 @@ from care_dvdms.api.specs.dvdms_product_mapping import (
 )
 from care_dvdms.models.dvdms_drug import DVDMSDrug
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
-from care_dvdms.models.dvdms_product_mapping import DVDMSProductMapping
-from care_dvdms.models.dvdms_record_item_order import DVDMSRecordItemOrder
+from care_dvdms.models.dvdms_product_mapping import DVDMSProductMapping, DVDMSProductMappingType
 from care_dvdms.models.dvdms_record_order import DVDMSRecordOrder
 from care_dvdms.settings import plugin_settings as settings
 
@@ -252,12 +252,10 @@ class DVDMSProductMappingViewSet(EMRBaseViewSet):
 
 class DVDMSRecordOrderProductMappingViewSet(EMRBaseViewSet):
     """
-    Read-only viewset listing a record order's items alongside their product
-    mapping, if one exists. Nested under:
     /institute/{institute_id}/record_order/{record_order_id}/product_mappings/
     """
 
-    database_model = DVDMSRecordItemOrder
+    database_model = DVDMSProductMapping
     filter_backends = [OrderingFilter]
     ordering_fields = ["created_date", "modified_date"]
 
@@ -286,47 +284,66 @@ class DVDMSRecordOrderProductMappingViewSet(EMRBaseViewSet):
         institute = self.get_institute()
         self._authorize_facility(institute)
         record_order = self.get_record_order(institute)
-        return DVDMSRecordItemOrder.objects.filter(
-            institute=institute, record_order=record_order, deleted=False
-        ).select_related("supply_request", "supply_request__item", "drug")
+        mapped_product_knowledge = DVDMSProductMapping.objects.filter(
+            institute=institute,
+            mapping_type=DVDMSProductMappingType.default_mapping,
+            deleted=False,
+        ).values("product_knowledge_id")
+        return (
+            SupplyRequest.objects.filter(
+                order=record_order.order,
+                deleted=False,
+                item_id__in=mapped_product_knowledge,
+            )
+            .select_related("item")
+            .order_by("-created_date")
+        )
+
+    def _default_mappings_by_product_knowledge(self, institute, supply_requests):
+        """Default mappings for the items on these supply requests, keyed by ProductKnowledge pk."""
+        product_knowledge_ids = {supply_request.item_id for supply_request in supply_requests}
+        if not product_knowledge_ids:
+            return {}
+
+        mappings = {}
+        for mapping in (
+            DVDMSProductMapping.objects.filter(
+                institute=institute,
+                product_knowledge_id__in=product_knowledge_ids,
+                mapping_type=DVDMSProductMappingType.default_mapping,
+                deleted=False,
+            )
+            .select_related(*SELECT_RELATED_FIELDS)
+            .order_by("-usage_count", "-modified_date")
+        ):
+            mappings.setdefault(mapping.product_knowledge_id, mapping)
+        return mappings
 
     def list(self, request, *args, **kwargs):
-        """GET .../product_mappings/ - List record order items with their product mapping"""
+        """GET .../product_mappings/ - List record order items that have a product mapping"""
         institute = self.get_institute()
         queryset = self.filter_queryset(self.get_queryset())
         paginator = self.pagination_class()
         page = paginator.paginate_queryset(queryset, request)
 
-        drug_ids = [item.drug.drug_id for item in page]
-        mappings_by_drug_id = {
-            mapping.drug.drug_id: mapping
-            for mapping in DVDMSProductMapping.objects.filter(
-                institute=institute, drug__drug_id__in=drug_ids, deleted=False
-            ).select_related(*SELECT_RELATED_FIELDS)
-        }
+        mappings_by_product_knowledge = self._default_mappings_by_product_knowledge(institute, page)
 
         results = [
             {
                 "supply_request": {
-                    "id": str(item.supply_request.external_id),
+                    "id": str(supply_request.external_id),
                     "item": {
-                        "id": str(item.supply_request.item.external_id),
-                        "status": item.supply_request.item.status,
+                        "id": str(supply_request.item.external_id),
+                        "status": supply_request.item.status,
                     },
-                    "quantity": (
-                        str(item.supply_request.quantity)
-                        if item.supply_request.quantity is not None
-                        else None
-                    ),
-                    "status": item.supply_request.status,
+                    "quantity": (str(supply_request.quantity) if supply_request.quantity is not None else None),
+                    "status": supply_request.status,
                 },
-                "product_mapping": (
-                    DVDMSProductMappingListSpec.serialize(mappings_by_drug_id[item.drug.drug_id]).to_json()
-                    if item.drug.drug_id in mappings_by_drug_id
-                    else None
-                ),
+                "product_mapping": DVDMSProductMappingListSpec.serialize(
+                    mappings_by_product_knowledge[supply_request.item_id]
+                ).to_json(),
             }
-            for item in page
+            for supply_request in page
         ]
 
         return paginator.get_paginated_response(results)
