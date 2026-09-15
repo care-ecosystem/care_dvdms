@@ -2096,6 +2096,11 @@ paths:
                         description: Item-level details for this inward record
                         items:
                           $ref: '#/components/schemas/DvdmsInwardItemRecord'
+                      sync_log:
+                        allOf:
+                          - $ref: '#/components/schemas/SyncLogSummary'
+                        nullable: true
+                        description: Latest DVDMS sync recorded against this inward record
               example:
                 id: "issue-uuid-1"
                 eaushadhi_issue_no: "ISS-2026-005678"
@@ -2104,6 +2109,11 @@ paths:
                 outward_record: "outwards-uuid-1"
                 eaushadhi_indent_no: "IND-2026-001234"
                 sync_log_id: "sync-log-456"
+                sync_log:
+                  id: "3a1f6c20-9b44-4d31-8a55-0c7e1f2b9d10"
+                  sync_type: "acknowledge_issue"
+                  request_status: "success"
+                  http_status_code: 200
                 items:
                   - id: "inward-item-uuid-1"
                     record_order_item: "record-item-order-uuid-1"
@@ -5520,6 +5530,31 @@ components:
           format: date
           description: Expiry date of the batch, as reported by DVDMS
           example: "2027-06-30"
+
+    SyncLogSummary:
+      type: object
+      description: Summary of the latest DVDMS sync attempt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Sync log UUID
+          example: "3a1f6c20-9b44-4d31-8a55-0c7e1f2b9d10"
+        sync_type:
+          type: string
+          enum: [save_indent, track_indent, fetch_issue, acknowledge_issue]
+          description: Type of DVDMS call this log records
+          example: "acknowledge_issue"
+        request_status:
+          type: string
+          enum: [pending, success, failure]
+          description: Outcome of the DVDMS call
+          example: "success"
+        http_status_code:
+          type: integer
+          nullable: true
+          description: HTTP status returned by DVDMS, if the call completed
+          example: 200
 
     SupplierDeliverySummary:
       type: object

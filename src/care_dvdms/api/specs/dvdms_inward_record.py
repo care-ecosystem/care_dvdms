@@ -62,11 +62,22 @@ class DVDMSInwardRecordListSpec(EMRResource):
 
 class DVDMSInwardRecordDetailSpec(DVDMSInwardRecordListSpec):
     items: list[dict] | None = None
+    sync_log: dict | None = None
 
     @classmethod
     def perform_extra_serialization(cls, mapping, obj):
         super().perform_extra_serialization(mapping, obj)
         mapping["items"] = [DVDMSInwardItemRecordListSpec.serialize(item).to_json() for item in obj.items.all()]
+        mapping["sync_log"] = (
+            {
+                "id": str(obj.sync_log.external_id),
+                "sync_type": obj.sync_log.sync_type,
+                "request_status": obj.sync_log.request_status,
+                "http_status_code": obj.sync_log.http_status_code,
+            }
+            if obj.sync_log
+            else None
+        )
 
 
 class DVDMSInwardRecordCreateSpec(EMRResource):
