@@ -1,4 +1,5 @@
 from care.emr.api.viewsets.base import EMRBaseViewSet, EMRListMixin
+from care.emr.models.location import FacilityLocation
 from care.emr.models.supply_request import RequestOrder, SupplyRequest
 from care.emr.resources.inventory.supply_request.request_order import (
     SUPPLY_REQUEST_ORDER_COMPLETED_STATUSES,
@@ -8,7 +9,7 @@ from care.utils.shortcuts import get_object_or_404
 from django.db.models import Count, IntegerField, OuterRef, Subquery
 from django.db.models.functions import Coalesce
 from django_filters import rest_framework as filters
-from rest_framework.exceptions import NotFound, PermissionDenied
+from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 from rest_framework.filters import OrderingFilter
 
 from care_dvdms.api.specs.dvdms_available_request_order import AvailableRequestOrderListSpec
@@ -56,16 +57,23 @@ class AvailableRequestOrderViewSet(EMRListMixin, EMRBaseViewSet):
         if not AuthorizationController.call("can_use_dvdms_integration", self.request.user, institute.facility):
             raise PermissionDenied("You are not authorized to use DVDMS plugin for this facility")
 
+    def get_location(self, institute):
+        location_id = self.request.query_params.get("location")
+        if not location_id:
+            raise ValidationError("location query parameter is required")
+        return get_object_or_404(FacilityLocation, external_id=location_id, facility_id=institute.facility_id)
+
     def get_queryset(self):
         institute = self.get_institute()
         self._authorize_facility(institute)
+        location = self.get_location(institute)
         mapped_order_ids = (
             DVDMSRecordOrder.objects.filter(deleted=False)
             .exclude(status__in=INACTIVE_RECORD_ORDER_STATUSES)
             .values("order_id")
         )
         return (
-            RequestOrder.objects.filter(destination__facility_id=institute.facility_id, deleted=False)
+            RequestOrder.objects.filter(destination=location, deleted=False)
             .exclude(id__in=mapped_order_ids)
             .exclude(status__in=SUPPLY_REQUEST_ORDER_COMPLETED_STATUSES)
             .select_related("supplier", "origin", "destination")

@@ -1589,8 +1589,9 @@ paths:
         - Available Request Orders
       summary: List available request orders
       description: |
-        Retrieve a paginated list of CARE RequestOrders, scoped to this institute's facility,
-        that are available to be mapped to a new DVDMS record order.
+        Retrieve a paginated list of CARE RequestOrders, scoped to a specific destination
+        location within this institute's facility, that are available to be mapped to a
+        new DVDMS record order.
 
         A RequestOrder is excluded if it already has an active DVDMSRecordOrder mapping
         (any record order not in `cancelled`, `rejected`, or `failed` status), or if the
@@ -1605,6 +1606,15 @@ paths:
           in: path
           required: true
           description: Institute UUID
+          schema:
+            type: string
+            format: uuid
+        - name: location
+          in: query
+          required: true
+          description: >-
+            Destination FacilityLocation UUID. Only RequestOrders with this exact
+            destination location are returned. Must belong to the institute's facility.
           schema:
             type: string
             format: uuid
@@ -1698,6 +1708,15 @@ paths:
                     updated_by: null
                     created_date: "2026-08-13T08:55:23.802Z"
                     modified_date: "2026-08-13T08:55:23.802Z"
+        '400':
+          description: Bad Request - location query parameter is missing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "location query parameter is required"
+                code: "MISSING_PARAMETER"
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -1707,7 +1726,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
         '404':
-          description: Institute not found
+          description: Institute not found, or location not found for this institute's facility
           content:
             application/json:
               schema:
