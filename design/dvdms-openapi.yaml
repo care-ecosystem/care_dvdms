@@ -1625,17 +1625,15 @@ paths:
         - name: priority
           in: query
           required: false
-          description: Filter by RequestOrder priority (case-insensitive)
+          description: "Filter by RequestOrder priority (case-insensitive). One of: routine, urgent, asap, stat"
           schema:
             type: string
-            enum: [routine, urgent, asap, stat]
         - name: status
           in: query
           required: false
-          description: Filter by RequestOrder status (case-insensitive)
+          description: "Filter by RequestOrder status (case-insensitive). One of: draft, pending, in_progress"
           schema:
             type: string
-            enum: [draft, pending, in_progress]
         - name: supplier
           in: query
           required: false
@@ -1702,6 +1700,12 @@ paths:
                     modified_date: "2026-08-13T08:55:23.802Z"
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Not authorized to use DVDMS plugin for this facility
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '404':
           description: Institute not found
           content:

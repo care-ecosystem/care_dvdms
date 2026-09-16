@@ -5,7 +5,8 @@ from care.emr.resources.inventory.supply_request.request_order import (
 )
 from care.security.authorization.base import AuthorizationController
 from care.utils.shortcuts import get_object_or_404
-from django.db.models import Count, OuterRef, Subquery
+from django.db.models import Count, IntegerField, OuterRef, Subquery
+from django.db.models.functions import Coalesce
 from django_filters import rest_framework as filters
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.filters import OrderingFilter
@@ -33,12 +34,16 @@ class AvailableRequestOrderViewSet(EMRListMixin, EMRBaseViewSet):
     filter_backends = [filters.DjangoFilterBackend, OrderingFilter]
     ordering_fields = ["created_date", "modified_date"]
 
-    item_count_subquery = Subquery(
-        SupplyRequest.objects.filter(order=OuterRef("pk"), deleted=False)
-        .order_by()
-        .values("order")
-        .annotate(count=Count("id"))
-        .values("count")
+    item_count_subquery = Coalesce(
+        Subquery(
+            SupplyRequest.objects.filter(order=OuterRef("pk"), deleted=False)
+            .order_by()
+            .values("order")
+            .annotate(count=Count("id"))
+            .values("count")
+        ),
+        0,
+        output_field=IntegerField(),
     )
 
     def get_institute(self):
