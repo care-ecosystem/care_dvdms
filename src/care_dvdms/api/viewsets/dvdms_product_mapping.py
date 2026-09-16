@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 import requests
 from care.emr.api.viewsets.base import EMRBaseViewSet
 from care.emr.models.product_knowledge import ProductKnowledge
@@ -300,12 +302,13 @@ class DVDMSRecordOrderProductMappingViewSet(EMRBaseViewSet):
         )
 
     def _default_mappings_by_product_knowledge(self, institute, supply_requests):
-        """Default mappings for the items on these supply requests, keyed by ProductKnowledge pk."""
+        # A product knowledge can carry more than one default mapping, so every one of them is
+        # kept against its key ProductKnowledge.
         product_knowledge_ids = {supply_request.item_id for supply_request in supply_requests}
         if not product_knowledge_ids:
             return {}
 
-        mappings = {}
+        mappings = defaultdict(list)
         for mapping in (
             DVDMSProductMapping.objects.filter(
                 institute=institute,
@@ -314,19 +317,26 @@ class DVDMSRecordOrderProductMappingViewSet(EMRBaseViewSet):
                 deleted=False,
             )
             .select_related(*SELECT_RELATED_FIELDS)
-            .order_by("-usage_count", "-modified_date")
+            .order_by("-modified_date")
         ):
-            mappings.setdefault(mapping.product_knowledge_id, mapping)
+            mappings[mapping.product_knowledge_id].append(mapping)
         return mappings
 
     def list(self, request, *args, **kwargs):
-        """GET .../product_mappings/ - List record order items that have a product mapping"""
-        institute = self.get_institute()
-        queryset = self.filter_queryset(self.get_queryset())
-        paginator = self.pagination_class()
-        page = paginator.paginate_queryset(queryset, request)
+        """ GET .../product_mappings/ - List record order items that have a product mapping"""
 
-        mappings_by_product_knowledge = self._default_mappings_by_product_knowledge(institute, page)
+        institute = self.get_institute()
+        supply_requests = list(self.filter_queryset(self.get_queryset()))
+        mappings_by_product_knowledge = self._default_mappings_by_product_knowledge(institute, supply_requests)
+
+        entries = [
+            (supply_request, mapping)
+            for supply_request in supply_requests
+            for mapping in mappings_by_product_knowledge.get(supply_request.item_id, ())
+        ]
+
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(entries, request)
 
         results = [
             {
@@ -339,11 +349,9 @@ class DVDMSRecordOrderProductMappingViewSet(EMRBaseViewSet):
                     "quantity": (str(supply_request.quantity) if supply_request.quantity is not None else None),
                     "status": supply_request.status,
                 },
-                "product_mapping": DVDMSProductMappingListSpec.serialize(
-                    mappings_by_product_knowledge[supply_request.item_id]
-                ).to_json(),
+                "product_mapping": DVDMSProductMappingListSpec.serialize(mapping).to_json(),
             }
-            for supply_request in page
+            for supply_request, mapping in page
         ]
 
         return paginator.get_paginated_response(results)

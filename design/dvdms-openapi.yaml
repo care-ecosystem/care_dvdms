@@ -2541,12 +2541,11 @@ paths:
         - Product Mapping
       summary: Get product mappings for record order items
       description: |
-        Retrieve the supply requests on the record order's CARE order that have an institute
-        default product mapping (mapping_type=default_mapping) for their item, along with that
-        mapping; supply requests whose item has no default mapping are omitted from the results
-        and from count. The mapping is resolved through the item (ProductKnowledge), so it is
-        returned whether or not a record item order exists yet, and when an item carries more
-        than one default mapping the highest usage_count (then most recently modified) wins.
+        Retrieve the supply requests on the record order's CARE order whose item has an institute
+        default product mapping (mapping_type=default_mapping), paired with that mapping; items
+        without one are omitted. Mappings are resolved through the item (ProductKnowledge), so
+        they are returned whether or not a record item order exists yet. An item with several
+        default mappings yields one entry per mapping, most recently modified first.
       operationId: getRecordOrderProductMappings
       parameters:
         - name: institute_id
