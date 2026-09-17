@@ -26,7 +26,6 @@ from care_dvdms.models.dvdms_outward_record_order import (
     DVDMSOutwardRecordOrder,
     DVDMSOutwardRecordOrderStatus,
 )
-from care_dvdms.models.dvdms_record_delivery import DVDMSRecordDeliveryStatus
 from care_dvdms.models.dvdms_record_order import DVDMSRecordOrder, DVDMSRecordOrderStatus
 from care_dvdms.models.dvdms_sync_log import (
     DVDMSSyncLog,
@@ -256,6 +255,8 @@ def save_acknowledgement_task(self, institute_id, inward_record_id, user_id, is_
         self.request.retries + 1,
     )
 
+    from care_dvdms.api.viewsets.dvdms_record_delivery import _sync_acknowledgement_status
+
     institute = get_object_or_404(DVDMSInstitute, external_id=institute_id)
     user = get_object_or_404(User, external_id=user_id)
 
@@ -279,6 +280,7 @@ def save_acknowledgement_task(self, institute_id, inward_record_id, user_id, is_
                 "save_acknowledgement_task: inward_record=%s already acknowledged, skipping",
                 inward_record_id,
             )
+            _sync_acknowledgement_status(record_delivery, last_sync_log, user)
             return
 
         if (
@@ -293,11 +295,13 @@ def save_acknowledgement_task(self, institute_id, inward_record_id, user_id, is_
                 "not auto-retrying - use retry_acknowledgement to force another attempt",
                 inward_record_id,
             )
+            _sync_acknowledgement_status(record_delivery, last_sync_log, user)
             return
 
-        if any(not hasattr(item, "item_delivery") for item in inward_record.items.all()):
+        items = inward_record.items.all()
+        if not items or any(not hasattr(item, "item_delivery") for item in items):
             logger.info(
-                "save_acknowledgement_task: inward_record=%s has items without a delivery yet, skipping",
+                "save_acknowledgement_task: inward_record=%s has no items with a delivery yet, skipping",
                 inward_record_id,
             )
             return
@@ -329,9 +333,7 @@ def save_acknowledgement_task(self, institute_id, inward_record_id, user_id, is_
             sync_log.http_status_code = http_status_code
             sync_log.save(update_fields=["request_status", "response_payload", "http_status_code", "modified_date"])
 
-            record_delivery.status = DVDMSRecordDeliveryStatus.completed
-            record_delivery.updated_by = user
-            record_delivery.save(update_fields=["status", "updated_by", "modified_date"])
+        _sync_acknowledgement_status(record_delivery, sync_log, user)
 
         inward_record.sync_log = sync_log
         inward_record.updated_by = user

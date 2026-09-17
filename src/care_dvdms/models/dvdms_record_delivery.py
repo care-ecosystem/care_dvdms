@@ -8,7 +8,9 @@ from care_dvdms.models.dvdms_record_order import DVDMSRecordOrder
 class DVDMSRecordDeliveryStatus(models.TextChoices):
     pending = "pending"
     in_progress = "in_progress"
-    completed = "completed"
+    received = "received"
+    acknowledged = "acknowledged"
+    acknowledgement_failed = "acknowledgement_failed"
     cancelled = "cancelled"
 
 
@@ -31,7 +33,7 @@ class DVDMSRecordDelivery(EMRBaseModel):
         related_name="dvdms_record_delivery",
     )
     status = models.CharField(
-        max_length=20,
+        max_length=30,
         choices=DVDMSRecordDeliveryStatus.choices,
         default=DVDMSRecordDeliveryStatus.pending,
     )
