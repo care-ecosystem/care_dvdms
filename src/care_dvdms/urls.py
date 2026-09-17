@@ -1,6 +1,9 @@
 from django.shortcuts import HttpResponse
 from django.urls import path, re_path
 
+from care_dvdms.api.viewsets.dvdms_available_request_order import (
+    AvailableRequestOrderViewSet,
+)
 from care_dvdms.api.viewsets.dvdms_institute import DVDMSInstituteViewSet
 from care_dvdms.api.viewsets.dvdms_inward_record import DVDMSInwardRecordViewSet
 from care_dvdms.api.viewsets.dvdms_lookup import DVDMSLookupViewSet
@@ -123,6 +126,11 @@ urlpatterns = [
             }
         ),
         name="dvdms-record-order-detail",
+    ),
+    re_path(
+        r"^institute/(?P<institute_id>[^/.]+)/available_request_orders/$",
+        AvailableRequestOrderViewSet.as_view({"get": "list"}),
+        name="dvdms-available-request-order-list",
     ),
     re_path(
         r"^institute/(?P<institute_id>[^/.]+)/record_order/(?P<record_order_id>[^/.]+)/item/$",

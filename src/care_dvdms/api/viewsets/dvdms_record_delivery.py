@@ -18,8 +18,22 @@ from care_dvdms.api.specs.dvdms_record_delivery import (
 from care_dvdms.api.viewsets.dvdms_record_item_delivery import _dispatch_acknowledgement
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
 from care_dvdms.models.dvdms_inward_record import DVDMSInwardRecord
-from care_dvdms.models.dvdms_record_delivery import DVDMSRecordDelivery
+from care_dvdms.models.dvdms_record_delivery import DVDMSRecordDelivery, DVDMSRecordDeliveryStatus
 from care_dvdms.models.dvdms_record_order import DVDMSRecordOrder
+from care_dvdms.models.dvdms_sync_log import DVDMSSyncRequestStatus, DVDMSSyncType
+
+ACKNOWLEDGEMENT_STATUS_BY_SYNC_STATUS = {
+    DVDMSSyncRequestStatus.success: DVDMSRecordDeliveryStatus.acknowledged,
+    DVDMSSyncRequestStatus.failure: DVDMSRecordDeliveryStatus.acknowledgement_failed,
+}
+
+ACKNOWLEDGEMENT_TRACKED_STATUSES = frozenset(
+    {
+        DVDMSRecordDeliveryStatus.received,
+        DVDMSRecordDeliveryStatus.acknowledged,
+        DVDMSRecordDeliveryStatus.acknowledgement_failed,
+    }
+)
 
 SELECT_RELATED_FIELDS = (
     "inward_record",
@@ -31,6 +45,25 @@ SELECT_RELATED_FIELDS = (
     "created_by",
     "updated_by",
 )
+
+
+def _sync_acknowledgement_status(record_delivery, sync_log, user=None):
+
+    if sync_log.sync_type != DVDMSSyncType.acknowledge_issue:
+        return
+    if record_delivery.status not in ACKNOWLEDGEMENT_TRACKED_STATUSES:
+        return
+
+    next_status = ACKNOWLEDGEMENT_STATUS_BY_SYNC_STATUS.get(sync_log.request_status)
+    if next_status is None or record_delivery.status == next_status:
+        return
+
+    record_delivery.status = next_status
+    update_fields = ["status", "modified_date"]
+    if user is not None:
+        record_delivery.updated_by = user
+        update_fields.append("updated_by")
+    record_delivery.save(update_fields=update_fields)
 
 
 class DVDMSRecordDeliveryFilters(filters.FilterSet):
@@ -167,9 +200,18 @@ class DVDMSRecordDeliveryViewSet(EMRBaseViewSet):
             self.get_queryset(),
             external_id=record_delivery_id,
         )
+
+        should_acknowledge = (
+            spec.status == DVDMSRecordDeliveryStatus.received
+            and record_delivery.status != DVDMSRecordDeliveryStatus.received
+        )
+
         record_delivery.status = spec.status
         record_delivery.updated_by = request.user
         record_delivery.save(update_fields=["status", "updated_by", "modified_date"])
+
+        if should_acknowledge:
+            _dispatch_acknowledgement(institute, record_delivery.inward_record, request.user)
 
         result = DVDMSRecordDeliveryListSpec.serialize(record_delivery)
         return Response(result.to_json(), status=status.HTTP_200_OK)
@@ -180,7 +222,21 @@ class DVDMSRecordDeliveryViewSet(EMRBaseViewSet):
         self._authorize_manage_facility(institute)
         inward_record = self.get_inward_record(institute)
 
-        get_object_or_404(self.get_queryset(), external_id=self.kwargs.get(self.lookup_field))
+        record_delivery = get_object_or_404(self.get_queryset(), external_id=self.kwargs.get(self.lookup_field))
+
+        last_sync_log = inward_record.sync_log
+        already_acknowledged = (
+            last_sync_log is not None
+            and last_sync_log.sync_type == DVDMSSyncType.acknowledge_issue
+            and last_sync_log.request_status == DVDMSSyncRequestStatus.success
+        )
+
+        if already_acknowledged:
+            _sync_acknowledgement_status(record_delivery, last_sync_log, request.user)
+        elif record_delivery.status != DVDMSRecordDeliveryStatus.received:
+            record_delivery.status = DVDMSRecordDeliveryStatus.received
+            record_delivery.updated_by = request.user
+            record_delivery.save(update_fields=["status", "updated_by", "modified_date"])
 
         _dispatch_acknowledgement(institute, inward_record, request.user, is_retry=True)
 

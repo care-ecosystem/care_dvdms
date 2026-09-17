@@ -36,6 +36,15 @@ class DVDMSRecordOrderStatus(models.TextChoices):
     cancelled = "cancelled"
 
 
+# Statuses that free up a RequestOrder to be mapped to a new record order.
+# Mirrors uniq_order_active_record_order below - keep both in sync.
+INACTIVE_RECORD_ORDER_STATUSES = [
+    DVDMSRecordOrderStatus.cancelled,
+    DVDMSRecordOrderStatus.rejected,
+    DVDMSRecordOrderStatus.failed,
+]
+
+
 class DVDMSRecordOrder(EMRBaseModel):
     institute = models.ForeignKey(
         DVDMSInstitute,
@@ -70,14 +79,7 @@ class DVDMSRecordOrder(EMRBaseModel):
         constraints = [
             models.UniqueConstraint(
                 fields=["order"],
-                condition=models.Q(deleted=False)
-                & ~models.Q(
-                    status__in=[
-                        DVDMSRecordOrderStatus.cancelled,
-                        DVDMSRecordOrderStatus.rejected,
-                        DVDMSRecordOrderStatus.failed,
-                    ]
-                ),
+                condition=models.Q(deleted=False) & ~models.Q(status__in=INACTIVE_RECORD_ORDER_STATUSES),
                 name="uniq_order_active_record_order",
             ),
         ]

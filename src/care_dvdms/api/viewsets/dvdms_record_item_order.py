@@ -9,6 +9,7 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 
+# from care_dvdms.api.services.dvdms_product_mapping_services import sync_product_mapping
 from care_dvdms.api.specs.dvdms_record_item_order import (
     DVDMSRecordItemOrderCreateSpec,
     DVDMSRecordItemOrderListSpec,
@@ -147,6 +148,10 @@ class DVDMSRecordItemOrderViewSet(EMRBaseViewSet):
                     created_by=request.user,
                     updated_by=request.user,
                 )
+
+                # sync_product_mapping(
+                #     institute, supply_request.item_id, spec.drug, request.user
+                # )
         except IntegrityError:
             return Response(
                 {"error": "This supply request is already linked to a supply request"},
