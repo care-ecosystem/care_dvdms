@@ -35,7 +35,6 @@ class PluginSettings:
         self.import_strings = import_strings or set()
         self.required_settings = required_settings or set()
         self._cached_attrs = set()
-        self.validate()
 
     def __getattr__(self, attr) -> Any:
         if attr not in self.defaults:
@@ -66,6 +65,13 @@ class PluginSettings:
         return self._user_settings
 
     def validate(self) -> None:
+        """
+        Validate that all required settings are configured.
+
+        Call this at runtime (not import time) so plugin functionality that
+        needs these settings fails loudly, while build-time commands that only
+        import the module keep working without them.
+        """
         for setting in self.required_settings:
             if not getattr(self, setting, None):
                 raise ValueError(f"Required plugin setting '{setting}' is missing or empty.")
