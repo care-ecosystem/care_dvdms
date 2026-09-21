@@ -3,6 +3,7 @@ from care.emr.models.location import FacilityLocation
 from care.emr.models.supply_request import RequestOrder, SupplyRequest
 from care.emr.resources.inventory.supply_request.request_order import (
     SUPPLY_REQUEST_ORDER_COMPLETED_STATUSES,
+    SupplyRequestIntentOptions,
 )
 from care.security.authorization.base import AuthorizationController
 from care.utils.shortcuts import get_object_or_404
@@ -73,7 +74,11 @@ class AvailableRequestOrderViewSet(EMRListMixin, EMRBaseViewSet):
             .values("order_id")
         )
         return (
-            RequestOrder.objects.filter(destination=location, deleted=False)
+            RequestOrder.objects.filter(
+                destination=location,
+                deleted=False,
+                intent=SupplyRequestIntentOptions.order.value,
+            )
             .exclude(id__in=mapped_order_ids)
             .exclude(status__in=SUPPLY_REQUEST_ORDER_COMPLETED_STATUSES)
             .select_related("supplier", "origin", "destination")

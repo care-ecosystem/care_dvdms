@@ -40,8 +40,6 @@ class DVDMSRecordOrderStatus(models.TextChoices):
 # Mirrors uniq_order_active_record_order below - keep both in sync.
 INACTIVE_RECORD_ORDER_STATUSES = [
     DVDMSRecordOrderStatus.cancelled,
-    DVDMSRecordOrderStatus.rejected,
-    DVDMSRecordOrderStatus.failed,
 ]
 
 
