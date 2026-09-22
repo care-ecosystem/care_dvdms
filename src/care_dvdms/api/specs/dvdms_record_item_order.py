@@ -2,19 +2,9 @@ import datetime
 
 from care.emr.resources.base import EMRResource
 from care.emr.resources.inventory.supply_request.spec import SupplyRequestReadSpec
-from pydantic import UUID4, BaseModel, Field
+from pydantic import UUID4, Field
 
 from care_dvdms.models.dvdms_record_item_order import DVDMSRecordItemOrder
-
-
-class DVDMSDrugSpec(BaseModel):
-    id: str = Field(max_length=50)
-    name: str = Field(max_length=255)
-    brand_id: str = Field(default="", max_length=50)
-    group_id: str = Field(default="", max_length=50)
-    sub_group_id: str = Field(default="", max_length=50)
-    unit_id: str = Field(default="", max_length=50)
-    drug_category: str = Field(default="", max_length=50)
 
 
 class DVDMSRecordItemOrderListSpec(EMRResource):
@@ -72,7 +62,7 @@ class DVDMSRecordItemOrderCreateSpec(EMRResource):
     ]
 
     supply_request: UUID4
-    drug: DVDMSDrugSpec
+    drug_id: str = Field(max_length=50)
 
 
 class DVDMSRecordItemOrderUpdateSpec(EMRResource):
@@ -94,4 +84,4 @@ class DVDMSRecordItemOrderUpdateSpec(EMRResource):
         "history",
     ]
 
-    drug: DVDMSDrugSpec | None = None
+    drug_id: str | None = Field(default=None, max_length=50)

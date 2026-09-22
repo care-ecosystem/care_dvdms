@@ -2,9 +2,8 @@ import datetime
 
 from care.emr.resources.base import EMRResource
 from care.emr.resources.inventory.product_knowledge.spec import ProductKnowledgeReadSpec
-from pydantic import UUID4
+from pydantic import UUID4, Field
 
-from care_dvdms.api.specs.dvdms_record_item_order import DVDMSDrugSpec
 from care_dvdms.models.dvdms_product_mapping import DVDMSProductMapping, DVDMSProductMappingType
 
 
@@ -41,9 +40,7 @@ class DVDMSProductMappingListSpec(EMRResource):
             "drug_category": obj.drug.drug_category,
         }
         mapping["product_knowledge"] = (
-            ProductKnowledgeReadSpec.serialize(obj.product_knowledge).to_json()
-            if obj.product_knowledge
-            else None
+            ProductKnowledgeReadSpec.serialize(obj.product_knowledge).to_json() if obj.product_knowledge else None
         )
         cls.serialize_audit_users(mapping, obj)
 
@@ -68,7 +65,7 @@ class DVDMSProductMappingCreateSpec(EMRResource):
         "history",
     ]
 
-    eaushadhi_drug_details: DVDMSDrugSpec
+    eaushadhi_drug_id: str = Field(max_length=50)
     product_knowledge_id: UUID4
     mapping_type: DVDMSProductMappingType = DVDMSProductMappingType.manual_mapping
 
@@ -94,5 +91,5 @@ class DVDMSProductMappingUpdateSpec(EMRResource):
         "history",
     ]
 
-    eaushadhi_drug_details: DVDMSDrugSpec | None = None
+    eaushadhi_drug_id: str | None = Field(default=None, max_length=50)
     product_knowledge_id: UUID4 | None = None

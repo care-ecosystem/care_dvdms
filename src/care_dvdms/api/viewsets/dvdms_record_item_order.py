@@ -9,12 +9,12 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 
-# from care_dvdms.api.services.dvdms_product_mapping_services import sync_product_mapping
 from care_dvdms.api.specs.dvdms_record_item_order import (
     DVDMSRecordItemOrderCreateSpec,
     DVDMSRecordItemOrderListSpec,
     DVDMSRecordItemOrderUpdateSpec,
 )
+from care_dvdms.api.viewsets.mixins import DVDMSDrugLookupMixin
 from care_dvdms.models.dvdms_drug import DVDMSDrug
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
 from care_dvdms.models.dvdms_record_item_order import DVDMSRecordItemOrder
@@ -36,7 +36,7 @@ class DVDMSRecordItemOrderFilters(filters.FilterSet):
     order = filters.UUIDFilter(field_name="record_order__order__external_id")
 
 
-class DVDMSRecordItemOrderViewSet(EMRBaseViewSet):
+class DVDMSRecordItemOrderViewSet(DVDMSDrugLookupMixin, EMRBaseViewSet):
     """
     ViewSet for managing DVDMS record item orders under a record order.
     Nested under: /institute/{institute_id}/record_order/{record_order_id}/item/
@@ -115,6 +115,10 @@ class DVDMSRecordItemOrderViewSet(EMRBaseViewSet):
 
         spec = DVDMSRecordItemOrderCreateSpec(**request.data)
 
+        details, error = self.fetch_drug_or_error(institute, spec.drug_id)
+        if error:
+            return error
+
         try:
             with transaction.atomic():
                 record_order = self._get_locked_record_order(institute)
@@ -130,13 +134,7 @@ class DVDMSRecordItemOrderViewSet(EMRBaseViewSet):
                 )
 
                 drug = DVDMSDrug.objects.create(
-                    drug_id=spec.drug.id,
-                    name=spec.drug.name,
-                    brand_id=spec.drug.brand_id,
-                    group_id=spec.drug.group_id,
-                    sub_group_id=spec.drug.sub_group_id,
-                    unit_id=spec.drug.unit_id,
-                    drug_category=spec.drug.drug_category,
+                    **details.model_dump(),
                     created_by=request.user,
                     updated_by=request.user,
                 )
@@ -149,9 +147,6 @@ class DVDMSRecordItemOrderViewSet(EMRBaseViewSet):
                     updated_by=request.user,
                 )
 
-                # sync_product_mapping(
-                #     institute, supply_request.item_id, spec.drug, request.user
-                # )
         except IntegrityError:
             return Response(
                 {"error": "This supply request is already linked to a supply request"},
@@ -169,6 +164,12 @@ class DVDMSRecordItemOrderViewSet(EMRBaseViewSet):
         item_order_id = self.kwargs.get(self.lookup_field)
         spec = DVDMSRecordItemOrderUpdateSpec(**request.data)
 
+        details = None
+        if spec.drug_id is not None:
+            details, error = self.fetch_drug_or_error(institute, spec.drug_id)
+            if error:
+                return error
+
         with transaction.atomic():
             record_order = self._get_locked_record_order(institute)
 
@@ -184,29 +185,13 @@ class DVDMSRecordItemOrderViewSet(EMRBaseViewSet):
                 deleted=False,
             )
 
-            if spec.drug is not None:
+            if details is not None:
                 drug = item_order.drug
-                drug.drug_id = spec.drug.id
-                drug.name = spec.drug.name
-                drug.brand_id = spec.drug.brand_id
-                drug.group_id = spec.drug.group_id
-                drug.sub_group_id = spec.drug.sub_group_id
-                drug.unit_id = spec.drug.unit_id
-                drug.drug_category = spec.drug.drug_category
+                drug_fields = details.model_dump()
+                for field, value in drug_fields.items():
+                    setattr(drug, field, value)
                 drug.updated_by = request.user
-                drug.save(
-                    update_fields=[
-                        "drug_id",
-                        "name",
-                        "brand_id",
-                        "group_id",
-                        "sub_group_id",
-                        "unit_id",
-                        "drug_category",
-                        "updated_by",
-                        "modified_date",
-                    ]
-                )
+                drug.save(update_fields=[*drug_fields, "updated_by", "modified_date"])
 
             item_order.updated_by = request.user
             item_order.save(update_fields=["updated_by", "modified_date"])

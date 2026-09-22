@@ -1044,7 +1044,6 @@ paths:
                   gnum_seatid: 14462
                   gnum_isvalid: 1
                   hststr_cpa_code: "0"
-                  hstnum_itembrand_id: 10103406
         '400':
           description: Bad Request - hstnum_group_id is required
           content:
@@ -2188,14 +2187,7 @@ paths:
             schema:
               $ref: '#/components/schemas/ProductMappingCreate'
             example:
-              eaushadhi_drug_details:
-                id: "10002270"
-                name: "Paracetamol 500mg tablet"
-                brand_id: "10103406"
-                group_id: "101047"
-                sub_group_id: "0"
-                unit_id: "630001"
-                drug_category: "10"
+              eaushadhi_drug_id: "10002270"
               product_knowledge_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
               mapping_type: "manual_mapping"
       responses:
@@ -2210,7 +2202,7 @@ paths:
                 eaushadhi_drug_details:
                   id: "10002270"
                   name: "Paracetamol 500mg tablet"
-                  brand_id: "10103406"
+                  brand_id: "10002270"
                   group_id: "101047"
                   sub_group_id: "0"
                   unit_id: "630001"
@@ -2344,7 +2336,7 @@ paths:
                     eaushadhi_drug_details:
                       id: "10002270"
                       name: "Paracetamol 500mg tablet"
-                      brand_id: "10103406"
+                      brand_id: "10002270"
                       group_id: "101047"
                       sub_group_id: "0"
                       unit_id: "630001"
@@ -2387,7 +2379,7 @@ paths:
                     eaushadhi_drug_details:
                       id: "10002271"
                       name: "Amoxicillin 250mg capsule"
-                      brand_id: "10103407"
+                      brand_id: "10002271"
                       group_id: "101048"
                       sub_group_id: "0"
                       unit_id: "630001"
@@ -2457,14 +2449,7 @@ paths:
             schema:
               $ref: '#/components/schemas/ProductMappingUpdate'
             example:
-              eaushadhi_drug_details:
-                id: "10002270"
-                name: "Paracetamol 500mg tablet (Updated)"
-                brand_id: "10103406"
-                group_id: "101047"
-                sub_group_id: "0"
-                unit_id: "630001"
-                drug_category: "10"
+              eaushadhi_drug_id: "10002271"
               product_knowledge_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
       responses:
         '200':
@@ -2476,10 +2461,10 @@ paths:
               example:
                 id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
                 eaushadhi_drug_details:
-                  id: "10002270"
-                  name: "Paracetamol 500mg tablet (Updated)"
-                  brand_id: "10103406"
-                  group_id: "101047"
+                  id: "10002271"
+                  name: "Amoxicillin 250mg capsule"
+                  brand_id: "10002271"
+                  group_id: "101048"
                   sub_group_id: "0"
                   unit_id: "630001"
                   drug_category: "10"
@@ -2647,7 +2632,7 @@ paths:
                       eaushadhi_drug_details:
                         id: "10002270"
                         name: "Paracetamol 500mg tablet"
-                        brand_id: "10103406"
+                        brand_id: "10002270"
                         group_id: "101047"
                         sub_group_id: "0"
                         unit_id: "630001"
@@ -3541,14 +3526,7 @@ paths:
               $ref: '#/components/schemas/RecordItemOrderCreate'
             example:
               supply_request: "2e1cb879-8101-4160-b324-bc97e07c35f3"
-              drug:
-                id: "10002270"
-                name: "abc 500mg tablet"
-                brand_id: "10103406"
-                group_id: "101047"
-                sub_group_id: "0"
-                unit_id: "630001"
-                drug_category: "10"
+              drug_id: "10002270"
       responses:
         '201':
           description: Record item order created successfully
@@ -3577,7 +3555,7 @@ paths:
                 drug:
                   id: "10002270"
                   name: "abc 500mg tablet"
-                  brand_id: "10103406"
+                  brand_id: "10002270"
                   group_id: "101047"
                   sub_group_id: "0"
                   unit_id: "630001"
@@ -3703,7 +3681,7 @@ paths:
                     drug:
                       id: "10002270"
                       name: "abc 500mg tablet"
-                      brand_id: "10103406"
+                      brand_id: "10002270"
                       group_id: "101047"
                       sub_group_id: "0"
                       unit_id: "630001"
@@ -3765,18 +3743,14 @@ paths:
             schema:
               type: object
               properties:
-                drug:
-                  $ref: '#/components/schemas/DrugInfo'
-                  description: Update drug information
+                drug_id:
+                  type: string
+                  description: |
+                    DVDMS drug/item ID. The rest of the drug's details are resolved
+                    server-side via the DVDMS lookup, not supplied by the client.
+                  example: "10002271"
             example:
-              drug:
-                id: "10002270"
-                name: "abc 500mg tablet - updated"
-                brand_id: "10103406"
-                group_id: "101047"
-                sub_group_id: "0"
-                unit_id: "630001"
-                drug_category: "10"
+              drug_id: "10002271"
       responses:
         '200':
           description: Record item order updated successfully
@@ -3799,9 +3773,9 @@ paths:
                   quantity: "16.000000"
                   status: "active"
                 drug:
-                  id: "10002270"
-                  name: "abc 500mg tablet - updated"
-                  brand_id: "10103406"
+                  id: "10002271"
+                  name: "xyz 250mg capsule"
+                  brand_id: "10002271"
                   group_id: "101047"
                   sub_group_id: "0"
                   unit_id: "630001"
@@ -4518,10 +4492,6 @@ components:
           type: string
           description: CPA code
           example: "0"
-        hstnum_itembrand_id:
-          type: integer
-          description: Item brand ID
-          example: 10103406
 
     DvdmsUnit:
       type: object
@@ -5103,8 +5073,8 @@ components:
           example: "abc 500mg tablet"
         brand_id:
           type: string
-          description: DVDMS brand ID
-          example: "10103406"
+          description: DVDMS brand ID (currently mirrors the drug ID; DVDMS does not expose a distinct brand ID)
+          example: "10002270"
         group_id:
           type: string
           description: DVDMS group ID
@@ -5126,15 +5096,20 @@ components:
       type: object
       required:
         - supply_request
-        - drug
+        - drug_id
       properties:
         supply_request:
           type: string
           format: uuid
           description: Supply request UUID
           example: "2e1cb879-8101-4160-b324-bc97e07c35f3"
-        drug:
-          $ref: '#/components/schemas/DrugInfo'
+        drug_id:
+          type: string
+          writeOnly: true
+          description: |
+            DVDMS drug/item ID. The rest of the drug's details are resolved
+            server-side via the DVDMS lookup, not supplied by the client.
+          example: "10002270"
 
     RecordItemOrder:
       allOf:
@@ -5142,6 +5117,7 @@ components:
         - type: object
           required:
             - id
+            - drug
             - created_by
             - created_date
             - modified_date
@@ -5157,6 +5133,11 @@ components:
                 - $ref: '#/components/schemas/SupplyRequestSummary'
               readOnly: true
               description: Supply request details (expanded in response)
+            drug:
+              allOf:
+                - $ref: '#/components/schemas/DrugInfo'
+              readOnly: true
+              description: Drug details, resolved server-side from drug_id via the DVDMS lookup (expanded in response)
             created_by:
               allOf:
                 - $ref: '#/components/schemas/UserSummary'
@@ -5321,8 +5302,8 @@ components:
           example: "Paracetamol 500mg tablet"
         brand_id:
           type: string
-          description: Brand ID
-          example: "10103406"
+          description: Brand ID (currently mirrors the drug ID; DVDMS does not expose a distinct brand ID)
+          example: "10002270"
         group_id:
           type: string
           description: Drug group ID
@@ -5344,12 +5325,15 @@ components:
       type: object
       description: Input for creating a new product mapping
       required:
-        - eaushadhi_drug_details
+        - eaushadhi_drug_id
         - product_knowledge_id
       properties:
-        eaushadhi_drug_details:
-          $ref: '#/components/schemas/EaushadhiDrugDetails'
-          description: eAushadhi/DVDMS drug details
+        eaushadhi_drug_id:
+          type: string
+          description: |
+            eAushadhi/DVDMS drug ID. The rest of the drug's details are resolved
+            server-side via the DVDMS lookup, not supplied by the client.
+          example: "10002270"
         product_knowledge_id:
           type: string
           format: uuid
@@ -5518,9 +5502,12 @@ components:
       type: object
       description: Input for updating a product mapping
       properties:
-        eaushadhi_drug_details:
-          $ref: '#/components/schemas/EaushadhiDrugDetails'
-          description: Updated eAushadhi/DVDMS drug details
+        eaushadhi_drug_id:
+          type: string
+          description: |
+            eAushadhi/DVDMS drug ID. The rest of the drug's details are resolved
+            server-side via the DVDMS lookup, not supplied by the client.
+          example: "10002270"
         product_knowledge_id:
           type: string
           format: uuid
