@@ -2,7 +2,7 @@ import requests
 from rest_framework import status
 from rest_framework.response import Response
 
-from care_dvdms.utils import get_drug_details
+from care_dvdms.utils.drug_lookup import get_drug_details
 
 
 class DVDMSDrugLookupMixin:
