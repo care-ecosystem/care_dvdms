@@ -1,0 +1,410 @@
+openapi: 3.0.3
+info:
+  title: CARE DVDMS Reporting APIs
+  description: |
+    Read-only reporting endpoints exposing facility and inventory data for
+    eAushadhi/DVDMS reconciliation.
+  version: 1.0.0
+  contact:
+    name: Jagankumar E
+    email: jagan.kumar@egov.org.in
+
+servers:
+  - url: https://analytics-care-k3s.digit.org
+    description: Reporting server (Egov)
+
+tags:
+  - name: Facility Information
+    description: Facility master data - IDs needed as parameters for the other reports
+  - name: Active DDC Count
+    description: Active DDC counts within a facility
+  - name: Active DDC Item Issue
+    description: Item-level issue details for active DDCs, per facility per day
+  - name: Issue and Consumption
+    description: Issue vs consumption, per drug, per store, within a facility, per day
+
+security:
+  - ApiKeyAuth: []
+
+paths:
+  /api/card/79/query/json:
+    post:
+      tags:
+        - Facility Information
+      summary: Facility Information
+      description: |
+        Returns facility id, name, and geo organization for eAushadhi/DVDMS
+        facility master reconciliation.
+      operationId: getFacilityInformation
+      responses:
+        '200':
+          description: Facility information retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FacilityInformation'
+              example:
+                - Facility ID: "3b024466-8c92-4845-b262-332232aae765"
+                  Facility Name: "Health Centre A"
+                  Geo Organization: "Karnataka"
+                - Facility ID: "ca2901c6-0d09-4504-9a2a-1fa3e9d49cdf"
+                  Facility Name: "Community Health Centre Najafgarh"
+                  Geo Organization: "Najafgarh Ward"
+                - Facility ID: "3deaa9c5-cde5-4e18-81ef-2125d67a619c"
+                  Facility Name: "Apollo Hospitals"
+                  Geo Organization: "Karnataka"
+        '401':
+          description: Unauthenticated - missing or invalid x-api-key
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: "Unauthenticated"
+
+  /api/card/75/query/json:
+    post:
+      tags:
+        - Active DDC Count
+      summary: Facility DDC Summary
+      description: |
+        Returns DDC counts for a facility - total, active, and inactive.
+      operationId: getFacilityDdcSummary
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - parameters
+              properties:
+                parameters:
+                  type: string
+                  description: |
+                    JSON-encoded array (JSON.stringify the array below) with
+                    a single filter entry for facility_id. The `id` and
+                    `target` values are fixed and must be sent exactly as
+                    shown; only `value` (the facility UUID) changes per
+                    request.
+
+                    Decoded shape:
+                    ```json
+                    [
+                      {
+                        "id": "353403c0-7a0d-4e5a-8888-ab8851c5371a",
+                        "type": "string/=",
+                        "value": ["<facility_id_uuid>"],
+                        "target": ["variable", ["template-tag", "facility_id"]]
+                      }
+                    ]
+                    ```
+                  example: >-
+                    [{"id":"353403c0-7a0d-4e5a-8888-ab8851c5371a","type":"string/=","value":["3deaa9c5-cde5-4e18-81ef-2125d67a619c"],"target":["variable",["template-tag","facility_id"]]}]
+      responses:
+        '200':
+          description: Facility DDC summary retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FacilityDdcSummary'
+              example:
+                - facilityCode: "****-****-****-619c"
+                  facilityName: "Apollo Hospitals"
+                  totalDDCCount: 3
+                  activeDDCCount: 3
+                  inactiveDDCCount: 0
+        '401':
+          description: Unauthenticated - missing or invalid x-api-key
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: "Unauthenticated"
+
+  /api/card/77/query/json:
+    post:
+      tags:
+        - Active DDC Item Issue
+      summary: Active DDC Item Issue
+      description: |
+        Returns item-level issue details for a facility on a given date -
+        one row per dispensed item, for eAushadhi/DVDMS issue-history
+        reconciliation.
+      operationId: getActiveDdcItemIssue
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - parameters
+              properties:
+                parameters:
+                  type: string
+                  description: |
+                    JSON-encoded array (JSON.stringify the array below) with
+                    two filter entries - facility_id and issue_date. The
+                    `id` and `target` values are fixed and must be sent
+                    exactly as shown; only the `value` of each entry (the
+                    facility UUID and the issue date) changes per request.
+
+                    Decoded shape:
+                    ```json
+                    [
+                      {
+                        "id": "9d9d860c-3fac-4660-8161-45f86a68de0a",
+                        "type": "string/=",
+                        "value": ["<facility_id_uuid>"],
+                        "target": ["variable", ["template-tag", "facility_id"]]
+                      },
+                      {
+                        "id": "5863530e-b8c7-48da-81a8-1dcb1d7d809b",
+                        "type": "date/single",
+                        "value": "<issue_date, e.g. 2026-09-23>",
+                        "target": ["variable", ["template-tag", "issue_date"]]
+                      }
+                    ]
+                    ```
+                  example: >-
+                    [{"id":"9d9d860c-3fac-4660-8161-45f86a68de0a","type":"string/=","value":["3deaa9c5-cde5-4e18-81ef-2125d67a619c"],"target":["variable",["template-tag","facility_id"]]},{"id":"5863530e-b8c7-48da-81a8-1dcb1d7d809b","type":"date/single","value":"2026-09-23","target":["variable",["template-tag","issue_date"]]}]
+      responses:
+        '200':
+          description: Active DDC item issue details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ActiveDdcItemIssue'
+              example:
+                - HSTNUM_ISSUE_NO: "ISS-2026-005678"
+                  HSTNUM_ITEM_ID: "ITM-100234"
+                  HSTNUM_ITEMBRAND_ID: "BRD-4521"
+                  HSTSTR_BATCH_SL_NO: "B2026JUL014"
+                  HSTNUM_ISSUE_QTY: 10
+                  HSTDT_MANUF_DATE: null
+                  HSTDT_EXPIRY_DATE: "2027-06-30"
+                  GSTR_REMARKS: null
+                  HRGNUM_PUK: "7e4b1c2a-9d3f-4e21-8b6a-1a2b3c4d5e6f"
+        '401':
+          description: Unauthenticated - missing or invalid x-api-key
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: "Unauthenticated"
+
+  /api/card/78/query/json:
+    post:
+      tags:
+        - Issue and Consumption
+      summary: Issue and Consumption
+      description: |
+        Returns issued vs. consumed quantities, per drug per pharmacy store,
+        for a facility on a given date - for stock reconciliation.
+      operationId: getIssueAndConsumption
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - parameters
+              properties:
+                parameters:
+                  type: string
+                  description: |
+                    JSON-encoded array (JSON.stringify the array below) with
+                    two filter entries - facility_id and issue_date. The
+                    `id` and `target` values are fixed and must be sent
+                    exactly as shown; only the `value` of each entry (the
+                    facility UUID and the issue date) changes per request.
+
+                    Decoded shape:
+                    ```json
+                    [
+                      {
+                        "id": "926362fd-f0a8-4050-9695-fa2991d35c36",
+                        "type": "string/=",
+                        "value": ["<facility_id_uuid>"],
+                        "target": ["variable", ["template-tag", "facility_id"]]
+                      },
+                      {
+                        "id": "2b9f4ab7-3e0b-4260-9225-ab4d27e93aa0",
+                        "type": "date/single",
+                        "value": "<issue_date, e.g. 2026-09-23>",
+                        "target": ["variable", ["template-tag", "issue_date"]]
+                      }
+                    ]
+                    ```
+                  example: >-
+                    [{"id":"926362fd-f0a8-4050-9695-fa2991d35c36","type":"string/=","value":["3deaa9c5-cde5-4e18-81ef-2125d67a619c"],"target":["variable",["template-tag","facility_id"]]},{"id":"2b9f4ab7-3e0b-4260-9225-ab4d27e93aa0","type":"date/single","value":"2026-09-23","target":["variable",["template-tag","issue_date"]]}]
+      responses:
+        '200':
+          description: Issue and consumption details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IssueAndConsumption'
+              example:
+                - store: "Main Store"
+                  drug: "Fluconazole  Tablets"
+                  metric_date: "2026-09-23"
+                  total_quantity_issued: 112.0
+                  total_quantity_consumed: 0
+                - store: "Main Store"
+                  drug: "Paracetamol"
+                  metric_date: "2026-09-23"
+                  total_quantity_issued: 112.0
+                  total_quantity_consumed: 0
+        '401':
+          description: Unauthenticated - missing or invalid x-api-key
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: "Unauthenticated"
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key issued for the reporting server
+
+  schemas:
+    FacilityInformation:
+      type: object
+      required:
+        - Facility ID
+        - Facility Name
+        - Geo Organization
+      properties:
+        Facility ID:
+          type: string
+          format: uuid
+          example: "3b024466-8c92-4845-b262-332232aae765"
+        Facility Name:
+          type: string
+          example: "Health Centre A"
+        Geo Organization:
+          type: string
+          example: "Karnataka"
+
+    FacilityDdcSummary:
+      type: object
+      required:
+        - facilityCode
+        - facilityName
+        - totalDDCCount
+        - activeDDCCount
+        - inactiveDDCCount
+      properties:
+        facilityCode:
+          type: string
+          description: Masked facility identifier (last 4 characters of the facility UUID visible)
+          example: "****-****-****-619c"
+        facilityName:
+          type: string
+          example: "Apollo Hospitals"
+        totalDDCCount:
+          type: integer
+          example: 3
+        activeDDCCount:
+          type: integer
+          example: 3
+        inactiveDDCCount:
+          type: integer
+          example: 0
+
+    ActiveDdcItemIssue:
+      type: object
+      required:
+        - HSTNUM_ISSUE_NO
+        - HSTNUM_ITEM_ID
+        - HSTNUM_ISSUE_QTY
+        - HRGNUM_PUK
+      properties:
+        HSTNUM_ISSUE_NO:
+          type: string
+          description: Issue Number
+          example: "ISS-2026-005678"
+        HSTNUM_ITEM_ID:
+          type: string
+          description: Item ID
+          example: "ITM-100234"
+        HSTNUM_ITEMBRAND_ID:
+          type: string
+          nullable: true
+          description: Item Brand ID
+          example: "BRD-4521"
+        HSTSTR_BATCH_SL_NO:
+          type: string
+          nullable: true
+          description: Batch Number
+          example: "B2026JUL014"
+        HSTNUM_ISSUE_QTY:
+          type: number
+          description: Quantity Issued
+          example: 10
+        HSTDT_MANUF_DATE:
+          type: string
+          format: date
+          nullable: true
+          description: Manufacturing Date - always null today, no source field exists yet
+          example: null
+        HSTDT_EXPIRY_DATE:
+          type: string
+          format: date
+          nullable: true
+          description: Expiry Date
+          example: "2027-06-30"
+        GSTR_REMARKS:
+          type: string
+          nullable: true
+          description: Remarks
+          example: null
+        HRGNUM_PUK:
+          type: string
+          format: uuid
+          description: Patient Unique Key
+          example: "7e4b1c2a-9d3f-4e21-8b6a-1a2b3c4d5e6f"
+
+    IssueAndConsumption:
+      type: object
+      required:
+        - store
+        - drug
+        - metric_date
+        - total_quantity_issued
+        - total_quantity_consumed
+      properties:
+        store:
+          type: string
+          description: Pharmacy store name
+          example: "Main Store"
+        drug:
+          type: string
+          description: Drug/item name
+          example: "Fluconazole  Tablets"
+        metric_date:
+          type: string
+          format: date
+          example: "2026-09-23"
+        total_quantity_issued:
+          type: number
+          description: Total quantity received into the store on this date
+          example: 112.0
+        total_quantity_consumed:
+          type: number
+          description: Total quantity dispensed from the store on this date
+          example: 0
