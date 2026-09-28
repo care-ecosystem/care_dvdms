@@ -1403,10 +1403,17 @@ paths:
         - name: status
           in: query
           required: false
-          description: Filter by status
+          description: |
+            Filter by one or more statuses. Pass multiple values as a
+            comma-separated list, e.g. `?status=pending,failed`.
+          style: form
+          explode: false
           schema:
-            type: string
-            enum: [draft, pending, approved, rejected, completed]
+            type: array
+            items:
+              type: string
+              enum: [draft, pending, approved, rejected, completed, failed, cancelled]
+          example: [pending, failed]
         - name: ordering
           in: query
           required: false
