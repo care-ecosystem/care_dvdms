@@ -1,6 +1,7 @@
 from care.emr.api.viewsets.base import EMRBaseViewSet
 from care.emr.models.supply_request import RequestOrder
 from care.security.authorization.base import AuthorizationController
+from care.utils.filters.multiselect import MultiSelectFilter
 from care.utils.shortcuts import get_object_or_404
 from django.db import IntegrityError, transaction
 from django_filters import rest_framework as filters
@@ -24,7 +25,7 @@ from care_dvdms.tasks import save_indent_task
 
 class DVDMSRecordOrderFilters(filters.FilterSet):
     order = filters.UUIDFilter(field_name="order__external_id")
-    status = filters.CharFilter(field_name="status")
+    status = MultiSelectFilter(field_name="status")
     care_indent_no = filters.CharFilter(field_name="care_indent_no")
 
 
