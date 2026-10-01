@@ -2,6 +2,7 @@ from care.emr.api.viewsets.base import EMRBaseViewSet
 from care.security.authorization.base import AuthorizationController
 from care.utils.shortcuts import get_object_or_404
 from django.db import IntegrityError
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.filters import OrderingFilter
@@ -23,6 +24,7 @@ SELECT_RELATED_FIELDS = (
 )
 
 
+@extend_schema(tags=["DVDMS: Inward Record"])
 class DVDMSInwardRecordViewSet(EMRBaseViewSet):
     """
     ViewSet for managing DVDMS inwards records under an institute.

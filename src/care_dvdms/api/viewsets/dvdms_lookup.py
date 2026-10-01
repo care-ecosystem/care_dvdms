@@ -4,6 +4,7 @@ import requests
 from care.security.authorization.base import AuthorizationController
 from care.utils.shortcuts import get_object_or_404
 from django.core.cache import cache
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.response import Response
@@ -30,6 +31,7 @@ from care_dvdms.settings import plugin_settings as settings
 logger = logging.getLogger(__name__)
 
 
+@extend_schema(tags=["DVDMS: Lookup"])
 class DVDMSLookupViewSet(ViewSet):
     def get_institute(self):
         institute_id = self.kwargs.get("institute_id")

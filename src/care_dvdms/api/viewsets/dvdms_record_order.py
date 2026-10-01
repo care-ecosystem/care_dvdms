@@ -5,6 +5,7 @@ from care.utils.filters.multiselect import MultiSelectFilter
 from care.utils.shortcuts import get_object_or_404
 from django.db import IntegrityError, transaction
 from django_filters import rest_framework as filters
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.filters import OrderingFilter
@@ -29,6 +30,7 @@ class DVDMSRecordOrderFilters(filters.FilterSet):
     care_indent_no = filters.CharFilter(field_name="care_indent_no")
 
 
+@extend_schema(tags=["DVDMS: Record Order"])
 class DVDMSRecordOrderViewSet(EMRBaseViewSet):
     """
     ViewSet for managing DVDMS record orders under an institute.

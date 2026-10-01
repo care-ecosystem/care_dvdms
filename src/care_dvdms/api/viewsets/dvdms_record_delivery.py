@@ -4,6 +4,7 @@ from care.security.authorization.base import AuthorizationController
 from care.utils.shortcuts import get_object_or_404
 from django.db import IntegrityError
 from django_filters import rest_framework as filters
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.filters import OrderingFilter
@@ -48,7 +49,6 @@ SELECT_RELATED_FIELDS = (
 
 
 def _sync_acknowledgement_status(record_delivery, sync_log, user=None):
-
     if sync_log.sync_type != DVDMSSyncType.acknowledge_issue:
         return
     if record_delivery.status not in ACKNOWLEDGEMENT_TRACKED_STATUSES:
@@ -70,6 +70,7 @@ class DVDMSRecordDeliveryFilters(filters.FilterSet):
     delivery_order = filters.UUIDFilter(field_name="delivery_order__external_id")
 
 
+@extend_schema(tags=["DVDMS: Record Delivery"])
 class DVDMSRecordDeliveryViewSet(EMRBaseViewSet):
     """
     ViewSet for managing DVDMS record deliveries under an inward record.

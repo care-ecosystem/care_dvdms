@@ -11,6 +11,7 @@ from care.utils.shortcuts import get_object_or_404
 from django.db import IntegrityError, transaction
 from django.db.models import Q
 from django_filters import rest_framework as filters
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 from rest_framework.filters import OrderingFilter
@@ -43,6 +44,7 @@ class DVDMSProductMappingFilters(filters.FilterSet):
     mapping_type = filters.CharFilter(field_name="mapping_type")
 
 
+@extend_schema(tags=["DVDMS: Product Mapping"])
 class DVDMSProductMappingViewSet(DVDMSDrugLookupMixin, EMRBaseViewSet):
     """
     ViewSet for managing DVDMS drug to CARE product mappings for an institute.
@@ -203,6 +205,7 @@ class DVDMSProductMappingViewSet(DVDMSDrugLookupMixin, EMRBaseViewSet):
         return Response(result.to_json(), status=status.HTTP_200_OK)
 
 
+@extend_schema(tags=["DVDMS: Record Order Product Mapping"])
 class DVDMSRecordOrderProductMappingViewSet(EMRBaseViewSet):
     """
     /institute/{institute_id}/record_order/{record_order_id}/product_mappings/

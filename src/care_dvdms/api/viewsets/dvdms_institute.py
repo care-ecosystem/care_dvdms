@@ -3,6 +3,7 @@ from care.facility.models import Facility
 from care.security.authorization.base import AuthorizationController
 from care.utils.shortcuts import get_object_or_404
 from django.db import IntegrityError, transaction
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.response import Response
@@ -15,6 +16,7 @@ from care_dvdms.api.specs.dvdms_institute import (
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
 
 
+@extend_schema(tags=["DVDMS: Institute"])
 class DVDMSInstituteViewSet(EMRBaseViewSet):
     """
     Nested viewset for managing DVDMS institute at facility scope.
