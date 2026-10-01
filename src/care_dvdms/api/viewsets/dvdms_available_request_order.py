@@ -10,6 +10,7 @@ from care.utils.shortcuts import get_object_or_404
 from django.db.models import Count, IntegerField, OuterRef, Subquery
 from django.db.models.functions import Coalesce
 from django_filters import rest_framework as filters
+from drf_spectacular.utils import extend_schema
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 from rest_framework.filters import OrderingFilter
 
@@ -24,6 +25,7 @@ class AvailableRequestOrderFilters(filters.FilterSet):
     supplier = filters.UUIDFilter(field_name="supplier__external_id")
 
 
+@extend_schema(tags=["DVDMS: Available Request Order"])
 class AvailableRequestOrderViewSet(EMRListMixin, EMRBaseViewSet):
     """
     List RequestOrders not mapped to any active DVDMS record order.
