@@ -46,13 +46,10 @@ paths:
                 items:
                   $ref: '#/components/schemas/FacilityInformation'
               example:
-                - Facility ID: "3b024466-8c92-4845-b262-332232aae765"
+                - Facility ID: "6cf17f1f-706d-43e3-bd62-e5de6a30f0dc"
                   Facility Name: "Health Centre A"
                   Geo Organization: "Karnataka"
-                - Facility ID: "ca2901c6-0d09-4504-9a2a-1fa3e9d49cdf"
-                  Facility Name: "Community Health Centre Najafgarh"
-                  Geo Organization: "Najafgarh Ward"
-                - Facility ID: "3deaa9c5-cde5-4e18-81ef-2125d67a619c"
+                - Facility ID: "cdebbb76-50fb-4fbd-85e3-4bdfb185d5da"
                   Facility Name: "Apollo Hospitals"
                   Geo Organization: "Karnataka"
         '401':
@@ -101,7 +98,7 @@ paths:
                     ]
                     ```
                   example: >-
-                    [{"id":"353403c0-7a0d-4e5a-8888-ab8851c5371a","type":"string/=","value":["3deaa9c5-cde5-4e18-81ef-2125d67a619c"],"target":["variable",["template-tag","facility_id"]]}]
+                    [{"id":"353403c0-7a0d-4e5a-8888-ab8851c5371a","type":"string/=","value":["cdebbb76-50fb-4fbd-85e3-4bdfb185d5da"],"target":["variable",["template-tag","facility_id"]]}]
       responses:
         '200':
           description: Facility DDC summary retrieved successfully
@@ -112,7 +109,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/FacilityDdcSummary'
               example:
-                - facilityCode: "****-****-****-619c"
+                - facilityCode: "****-****-****-d5da"
                   facilityName: "Apollo Hospitals"
                   totalDDCCount: 3
                   activeDDCCount: 3
@@ -157,21 +154,21 @@ paths:
                     ```json
                     [
                       {
-                        "id": "9d9d860c-3fac-4660-8161-45f86a68de0a",
+                        "id": "c0a2a13c-5065-45e4-97f3-d92165577a86",
                         "type": "string/=",
                         "value": ["<facility_id_uuid>"],
                         "target": ["variable", ["template-tag", "facility_id"]]
                       },
                       {
-                        "id": "5863530e-b8c7-48da-81a8-1dcb1d7d809b",
-                        "type": "date/single",
-                        "value": "<issue_date, e.g. 2026-09-23>",
+                        "id": "5ceb4334-212c-4711-b3c4-a48b637adb9f",
+                        "type": "string/=",
+                        "value": ["<issue_date in YYYY-MM-DD, e.g. 2026-10-06>"],
                         "target": ["variable", ["template-tag", "issue_date"]]
                       }
                     ]
                     ```
                   example: >-
-                    [{"id":"9d9d860c-3fac-4660-8161-45f86a68de0a","type":"string/=","value":["3deaa9c5-cde5-4e18-81ef-2125d67a619c"],"target":["variable",["template-tag","facility_id"]]},{"id":"5863530e-b8c7-48da-81a8-1dcb1d7d809b","type":"date/single","value":"2026-09-23","target":["variable",["template-tag","issue_date"]]}]
+                    [{"id":"c0a2a13c-5065-45e4-97f3-d92165577a86","type":"string/=","value":["cdebbb76-50fb-4fbd-85e3-4bdfb185d5da"],"target":["variable",["template-tag","facility_id"]]},{"id":"5ceb4334-212c-4711-b3c4-a48b637adb9f","type":"string/=","value":["2026-10-06"],"target":["variable",["template-tag","issue_date"]]}]
       responses:
         '200':
           description: Active DDC item issue details retrieved successfully
@@ -182,15 +179,14 @@ paths:
                 items:
                   $ref: '#/components/schemas/ActiveDdcItemIssue'
               example:
-                - HSTNUM_ISSUE_NO: "ISS-2026-005678"
-                  HSTNUM_ITEM_ID: "ITM-100234"
-                  HSTNUM_ITEMBRAND_ID: "BRD-4521"
-                  HSTSTR_BATCH_SL_NO: "B2026JUL014"
-                  HSTNUM_ISSUE_QTY: 10
-                  HSTDT_MANUF_DATE: null
-                  HSTDT_EXPIRY_DATE: "2027-06-30"
-                  GSTR_REMARKS: null
-                  HRGNUM_PUK: "7e4b1c2a-9d3f-4e21-8b6a-1a2b3c4d5e6f"
+                - STORE_NAME: "Main Store"
+                  HSTNUM_ISSUE_NO: "10322609000030"
+                  HSTNUM_ITEM_ID: "10000237"
+                  HSTNUM_ITEMBRAND_ID: "10000237"
+                  HSTSTR_BATCH_SL_NO: "MOCK-BATCH"
+                  HSTNUM_ISSUE_QTY: 2.0
+                  HSTDT_EXPIRY_DATE: "2027-09-18"
+                  HRGNUM_PUK: "b7d3e9a1-2f4c-4a6e-9c8d-5e1f7a3b2c64"
         '401':
           description: Unauthenticated - missing or invalid x-api-key
           content:
@@ -205,8 +201,8 @@ paths:
         - Issue and Consumption
       summary: Issue and Consumption
       description: |
-        Returns issued vs. consumed quantities, per drug per pharmacy store,
-        for a facility on a given date - for stock reconciliation.
+        Returns issued vs. consumed quantities, per drug batch per store
+        movement, for a facility on a given date - for stock reconciliation.
       operationId: getIssueAndConsumption
       requestBody:
         required: true
@@ -230,21 +226,21 @@ paths:
                     ```json
                     [
                       {
-                        "id": "926362fd-f0a8-4050-9695-fa2991d35c36",
+                        "id": "d9c87cae-0cb5-478e-9040-ddfe4c32f4f2",
                         "type": "string/=",
                         "value": ["<facility_id_uuid>"],
                         "target": ["variable", ["template-tag", "facility_id"]]
                       },
                       {
-                        "id": "2b9f4ab7-3e0b-4260-9225-ab4d27e93aa0",
-                        "type": "date/single",
-                        "value": "<issue_date, e.g. 2026-09-23>",
+                        "id": "0c102071-d5a6-46b7-8a13-7ccfa3703ecd",
+                        "type": "string/=",
+                        "value": ["<issue_date in YYYY-MM-DD, e.g. 2026-09-23>"],
                         "target": ["variable", ["template-tag", "issue_date"]]
                       }
                     ]
                     ```
                   example: >-
-                    [{"id":"926362fd-f0a8-4050-9695-fa2991d35c36","type":"string/=","value":["3deaa9c5-cde5-4e18-81ef-2125d67a619c"],"target":["variable",["template-tag","facility_id"]]},{"id":"2b9f4ab7-3e0b-4260-9225-ab4d27e93aa0","type":"date/single","value":"2026-09-23","target":["variable",["template-tag","issue_date"]]}]
+                    [{"id":"d9c87cae-0cb5-478e-9040-ddfe4c32f4f2","type":"string/=","value":["cdebbb76-50fb-4fbd-85e3-4bdfb185d5da"],"target":["variable",["template-tag","facility_id"]]},{"id":"0c102071-d5a6-46b7-8a13-7ccfa3703ecd","type":"string/=","value":["2026-09-23"],"target":["variable",["template-tag","issue_date"]]}]
       responses:
         '200':
           description: Issue and consumption details retrieved successfully
@@ -255,16 +251,16 @@ paths:
                 items:
                   $ref: '#/components/schemas/IssueAndConsumption'
               example:
-                - store: "Main Store"
-                  drug: "Fluconazole  Tablets"
+                - from_store: "-"
+                  to_store: "Main Store"
+                  drug_id: "10000237"
+                  drug_name: "Paracetamol 150 Mg / Ml"
+                  batch_number: "MOCK-BATCH"
+                  expiry_date: "2027-09-18"
+                  issue_no: "10322609000030"
                   metric_date: "2026-09-23"
-                  total_quantity_issued: 112.0
-                  total_quantity_consumed: 0
-                - store: "Main Store"
-                  drug: "Paracetamol"
-                  metric_date: "2026-09-23"
-                  total_quantity_issued: 112.0
-                  total_quantity_consumed: 0
+                  total_quantity_issued: 0
+                  total_quantity_consumed: 112.0
         '401':
           description: Unauthenticated - missing or invalid x-api-key
           content:
@@ -292,7 +288,7 @@ components:
         Facility ID:
           type: string
           format: uuid
-          example: "3b024466-8c92-4845-b262-332232aae765"
+          example: "6cf17f1f-706d-43e3-bd62-e5de6a30f0dc"
         Facility Name:
           type: string
           example: "Health Centre A"
@@ -312,7 +308,7 @@ components:
         facilityCode:
           type: string
           description: Masked facility identifier (last 4 characters of the facility UUID visible)
-          example: "****-****-****-619c"
+          example: "****-****-****-d5da"
         facilityName:
           type: string
           example: "Apollo Hospitals"
@@ -329,73 +325,93 @@ components:
     ActiveDdcItemIssue:
       type: object
       required:
+        - STORE_NAME
         - HSTNUM_ISSUE_NO
         - HSTNUM_ITEM_ID
         - HSTNUM_ISSUE_QTY
         - HRGNUM_PUK
       properties:
+        STORE_NAME:
+          type: string
+          description: Pharmacy store name
+          example: "Main Store"
         HSTNUM_ISSUE_NO:
           type: string
           description: Issue Number
-          example: "ISS-2026-005678"
+          example: "10322609000030"
         HSTNUM_ITEM_ID:
           type: string
           description: Item ID
-          example: "ITM-100234"
+          example: "10000237"
         HSTNUM_ITEMBRAND_ID:
           type: string
           nullable: true
           description: Item Brand ID
-          example: "BRD-4521"
+          example: "10000237"
         HSTSTR_BATCH_SL_NO:
           type: string
           nullable: true
           description: Batch Number
-          example: "B2026JUL014"
+          example: "MOCK-BATCH"
         HSTNUM_ISSUE_QTY:
           type: number
           description: Quantity Issued
-          example: 10
-        HSTDT_MANUF_DATE:
-          type: string
-          format: date
-          nullable: true
-          description: Manufacturing Date - always null today, no source field exists yet
-          example: null
+          example: 2.0
         HSTDT_EXPIRY_DATE:
           type: string
           format: date
           nullable: true
           description: Expiry Date
-          example: "2027-06-30"
-        GSTR_REMARKS:
-          type: string
-          nullable: true
-          description: Remarks
-          example: null
+          example: "2027-09-18"
         HRGNUM_PUK:
           type: string
           format: uuid
           description: Patient Unique Key
-          example: "7e4b1c2a-9d3f-4e21-8b6a-1a2b3c4d5e6f"
+          example: "b7d3e9a1-2f4c-4a6e-9c8d-5e1f7a3b2c64"
 
     IssueAndConsumption:
       type: object
       required:
-        - store
-        - drug
+        - from_store
+        - to_store
+        - drug_id
+        - drug_name
+        - batch_number
+        - expiry_date
+        - issue_no
         - metric_date
         - total_quantity_issued
         - total_quantity_consumed
       properties:
-        store:
+        from_store:
           type: string
-          description: Pharmacy store name
+          description: Source store name; "-" when there is no source store
+          example: "-"
+        to_store:
+          type: string
+          description: Destination pharmacy store name
           example: "Main Store"
-        drug:
+        drug_id:
+          type: string
+          description: Drug/item ID
+          example: "10000237"
+        drug_name:
           type: string
           description: Drug/item name
-          example: "Fluconazole  Tablets"
+          example: "Paracetamol 150 Mg / Ml"
+        batch_number:
+          type: string
+          description: Batch Number
+          example: "MOCK-BATCH"
+        expiry_date:
+          type: string
+          format: date
+          description: Expiry Date
+          example: "2027-09-18"
+        issue_no:
+          type: string
+          description: Issue Number
+          example: "10322609000030"
         metric_date:
           type: string
           format: date
@@ -403,8 +419,8 @@ components:
         total_quantity_issued:
           type: number
           description: Total quantity received into the store on this date
-          example: 112.0
+          example: 0
         total_quantity_consumed:
           type: number
           description: Total quantity dispensed from the store on this date
-          example: 0
+          example: 112.0
