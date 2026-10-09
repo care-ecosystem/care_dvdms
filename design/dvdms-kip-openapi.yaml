@@ -1,0 +1,350 @@
+openapi: 3.0.3
+info:
+  title: CARE Analytics - Embedded Dashboard API
+  description: |
+    Flow for rendering Metabase KPI data inside CARE:
+
+    1. Log in to CARE and get an access token.
+    2. Fetch the organizations the user can access, then list the analytics configs for an organization.
+    3. Call the CARE backend to generate a signed Metabase embed URL for an analytics config.
+    4. Use the signed token from that URL to fetch a dashboard card's data as JSON from Metabase.
+  version: 1.1.0
+servers:
+  - url: https://care-k3s.digit.org
+    description: CARE backend (k3s)
+  - url: https://analytics-care-k3s.digit.org
+    description: Metabase (embedded analytics)
+
+tags:
+  - name: Auth
+    description: CARE backend - authentication
+  - name: Organization
+    description: CARE backend - organizations
+  - name: Analytics Config
+    description: CARE backend - analytics configuration
+  - name: Metabase Embed
+    description: Metabase signed-embed endpoints
+
+paths:
+  /api/v1/auth/login/:
+    post:
+      tags: [Auth]
+      servers:
+        - url: https://care-k3s.digit.org
+      summary: Log in and obtain tokens
+      description: Authenticates a user with username and password. Use the returned access token as a Bearer token on the other CARE endpoints.
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              username: admin
+              password: "<password>"
+      responses:
+        '200':
+          description: Login successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: Missing or malformed fields.
+        '401':
+          description: Invalid credentials.
+
+  /api/v1/organization/accessible_role_organizations/:
+    get:
+      tags: [Organization]
+      servers:
+        - url: https://care-k3s.digit.org
+      summary: List organizations accessible to the current user
+      description: Returns the organizations the authenticated user can access through their roles. The organization `id` is used as the context for analytics configs.
+      operationId: listAccessibleRoleOrganizations
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Accessible organizations (response shape not captured; adjust to the actual payload).
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Organization'
+                  - $ref: '#/components/schemas/PaginatedOrganizationList'
+        '401':
+          description: Authentication credentials missing or invalid.
+
+  /api/analytics/config/:
+    get:
+      tags: [Analytics Config]
+      servers:
+        - url: https://care-k3s.digit.org
+      summary: List analytics configs
+      description: Paginated list of analytics configs for a given context type (for example, `organization`).
+      operationId: listAnalyticsConfigs
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: Page size.
+          schema:
+            type: integer
+            default: 15
+          example: 15
+        - name: offset
+          in: query
+          required: false
+          description: Number of records to skip.
+          schema:
+            type: integer
+            default: 0
+          example: 0
+        - name: context_type
+          in: query
+          required: false
+          description: Type of context the configs apply to.
+          schema:
+            type: string
+            example: organization
+      responses:
+        '200':
+          description: Paginated analytics configs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAnalyticsConfigList'
+        '401':
+          description: Authentication credentials missing or invalid.
+        '403':
+          description: Not permitted.
+
+  /api/analytics/config/{config_id}/generate_analytics_url/:
+    post:
+      tags: [Analytics Config]
+      servers:
+        - url: https://care-k3s.digit.org
+      summary: Generate a signed Metabase embed URL
+      description: |
+        Returns a signed Metabase embed URL (JWT in the path) for the given analytics config,
+        scoped to the supplied context.
+      operationId: generateAnalyticsUrl
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: config_id
+          in: path
+          required: true
+          description: ID of the analytics config.
+          schema:
+            type: string
+            format: uuid
+          example: 8156c401-e214-46e4-93c9-d778a9bae782
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateAnalyticsUrlRequest'
+            example:
+              context_id: 931d9bb1-b47b-4cfb-b903-ec0629470d7b
+      responses:
+        '200':
+          description: Signed embed URL generated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateAnalyticsUrlResponse'
+              example:
+                redirect_url: "https://analytics-care-k3s.digit.org/embed/dashboard/<signed-jwt>#bordered=true&titled=true"
+        '400':
+          description: Invalid or missing context_id.
+        '401':
+          description: Authentication credentials missing or invalid.
+        '403':
+          description: Not permitted to access this config/context.
+        '404':
+          description: Analytics config not found.
+
+  /api/embed/dashboard/{token}/dashcard/{dashcard_id}/card/{card_id}/json:
+    get:
+      tags: [Metabase Embed]
+      servers:
+        - url: https://analytics-care-k3s.digit.org
+      summary: Get dashboard card data as JSON
+      description: |
+        Metabase signed-embed endpoint. Returns the result rows of a single card on a dashboard,
+        filtered by the dashboard parameters. The `token` is the signed JWT taken from the
+        `redirect_url` returned by `generateAnalyticsUrl`. No other auth header is needed;
+        the token carries the authorisation and has an expiry (`exp` claim).
+      operationId: getEmbeddedDashcardJson
+      parameters:
+        - name: token
+          in: path
+          required: true
+          description: Signed Metabase embed JWT (the path segment after `/embed/dashboard/` in `redirect_url`).
+          schema:
+            type: string
+        - name: dashcard_id
+          in: path
+          required: true
+          description: Dashboard card (placement of a card on the dashboard) ID.
+          schema:
+            type: integer
+          example: 87
+        - name: card_id
+          in: path
+          required: true
+          description: Metabase card (question) ID.
+          schema:
+            type: integer
+          example: 90
+        - name: parameters
+          in: query
+          required: false
+          description: |
+            URL-encoded JSON object of dashboard filter values.
+            Example (decoded): `{"facility_id":"5e971c0e-22d8-494a-a231-2b10c5938140","date":"10-08-2026"}`
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardParameters'
+              example:
+                facility_id: 5e971c0e-22d8-494a-a231-2b10c5938140
+                date: "10-08-2026"
+      responses:
+        '200':
+          description: Card result rows. Keys depend on the card's query columns.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+              example:
+                - column_a: value
+                  column_b: 123
+        '400':
+          description: Malformed parameters.
+        '401':
+          description: Token invalid, tampered or expired.
+        '404':
+          description: Dashboard, dashcard or card not found.
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: CARE access token returned by `POST /api/v1/auth/login/`, sent as `Authorization Bearer <access>`.
+  schemas:
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          example: admin
+        password:
+          type: string
+          format: password
+    LoginResponse:
+      type: object
+      description: Token pair (field names assumed from a standard JWT login; confirm against the actual response).
+      properties:
+        access:
+          type: string
+          description: Short-lived JWT access token.
+        refresh:
+          type: string
+          description: Refresh token.
+    Organization:
+      type: object
+      description: Organization record (fields not captured; extend as needed).
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: d0d8f5ba-9296-475b-a815-d52d0993cc2b
+        name:
+          type: string
+      additionalProperties: true
+    PaginatedOrganizationList:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          nullable: true
+        previous:
+          type: string
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Organization'
+    AnalyticsConfig:
+      type: object
+      description: Analytics config record (fields not captured; extend as needed).
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 8156c401-e214-46e4-93c9-d778a9bae782
+      additionalProperties: true
+    PaginatedAnalyticsConfigList:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          nullable: true
+        previous:
+          type: string
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnalyticsConfig'
+    GenerateAnalyticsUrlRequest:
+      type: object
+      required: [context_id]
+      properties:
+        context_id:
+          type: string
+          format: uuid
+          description: Context (e.g. facility/organization) the analytics URL is generated for.
+          example: 931d9bb1-b47b-4cfb-b903-ec0629470d7b
+    GenerateAnalyticsUrlResponse:
+      type: object
+      required: [redirect_url]
+      properties:
+        redirect_url:
+          type: string
+          format: uri
+          description: |
+            Full Metabase embed URL. The signed JWT is the path segment after `/embed/dashboard/`;
+            the fragment (`#bordered=true&titled=true`) holds display options.
+    DashboardParameters:
+      type: object
+      description: Dashboard filter values passed to Metabase.
+      properties:
+        facility_id:
+          type: string
+          format: uuid
+          example: 5e971c0e-22d8-494a-a231-2b10c5938140
+        date:
+          type: string
+          description: Date filter. Format appears to be DD-MM-YYYY based on the sample.
+          example: "10-08-2026"
+      additionalProperties: true
