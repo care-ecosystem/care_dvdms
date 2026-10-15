@@ -4,12 +4,43 @@
 		"name": "Metabase KPIs",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "53917346",
-		"_collection_link": "https://pranav-rutagi-4697109.postman.co/workspace/d9058d3a-07e0-473c-808b-99b26e834ebc/collection/53917346-79f8361d-795c-4653-9e8e-0ac8bf2c5602?action=share&source=collection_link&creator=53917346"
+		"_collection_link": "https://pranav-rutagi-4697109.postman.co/workspace/Pranav-Rutagi's-Workspace~d9058d3a-07e0-473c-808b-99b26e834ebc/collection/53917346-79f8361d-795c-4653-9e8e-0ac8bf2c5602?action=share&source=collection_link&creator=53917346"
 	},
 	"item": [
 		{
 			"name": "CARE Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json();",
+							"const access_token = response.access;",
+							"",
+							"pm.collectionVariables.set(\"access_token\", access_token);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
 			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
 				"header": [
 					{
@@ -107,7 +138,34 @@
 		},
 		{
 			"name": "Token Generation",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json();",
+							"const redirect_url = response.redirect_url;",
+							"const token = redirect_url.split(\"/embed/dashboard/\")[1].split(\"#\")[0];",
+							"",
+							"pm.collectionVariables.set(\"dashboard_token\", token);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
 				"header": [
 					{
@@ -283,7 +341,7 @@
 					}
 				],
 				"url": {
-					"raw": "https://analytics-care-k3s.digit.org/api/embed/dashboard/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNvdXJjZSI6eyJkYXNoYm9hcmQiOjd9LCJwYXJhbXMiOnsiZmFjaWxpdHlfaWQiOiI1ZTk3MWMwZS0yMmQ4LTQ5NGEtYTIzMS0yYjEwYzU5MzgxNDAifSwiZXhwIjoxNzkyMDQ2OTQ2fQ.ES3nYi1Yk5fg7KOaShDS_zEAuq6FUgFfXLFTAl8Lrkk/dashcard/85/card/88/json?parameters=%7B%22date%22%3A%5B%22today%22%5D%7D",
+					"raw": "https://analytics-care-k3s.digit.org/api/embed/dashboard/{{dashboard_token}}/dashcard/85/card/88/json?parameters=%7B%22date%22%3A%5B%22today%22%5D%7D",
 					"protocol": "https",
 					"host": [
 						"analytics-care-k3s",
@@ -294,7 +352,7 @@
 						"api",
 						"embed",
 						"dashboard",
-						"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNvdXJjZSI6eyJkYXNoYm9hcmQiOjd9LCJwYXJhbXMiOnsiZmFjaWxpdHlfaWQiOiI1ZTk3MWMwZS0yMmQ4LTQ5NGEtYTIzMS0yYjEwYzU5MzgxNDAifSwiZXhwIjoxNzkyMDQ2OTQ2fQ.ES3nYi1Yk5fg7KOaShDS_zEAuq6FUgFfXLFTAl8Lrkk",
+						"{{dashboard_token}}",
 						"dashcard",
 						"85",
 						"card",
@@ -386,7 +444,7 @@
 					}
 				],
 				"url": {
-					"raw": "https://analytics-care-k3s.digit.org/api/embed/dashboard/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNvdXJjZSI6eyJkYXNoYm9hcmQiOjd9LCJwYXJhbXMiOnsiZmFjaWxpdHlfaWQiOiI1ZTk3MWMwZS0yMmQ4LTQ5NGEtYTIzMS0yYjEwYzU5MzgxNDAifSwiZXhwIjoxNzkyMDQ2OTQ2fQ.ES3nYi1Yk5fg7KOaShDS_zEAuq6FUgFfXLFTAl8Lrkk/dashcard/87/card/90/json?parameters=%7B%22date%22%3A%5B%22today%22%5D%7D",
+					"raw": "https://analytics-care-k3s.digit.org/api/embed/dashboard/{{dashboard_token}}/dashcard/87/card/90/json?parameters=%7B%22date%22%3A%5B%22today%22%5D%7D",
 					"protocol": "https",
 					"host": [
 						"analytics-care-k3s",
@@ -397,7 +455,7 @@
 						"api",
 						"embed",
 						"dashboard",
-						"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNvdXJjZSI6eyJkYXNoYm9hcmQiOjd9LCJwYXJhbXMiOnsiZmFjaWxpdHlfaWQiOiI1ZTk3MWMwZS0yMmQ4LTQ5NGEtYTIzMS0yYjEwYzU5MzgxNDAifSwiZXhwIjoxNzkyMDQ2OTQ2fQ.ES3nYi1Yk5fg7KOaShDS_zEAuq6FUgFfXLFTAl8Lrkk",
+						"{{dashboard_token}}",
 						"dashcard",
 						"87",
 						"card",
@@ -489,7 +547,7 @@
 					}
 				],
 				"url": {
-					"raw": "https://analytics-care-k3s.digit.org/api/embed/dashboard/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNvdXJjZSI6eyJkYXNoYm9hcmQiOjd9LCJwYXJhbXMiOnsiZmFjaWxpdHlfaWQiOiI1ZTk3MWMwZS0yMmQ4LTQ5NGEtYTIzMS0yYjEwYzU5MzgxNDAifSwiZXhwIjoxNzkyMDQ2OTQ2fQ.ES3nYi1Yk5fg7KOaShDS_zEAuq6FUgFfXLFTAl8Lrkk/dashcard/89/card/92/json?parameters=%7B%22date%22%3A%5B%22today%22%5D%7D",
+					"raw": "https://analytics-care-k3s.digit.org/api/embed/dashboard/{{dashboard_token}}/dashcard/89/card/92/json?parameters=%7B%22date%22%3A%5B%22today%22%5D%7D",
 					"protocol": "https",
 					"host": [
 						"analytics-care-k3s",
@@ -500,7 +558,7 @@
 						"api",
 						"embed",
 						"dashboard",
-						"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNvdXJjZSI6eyJkYXNoYm9hcmQiOjd9LCJwYXJhbXMiOnsiZmFjaWxpdHlfaWQiOiI1ZTk3MWMwZS0yMmQ4LTQ5NGEtYTIzMS0yYjEwYzU5MzgxNDAifSwiZXhwIjoxNzkyMDQ2OTQ2fQ.ES3nYi1Yk5fg7KOaShDS_zEAuq6FUgFfXLFTAl8Lrkk",
+						"{{dashboard_token}}",
 						"dashcard",
 						"89",
 						"card",
@@ -592,7 +650,7 @@
 					}
 				],
 				"url": {
-					"raw": "https://analytics-care-k3s.digit.org/api/embed/dashboard/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNvdXJjZSI6eyJkYXNoYm9hcmQiOjd9LCJwYXJhbXMiOnsiZmFjaWxpdHlfaWQiOiI1ZTk3MWMwZS0yMmQ4LTQ5NGEtYTIzMS0yYjEwYzU5MzgxNDAifSwiZXhwIjoxNzkyMDQ2OTQ2fQ.ES3nYi1Yk5fg7KOaShDS_zEAuq6FUgFfXLFTAl8Lrkk/dashcard/90/card/93/json?parameters=%7B%22date%22%3A%5B%22today%22%5D%7D",
+					"raw": "https://analytics-care-k3s.digit.org/api/embed/dashboard/{{dashboard_token}}/dashcard/90/card/93/json?parameters=%7B%22date%22%3A%5B%22today%22%5D%7D",
 					"protocol": "https",
 					"host": [
 						"analytics-care-k3s",
@@ -603,7 +661,7 @@
 						"api",
 						"embed",
 						"dashboard",
-						"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNvdXJjZSI6eyJkYXNoYm9hcmQiOjd9LCJwYXJhbXMiOnsiZmFjaWxpdHlfaWQiOiI1ZTk3MWMwZS0yMmQ4LTQ5NGEtYTIzMS0yYjEwYzU5MzgxNDAifSwiZXhwIjoxNzkyMDQ2OTQ2fQ.ES3nYi1Yk5fg7KOaShDS_zEAuq6FUgFfXLFTAl8Lrkk",
+						"{{dashboard_token}}",
 						"dashcard",
 						"90",
 						"card",
@@ -619,6 +677,16 @@
 				}
 			},
 			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "access_token",
+			"value": ""
+		},
+		{
+			"key": "dashboard_token",
+			"value": ""
 		}
 	]
 }
