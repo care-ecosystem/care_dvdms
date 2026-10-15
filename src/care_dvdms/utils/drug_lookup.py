@@ -34,7 +34,7 @@ def get_drug_details(institute, drug_id) -> DVDMSDrugDetails | None:
             return DVDMSDrugDetails(
                 drug_id=item_id,
                 name=drug.get("hststr_item_name", ""),
-                brand_id=drug.get("hstnum_itembrand_id", ""),
+                brand_id=str(drug.get("hstnum_itembrand_id", "")),
                 group_id=str(drug.get("hstnum_group_id", "")),
                 sub_group_id=str(drug.get("hstnum_subgroup_id", "")),
                 unit_id=str(drug.get("gnum_inventory_unitid", "")),
