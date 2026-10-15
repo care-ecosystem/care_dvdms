@@ -1,0 +1,624 @@
+{
+	"info": {
+		"_postman_id": "79f8361d-795c-4653-9e8e-0ac8bf2c5602",
+		"name": "Metabase KPIs",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "53917346",
+		"_collection_link": "https://pranav-rutagi-4697109.postman.co/workspace/d9058d3a-07e0-473c-808b-99b26e834ebc/collection/53917346-79f8361d-795c-4653-9e8e-0ac8bf2c5602?action=share&source=collection_link&creator=53917346"
+	},
+	"item": [
+		{
+			"name": "CARE Login",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					},
+					{
+						"key": "accept-language",
+						"value": "en-GB,en-US;q=0.9,en;q=0.8"
+					},
+					{
+						"key": "cache-control",
+						"value": "no-cache"
+					},
+					{
+						"key": "content-type",
+						"value": "application/json"
+					},
+					{
+						"key": "origin",
+						"value": "https://care-k3s.digit.org"
+					},
+					{
+						"key": "pragma",
+						"value": "no-cache"
+					},
+					{
+						"key": "priority",
+						"value": "u=1, i"
+					},
+					{
+						"key": "referer",
+						"value": "https://care-k3s.digit.org/login"
+					},
+					{
+						"key": "sec-ch-ua",
+						"value": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\""
+					},
+					{
+						"key": "sec-ch-ua-mobile",
+						"value": "?0"
+					},
+					{
+						"key": "sec-ch-ua-platform",
+						"value": "\"Linux\""
+					},
+					{
+						"key": "sec-fetch-dest",
+						"value": "empty"
+					},
+					{
+						"key": "sec-fetch-mode",
+						"value": "cors"
+					},
+					{
+						"key": "sec-fetch-site",
+						"value": "same-origin"
+					},
+					{
+						"key": "user-agent",
+						"value": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+					},
+					{
+						"key": "Cookie",
+						"value": "_ga=GA1.1.1493766669.1785403064; _ga_SWNFWJXDJM=GS2.1.s1785474653$o5$g0$t1785474653$j60$l0$h0; sidebar:state=true"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"username\":\"admin\",\"password\":\"admin123\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://care-k3s.digit.org/api/v1/auth/login/",
+					"protocol": "https",
+					"host": [
+						"care-k3s",
+						"digit",
+						"org"
+					],
+					"path": [
+						"api",
+						"v1",
+						"auth",
+						"login",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Token Generation",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					},
+					{
+						"key": "accept-language",
+						"value": "en-GB,en-US;q=0.9,en;q=0.8"
+					},
+					{
+						"key": "authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzkyMDQ3NTM1LCJpYXQiOjE3OTIwNDY5MzUsImp0aSI6IjQ0NGZkOGE1MWIxZjQ3ODg5YWU2OTY3YmRhYWJlOTlhIiwidXNlcl9pZCI6IjlmYjIzY2RkLWRlNWYtNDcxYy05NDE5LWEyYTI5NGY0NGVkYiJ9.H46uqvGMicL9P_xKO1hVlAmqnoKXQVg56ExMEu8AS_U"
+					},
+					{
+						"key": "cache-control",
+						"value": "no-cache"
+					},
+					{
+						"key": "content-type",
+						"value": "application/json"
+					},
+					{
+						"key": "origin",
+						"value": "https://care-k3s.digit.org"
+					},
+					{
+						"key": "pragma",
+						"value": "no-cache"
+					},
+					{
+						"key": "priority",
+						"value": "u=1, i"
+					},
+					{
+						"key": "referer",
+						"value": "https://care-k3s.digit.org/facility/5e971c0e-22d8-494a-a231-2b10c5938140/analytics/1e5cc779-1315-4f3b-8350-1bcadc4e4272"
+					},
+					{
+						"key": "sec-ch-ua",
+						"value": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\""
+					},
+					{
+						"key": "sec-ch-ua-mobile",
+						"value": "?0"
+					},
+					{
+						"key": "sec-ch-ua-platform",
+						"value": "\"Linux\""
+					},
+					{
+						"key": "sec-fetch-dest",
+						"value": "empty"
+					},
+					{
+						"key": "sec-fetch-mode",
+						"value": "cors"
+					},
+					{
+						"key": "sec-fetch-site",
+						"value": "same-origin"
+					},
+					{
+						"key": "user-agent",
+						"value": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+					},
+					{
+						"key": "Cookie",
+						"value": "_ga=GA1.1.1493766669.1785403064; _ga_SWNFWJXDJM=GS2.1.s1785474653$o5$g0$t1785474653$j60$l0$h0; sidebar:state=true"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"context_id\":\"5e971c0e-22d8-494a-a231-2b10c5938140\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://care-k3s.digit.org/api/analytics/config/1e5cc779-1315-4f3b-8350-1bcadc4e4272/generate_analytics_url/",
+					"protocol": "https",
+					"host": [
+						"care-k3s",
+						"digit",
+						"org"
+					],
+					"path": [
+						"api",
+						"analytics",
+						"config",
+						"1e5cc779-1315-4f3b-8350-1bcadc4e4272",
+						"generate_analytics_url",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "All Facility",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					},
+					{
+						"key": "accept-language",
+						"value": "en-GB,en-US;q=0.9,en;q=0.8"
+					},
+					{
+						"key": "cache-control",
+						"value": "no-cache"
+					},
+					{
+						"key": "content-type",
+						"value": "application/json"
+					},
+					{
+						"key": "pragma",
+						"value": "no-cache"
+					},
+					{
+						"key": "priority",
+						"value": "u=1, i"
+					},
+					{
+						"key": "referer",
+						"value": "https://analytics-care-k3s.digit.org/embed/dashboard/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNvdXJjZSI6eyJkYXNoYm9hcmQiOjd9LCJwYXJhbXMiOnsiZmFjaWxpdHlfaWQiOiI1ZTk3MWMwZS0yMmQ4LTQ5NGEtYTIzMS0yYjEwYzU5MzgxNDAifSwiZXhwIjoxNzkyMDQ2OTQ2fQ.ES3nYi1Yk5fg7KOaShDS_zEAuq6FUgFfXLFTAl8Lrkk?date=today"
+					},
+					{
+						"key": "sec-ch-ua",
+						"value": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\""
+					},
+					{
+						"key": "sec-ch-ua-mobile",
+						"value": "?0"
+					},
+					{
+						"key": "sec-ch-ua-platform",
+						"value": "\"Linux\""
+					},
+					{
+						"key": "sec-fetch-dest",
+						"value": "empty"
+					},
+					{
+						"key": "sec-fetch-mode",
+						"value": "cors"
+					},
+					{
+						"key": "sec-fetch-site",
+						"value": "same-origin"
+					},
+					{
+						"key": "user-agent",
+						"value": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+					},
+					{
+						"key": "x-metabase-client",
+						"value": "embedding-iframe-static"
+					},
+					{
+						"key": "x-metabase-embedded",
+						"value": "true"
+					},
+					{
+						"key": "Cookie",
+						"value": "metabase.DEVICE=62cc2cab-c606-4b21-9798-14fc1c6d4ab7; _ga=GA1.1.1493766669.1785403064; _ga_SWNFWJXDJM=GS2.1.s1785474653$o5$g0$t1785474653$j60$l0$h0; metabase.TIMEOUT=alive; metabase.SESSION=7012e28e-2eb2-437c-9afc-4daee1f8d320"
+					}
+				],
+				"url": {
+					"raw": "https://analytics-care-k3s.digit.org/api/embed/dashboard/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNvdXJjZSI6eyJkYXNoYm9hcmQiOjd9LCJwYXJhbXMiOnsiZmFjaWxpdHlfaWQiOiI1ZTk3MWMwZS0yMmQ4LTQ5NGEtYTIzMS0yYjEwYzU5MzgxNDAifSwiZXhwIjoxNzkyMDQ2OTQ2fQ.ES3nYi1Yk5fg7KOaShDS_zEAuq6FUgFfXLFTAl8Lrkk/dashcard/85/card/88/json?parameters=%7B%22date%22%3A%5B%22today%22%5D%7D",
+					"protocol": "https",
+					"host": [
+						"analytics-care-k3s",
+						"digit",
+						"org"
+					],
+					"path": [
+						"api",
+						"embed",
+						"dashboard",
+						"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNvdXJjZSI6eyJkYXNoYm9hcmQiOjd9LCJwYXJhbXMiOnsiZmFjaWxpdHlfaWQiOiI1ZTk3MWMwZS0yMmQ4LTQ5NGEtYTIzMS0yYjEwYzU5MzgxNDAifSwiZXhwIjoxNzkyMDQ2OTQ2fQ.ES3nYi1Yk5fg7KOaShDS_zEAuq6FUgFfXLFTAl8Lrkk",
+						"dashcard",
+						"85",
+						"card",
+						"88",
+						"json"
+					],
+					"query": [
+						{
+							"key": "parameters",
+							"value": "%7B%22date%22%3A%5B%22today%22%5D%7D"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Active DDC",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					},
+					{
+						"key": "accept-language",
+						"value": "en-GB,en-US;q=0.9,en;q=0.8"
+					},
+					{
+						"key": "cache-control",
+						"value": "no-cache"
+					},
+					{
+						"key": "content-type",
+						"value": "application/json"
+					},
+					{
+						"key": "pragma",
+						"value": "no-cache"
+					},
+					{
+						"key": "priority",
+						"value": "u=1, i"
+					},
+					{
+						"key": "referer",
+						"value": "https://analytics-care-k3s.digit.org/embed/dashboard/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNvdXJjZSI6eyJkYXNoYm9hcmQiOjd9LCJwYXJhbXMiOnsiZmFjaWxpdHlfaWQiOiI1ZTk3MWMwZS0yMmQ4LTQ5NGEtYTIzMS0yYjEwYzU5MzgxNDAifSwiZXhwIjoxNzkyMDQ2OTQ2fQ.ES3nYi1Yk5fg7KOaShDS_zEAuq6FUgFfXLFTAl8Lrkk?date=today"
+					},
+					{
+						"key": "sec-ch-ua",
+						"value": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\""
+					},
+					{
+						"key": "sec-ch-ua-mobile",
+						"value": "?0"
+					},
+					{
+						"key": "sec-ch-ua-platform",
+						"value": "\"Linux\""
+					},
+					{
+						"key": "sec-fetch-dest",
+						"value": "empty"
+					},
+					{
+						"key": "sec-fetch-mode",
+						"value": "cors"
+					},
+					{
+						"key": "sec-fetch-site",
+						"value": "same-origin"
+					},
+					{
+						"key": "user-agent",
+						"value": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+					},
+					{
+						"key": "x-metabase-client",
+						"value": "embedding-iframe-static"
+					},
+					{
+						"key": "x-metabase-embedded",
+						"value": "true"
+					},
+					{
+						"key": "Cookie",
+						"value": "metabase.DEVICE=62cc2cab-c606-4b21-9798-14fc1c6d4ab7; _ga=GA1.1.1493766669.1785403064; _ga_SWNFWJXDJM=GS2.1.s1785474653$o5$g0$t1785474653$j60$l0$h0; metabase.TIMEOUT=alive; metabase.SESSION=7012e28e-2eb2-437c-9afc-4daee1f8d320"
+					}
+				],
+				"url": {
+					"raw": "https://analytics-care-k3s.digit.org/api/embed/dashboard/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNvdXJjZSI6eyJkYXNoYm9hcmQiOjd9LCJwYXJhbXMiOnsiZmFjaWxpdHlfaWQiOiI1ZTk3MWMwZS0yMmQ4LTQ5NGEtYTIzMS0yYjEwYzU5MzgxNDAifSwiZXhwIjoxNzkyMDQ2OTQ2fQ.ES3nYi1Yk5fg7KOaShDS_zEAuq6FUgFfXLFTAl8Lrkk/dashcard/87/card/90/json?parameters=%7B%22date%22%3A%5B%22today%22%5D%7D",
+					"protocol": "https",
+					"host": [
+						"analytics-care-k3s",
+						"digit",
+						"org"
+					],
+					"path": [
+						"api",
+						"embed",
+						"dashboard",
+						"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNvdXJjZSI6eyJkYXNoYm9hcmQiOjd9LCJwYXJhbXMiOnsiZmFjaWxpdHlfaWQiOiI1ZTk3MWMwZS0yMmQ4LTQ5NGEtYTIzMS0yYjEwYzU5MzgxNDAifSwiZXhwIjoxNzkyMDQ2OTQ2fQ.ES3nYi1Yk5fg7KOaShDS_zEAuq6FUgFfXLFTAl8Lrkk",
+						"dashcard",
+						"87",
+						"card",
+						"90",
+						"json"
+					],
+					"query": [
+						{
+							"key": "parameters",
+							"value": "%7B%22date%22%3A%5B%22today%22%5D%7D"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Active DDC Item Issue",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					},
+					{
+						"key": "accept-language",
+						"value": "en-GB,en-US;q=0.9,en;q=0.8"
+					},
+					{
+						"key": "cache-control",
+						"value": "no-cache"
+					},
+					{
+						"key": "content-type",
+						"value": "application/json"
+					},
+					{
+						"key": "pragma",
+						"value": "no-cache"
+					},
+					{
+						"key": "priority",
+						"value": "u=1, i"
+					},
+					{
+						"key": "referer",
+						"value": "https://analytics-care-k3s.digit.org/embed/dashboard/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNvdXJjZSI6eyJkYXNoYm9hcmQiOjd9LCJwYXJhbXMiOnsiZmFjaWxpdHlfaWQiOiI1ZTk3MWMwZS0yMmQ4LTQ5NGEtYTIzMS0yYjEwYzU5MzgxNDAifSwiZXhwIjoxNzkyMDQ2OTQ2fQ.ES3nYi1Yk5fg7KOaShDS_zEAuq6FUgFfXLFTAl8Lrkk?date=today"
+					},
+					{
+						"key": "sec-ch-ua",
+						"value": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\""
+					},
+					{
+						"key": "sec-ch-ua-mobile",
+						"value": "?0"
+					},
+					{
+						"key": "sec-ch-ua-platform",
+						"value": "\"Linux\""
+					},
+					{
+						"key": "sec-fetch-dest",
+						"value": "empty"
+					},
+					{
+						"key": "sec-fetch-mode",
+						"value": "cors"
+					},
+					{
+						"key": "sec-fetch-site",
+						"value": "same-origin"
+					},
+					{
+						"key": "user-agent",
+						"value": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+					},
+					{
+						"key": "x-metabase-client",
+						"value": "embedding-iframe-static"
+					},
+					{
+						"key": "x-metabase-embedded",
+						"value": "true"
+					},
+					{
+						"key": "Cookie",
+						"value": "metabase.DEVICE=62cc2cab-c606-4b21-9798-14fc1c6d4ab7; _ga=GA1.1.1493766669.1785403064; _ga_SWNFWJXDJM=GS2.1.s1785474653$o5$g0$t1785474653$j60$l0$h0; metabase.TIMEOUT=alive; metabase.SESSION=7012e28e-2eb2-437c-9afc-4daee1f8d320"
+					}
+				],
+				"url": {
+					"raw": "https://analytics-care-k3s.digit.org/api/embed/dashboard/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNvdXJjZSI6eyJkYXNoYm9hcmQiOjd9LCJwYXJhbXMiOnsiZmFjaWxpdHlfaWQiOiI1ZTk3MWMwZS0yMmQ4LTQ5NGEtYTIzMS0yYjEwYzU5MzgxNDAifSwiZXhwIjoxNzkyMDQ2OTQ2fQ.ES3nYi1Yk5fg7KOaShDS_zEAuq6FUgFfXLFTAl8Lrkk/dashcard/89/card/92/json?parameters=%7B%22date%22%3A%5B%22today%22%5D%7D",
+					"protocol": "https",
+					"host": [
+						"analytics-care-k3s",
+						"digit",
+						"org"
+					],
+					"path": [
+						"api",
+						"embed",
+						"dashboard",
+						"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNvdXJjZSI6eyJkYXNoYm9hcmQiOjd9LCJwYXJhbXMiOnsiZmFjaWxpdHlfaWQiOiI1ZTk3MWMwZS0yMmQ4LTQ5NGEtYTIzMS0yYjEwYzU5MzgxNDAifSwiZXhwIjoxNzkyMDQ2OTQ2fQ.ES3nYi1Yk5fg7KOaShDS_zEAuq6FUgFfXLFTAl8Lrkk",
+						"dashcard",
+						"89",
+						"card",
+						"92",
+						"json"
+					],
+					"query": [
+						{
+							"key": "parameters",
+							"value": "%7B%22date%22%3A%5B%22today%22%5D%7D"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Issue & Consumption",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					},
+					{
+						"key": "accept-language",
+						"value": "en-GB,en-US;q=0.9,en;q=0.8"
+					},
+					{
+						"key": "cache-control",
+						"value": "no-cache"
+					},
+					{
+						"key": "content-type",
+						"value": "application/json"
+					},
+					{
+						"key": "pragma",
+						"value": "no-cache"
+					},
+					{
+						"key": "priority",
+						"value": "u=1, i"
+					},
+					{
+						"key": "referer",
+						"value": "https://analytics-care-k3s.digit.org/embed/dashboard/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNvdXJjZSI6eyJkYXNoYm9hcmQiOjd9LCJwYXJhbXMiOnsiZmFjaWxpdHlfaWQiOiI1ZTk3MWMwZS0yMmQ4LTQ5NGEtYTIzMS0yYjEwYzU5MzgxNDAifSwiZXhwIjoxNzkyMDQ2OTQ2fQ.ES3nYi1Yk5fg7KOaShDS_zEAuq6FUgFfXLFTAl8Lrkk?date=today"
+					},
+					{
+						"key": "sec-ch-ua",
+						"value": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\""
+					},
+					{
+						"key": "sec-ch-ua-mobile",
+						"value": "?0"
+					},
+					{
+						"key": "sec-ch-ua-platform",
+						"value": "\"Linux\""
+					},
+					{
+						"key": "sec-fetch-dest",
+						"value": "empty"
+					},
+					{
+						"key": "sec-fetch-mode",
+						"value": "cors"
+					},
+					{
+						"key": "sec-fetch-site",
+						"value": "same-origin"
+					},
+					{
+						"key": "user-agent",
+						"value": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+					},
+					{
+						"key": "x-metabase-client",
+						"value": "embedding-iframe-static"
+					},
+					{
+						"key": "x-metabase-embedded",
+						"value": "true"
+					},
+					{
+						"key": "Cookie",
+						"value": "metabase.DEVICE=62cc2cab-c606-4b21-9798-14fc1c6d4ab7; _ga=GA1.1.1493766669.1785403064; _ga_SWNFWJXDJM=GS2.1.s1785474653$o5$g0$t1785474653$j60$l0$h0; metabase.TIMEOUT=alive; metabase.SESSION=7012e28e-2eb2-437c-9afc-4daee1f8d320"
+					}
+				],
+				"url": {
+					"raw": "https://analytics-care-k3s.digit.org/api/embed/dashboard/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNvdXJjZSI6eyJkYXNoYm9hcmQiOjd9LCJwYXJhbXMiOnsiZmFjaWxpdHlfaWQiOiI1ZTk3MWMwZS0yMmQ4LTQ5NGEtYTIzMS0yYjEwYzU5MzgxNDAifSwiZXhwIjoxNzkyMDQ2OTQ2fQ.ES3nYi1Yk5fg7KOaShDS_zEAuq6FUgFfXLFTAl8Lrkk/dashcard/90/card/93/json?parameters=%7B%22date%22%3A%5B%22today%22%5D%7D",
+					"protocol": "https",
+					"host": [
+						"analytics-care-k3s",
+						"digit",
+						"org"
+					],
+					"path": [
+						"api",
+						"embed",
+						"dashboard",
+						"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNvdXJjZSI6eyJkYXNoYm9hcmQiOjd9LCJwYXJhbXMiOnsiZmFjaWxpdHlfaWQiOiI1ZTk3MWMwZS0yMmQ4LTQ5NGEtYTIzMS0yYjEwYzU5MzgxNDAifSwiZXhwIjoxNzkyMDQ2OTQ2fQ.ES3nYi1Yk5fg7KOaShDS_zEAuq6FUgFfXLFTAl8Lrkk",
+						"dashcard",
+						"90",
+						"card",
+						"93",
+						"json"
+					],
+					"query": [
+						{
+							"key": "parameters",
+							"value": "%7B%22date%22%3A%5B%22today%22%5D%7D"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
