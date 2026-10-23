@@ -92,27 +92,26 @@ def _track_indent(indent_no):
         return {"message": "Indent not found", "status": 0}
 
     record["hits"] += 1
-    indent_status = "Issue in Process" if record["hits"] == 1 else "Issued"
-    if indent_status == "Issued" and "issue_no" not in record:
-        issue_no = _next_issue_no()
-        record["issue_no"] = issue_no
-        _issues[issue_no] = indent_no
     requesting_store_id = record["requesting_store_id"]
     issuing_store_id = record["issuing_store_id"]
-
-    return {
-        "message": "Ok",
-        "status": 1,
-        "data": {
-            "indentNo": indent_no,
-            "requestingStoreId": requesting_store_id,
-            "issuingStoreId": issuing_store_id,
-            "indentDate": f"{datetime.now(tz=timezone.utc):%d-%b-%Y}",
-            "indentingStore": STORE_NAMES_BY_ID.get(str(requesting_store_id), "Unknown"),
-            "issuingStore": STORE_NAMES_BY_ID.get(str(issuing_store_id), "Unknown"),
-            "indentStatus": indent_status,
-        },
+    data = {
+        "indentNo": indent_no,
+        "requestingStoreId": requesting_store_id,
+        "issuingStoreId": issuing_store_id,
+        "indentDate": f"{datetime.now(tz=timezone.utc):%d-%b-%Y}",
+        "indentingStore": STORE_NAMES_BY_ID.get(str(requesting_store_id), "Unknown"),
+        "issuingStore": STORE_NAMES_BY_ID.get(str(issuing_store_id), "Unknown"),
+        "indentStatus": "Issue in Process",
     }
+
+    if record["hits"] > 1:
+        if "issue_no" not in record:
+            record["issue_no"] = _next_issue_no()
+            _issues[record["issue_no"]] = indent_no
+        data["indentStatus"] = "Issued"
+        data["issueNo"] = record["issue_no"]
+
+    return {"message": "Ok", "status": 1, "data": data}
 
 
 def _acknowledge_pending_list(to_store_id, indent_no):
