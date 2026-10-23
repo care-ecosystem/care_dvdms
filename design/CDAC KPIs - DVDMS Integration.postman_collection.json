@@ -1,0 +1,1299 @@
+{
+  "info": {
+    "_postman_id": "5e1e67f0-a1e4-4cef-9ddc-d87b7da7e778",
+    "name": "CDAC KPIs - DVDMS Integration",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "8437237",
+    "_collection_link": "https://go.postman.co/collection/8437237-5e1e67f0-a1e4-4cef-9ddc-d87b7da7e778?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "KPIS to be shared",
+      "item": [
+        {
+          "name": "All facilities",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "sec-ch-ua-platform",
+                "value": "\"macOS\""
+              },
+              {
+                "key": "Referer",
+                "value": "https://analytics-care-k3s.digit.org/dashboard/9-dvdms-stock-export?date=10-09-2026&facility_id=5e971c0e-22d8-494a-a231-2b10c5938140&issue_id=&location_id=ca4e2999-0a14-45a5-a96b-d418317496ee"
+              },
+              {
+                "key": "User-Agent",
+                "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "sec-ch-ua",
+                "value": "\"Google Chrome\";v=\"155\", \"Chromium\";v=\"155\", \"Not(A:Brand\";v=\"24\""
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded;charset=UTF-8"
+              },
+              {
+                "key": "sec-ch-ua-mobile",
+                "value": "?0"
+              },
+              {
+                "key": "x-api-key",
+                "value": "{{metabase_api_key}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"parameters\": [\n        {\n            \"type\": \"category\",\n            \"target\": [\n                \"variable\",\n                [\n                    \"template-tag\",\n                    \"facility_id\"\n                ]\n            ],\n            \"value\": \"5e971c0e-22d8-494a-a231-2b10c5938140\"\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://analytics-care-k3s.digit.org/api/card/104/query/json",
+              "protocol": "https",
+              "host": [
+                "analytics-care-k3s",
+                "digit",
+                "org"
+              ],
+              "path": [
+                "api",
+                "card",
+                "104",
+                "query",
+                "json"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "All facilities",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "sec-ch-ua-platform",
+                    "value": "\"macOS\""
+                  },
+                  {
+                    "key": "Referer",
+                    "value": "https://analytics-care-k3s.digit.org/dashboard/9-dvdms-stock-export?date=10-09-2026&facility_id=5e971c0e-22d8-494a-a231-2b10c5938140&issue_id=&location_id=ca4e2999-0a14-45a5-a96b-d418317496ee"
+                  },
+                  {
+                    "key": "User-Agent",
+                    "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "sec-ch-ua",
+                    "value": "\"Google Chrome\";v=\"155\", \"Chromium\";v=\"155\", \"Not(A:Brand\";v=\"24\""
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded;charset=UTF-8"
+                  },
+                  {
+                    "key": "sec-ch-ua-mobile",
+                    "value": "?0"
+                  },
+                  {
+                    "key": "x-api-key",
+                    "value": "{{metabase_api_key}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"parameters\": [\n        {\n            \"type\": \"category\",\n            \"target\": [\n                \"variable\",\n                [\n                    \"template-tag\",\n                    \"facility_id\"\n                ]\n            ],\n            \"value\": \"5e971c0e-22d8-494a-a231-2b10c5938140\"\n        }\n    ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "https://analytics-care-k3s.digit.org/api/card/104/query/json",
+                  "protocol": "https",
+                  "host": [
+                    "analytics-care-k3s",
+                    "digit",
+                    "org"
+                  ],
+                  "path": [
+                    "api",
+                    "card",
+                    "104",
+                    "query",
+                    "json"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "cache-control",
+                  "value": "max-age=0, no-cache, must-revalidate, proxy-revalidate"
+                },
+                {
+                  "key": "content-disposition",
+                  "value": "attachment; filename=\"all_facilities___its_stores_2026-10-19T13:51:46.650707478Z.json\""
+                },
+                {
+                  "key": "content-encoding",
+                  "value": "gzip"
+                },
+                {
+                  "key": "content-security-policy",
+                  "value": "font-src 'self' data:; style-src-attr 'self'; script-src 'self' 'nonce-lGab4rCRPP' https://maps.google.com https://accounts.google.com https://www.google-analytics.com   'sha256-SxNB1/NQ1TUHWrwTi7scFI31VsahWQBj54W7KQZQs1Q=' 'sha256-isH538cVBUY8IMlGYGbWtBwr+cGqkc4mN6nLcA7lUjE=' 'sha256-3N2Z+Nu++/yNMVHIl863JigVmt2Nr9gt2doEMJT2Wzk='; style-src 'self' 'nonce-lGab4rCRPP'   https://accounts.google.com; manifest-src 'self'; connect-src 'self' https://accounts.google.com metabase.us10.list-manage.com https://sp.metabase.com   ; img-src * 'self' data:; frame-src 'self' https://www.metabase.com/ https://metabase.com/ youtube.com *.youtube.com youtu.be *.youtu.be loom.com *.loom.com vimeo.com *.vimeo.com docs.google.com calendar.google.com airtable.com *.airtable.com typeform.com *.typeform.com canva.com *.canva.com codepen.io *.codepen.io figma.com *.figma.com grafana.com *.grafana.com miro.com *.miro.com excalidraw.com *.excalidraw.com notion.com *.notion.com atlassian.com *.atlassian.com trello.com *.trello.com asana.com *.asana.com gist.github.com linkedin.com *.linkedin.com twitter.com *.twitter.com x.com *.x.com; default-src 'none'; media-src www.metabase.com; child-src 'self' https://accounts.google.com;  frame-ancestors 'none';"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json;charset=utf-8"
+                },
+                {
+                  "key": "date",
+                  "value": "Mon, 19 Oct 2026 13:51:46 GMT"
+                },
+                {
+                  "key": "expires",
+                  "value": "Tue, 03 Jul 2001 06:00:00 GMT"
+                },
+                {
+                  "key": "last-modified",
+                  "value": "Mon, 19 Oct 2026 13:51:46 GMT"
+                },
+                {
+                  "key": "strict-transport-security",
+                  "value": "max-age=31536000"
+                },
+                {
+                  "key": "x-accel-buffering",
+                  "value": "no"
+                },
+                {
+                  "key": "x-content-type-options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "x-frame-options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "x-metabase-version",
+                  "value": "v0.63.16.8"
+                },
+                {
+                  "key": "x-permitted-cross-domain-policies",
+                  "value": "none"
+                },
+                {
+                  "key": "transfer-encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"facility_id\": \"5e971c0e-22d8-494a-a231-2b10c5938140\",\n    \"facility_name\": \"Apollo Hospitals\",\n    \"geo_organization\": \"Karnataka\",\n    \"institute_id\": \"998\",\n    \"institute_name\": \"Ramghar_DH\",\n    \"store_id\": \"99901036\",\n    \"store_name\": \"Ramghar_DH\",\n    \"store_location\": \"Main Store\",\n    \"supplier_id\": \"99901012\",\n    \"supplier_name\": \"Ramgarh_DWH\",\n    \"supplier_organization\": \"eAushadi\",\n    \"dvdms_status\": \"Configured\"\n  },\n  {\n    \"facility_id\": \"55f1e443-4f6b-4888-93d7-e0b003b310cf\",\n    \"facility_name\": \"Bannur Goverment Hospital\",\n    \"geo_organization\": \"Karnataka\",\n    \"institute_id\": null,\n    \"institute_name\": null,\n    \"store_id\": null,\n    \"store_name\": null,\n    \"store_location\": null,\n    \"supplier_id\": null,\n    \"supplier_name\": null,\n    \"supplier_organization\": null,\n    \"dvdms_status\": \"Not onboarded\"\n  },\n  {\n    \"facility_id\": \"b0452384-7242-40b6-9c8e-30bdb8f9ebfc\",\n    \"facility_name\": \"Community Health Centre Bawana\",\n    \"geo_organization\": \"Narela Ward\",\n    \"institute_id\": null,\n    \"institute_name\": null,\n    \"store_id\": null,\n    \"store_name\": null,\n    \"store_location\": null,\n    \"supplier_id\": null,\n    \"supplier_name\": null,\n    \"supplier_organization\": null,\n    \"dvdms_status\": \"Not onboarded\"\n  },\n  {\n    \"facility_id\": \"644df92a-3c12-43a1-9345-bdc2f600820c\",\n    \"facility_name\": \"Community Health Centre Najafgarh\",\n    \"geo_organization\": \"Najafgarh Ward\",\n    \"institute_id\": null,\n    \"institute_name\": null,\n    \"store_id\": null,\n    \"store_name\": null,\n    \"store_location\": null,\n    \"supplier_id\": null,\n    \"supplier_name\": null,\n    \"supplier_organization\": null,\n    \"dvdms_status\": \"Not onboarded\"\n  },\n  {\n    \"facility_id\": \"31416e8f-65d7-4e75-a05f-138a8898219e\",\n    \"facility_name\": \"Dr. BSA District Hospital Rohini\",\n    \"geo_organization\": \"Rohini Ward\",\n    \"institute_id\": null,\n    \"institute_name\": null,\n    \"store_id\": null,\n    \"store_name\": null,\n    \"store_location\": null,\n    \"supplier_id\": null,\n    \"supplier_name\": null,\n    \"supplier_organization\": null,\n    \"dvdms_status\": \"Not onboarded\"\n  },\n  {\n    \"facility_id\": \"eaa7adcf-da70-4d6c-9811-f1d8f591acf8\",\n    \"facility_name\": \"Health Centre A\",\n    \"geo_organization\": \"Karnataka\",\n    \"institute_id\": null,\n    \"institute_name\": null,\n    \"store_id\": null,\n    \"store_name\": null,\n    \"store_location\": null,\n    \"supplier_id\": null,\n    \"supplier_name\": null,\n    \"supplier_organization\": null,\n    \"dvdms_status\": \"Not onboarded\"\n  },\n  {\n    \"facility_id\": \"012c9c86-7361-4908-bb26-c58ccf2fccb8\",\n    \"facility_name\": \"Primary Health Centre Jharoda Kalan\",\n    \"geo_organization\": \"Jharoda Ward\",\n    \"institute_id\": null,\n    \"institute_name\": null,\n    \"store_id\": null,\n    \"store_name\": null,\n    \"store_location\": null,\n    \"supplier_id\": null,\n    \"supplier_name\": null,\n    \"supplier_organization\": null,\n    \"dvdms_status\": \"Not onboarded\"\n  },\n  {\n    \"facility_id\": \"6b214ca2-1ecd-4b17-ba5f-d74034779848\",\n    \"facility_name\": \"Primary Health Centre Narela\",\n    \"geo_organization\": \"Narela Ward\",\n    \"institute_id\": null,\n    \"institute_name\": null,\n    \"store_id\": null,\n    \"store_name\": null,\n    \"store_location\": null,\n    \"supplier_id\": null,\n    \"supplier_name\": null,\n    \"supplier_organization\": null,\n    \"dvdms_status\": \"Not onboarded\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Active DDCs",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              },
+              {
+                "key": "accept-language",
+                "value": "en-US,en;q=0.9,am;q=0.8,ar;q=0.7"
+              },
+              {
+                "key": "cache-control",
+                "value": "no-cache"
+              },
+              {
+                "key": "content-type",
+                "value": "application/x-www-form-urlencoded;charset=UTF-8"
+              },
+              {
+                "key": "origin",
+                "value": "https://analytics-care-k3s.digit.org"
+              },
+              {
+                "key": "pragma",
+                "value": "no-cache"
+              },
+              {
+                "key": "priority",
+                "value": "u=1, i"
+              },
+              {
+                "key": "referer",
+                "value": "https://analytics-care-k3s.digit.org/dashboard/9-dvdms-stock-export?date=10-09-2026&facility_id=5e971c0e-22d8-494a-a231-2b10c5938140&issue_id=&location_id=2a242afe-9845-4c84-843c-e2625c3adebb"
+              },
+              {
+                "key": "sec-ch-ua",
+                "value": "\"Google Chrome\";v=\"155\", \"Chromium\";v=\"155\", \"Not(A:Brand\";v=\"24\""
+              },
+              {
+                "key": "sec-ch-ua-mobile",
+                "value": "?0"
+              },
+              {
+                "key": "sec-ch-ua-platform",
+                "value": "\"macOS\""
+              },
+              {
+                "key": "sec-fetch-dest",
+                "value": "empty"
+              },
+              {
+                "key": "sec-fetch-mode",
+                "value": "cors"
+              },
+              {
+                "key": "sec-fetch-site",
+                "value": "same-origin"
+              },
+              {
+                "key": "user-agent",
+                "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36"
+              },
+              {
+                "key": "x-api-key",
+                "value": "{{metabase_api_key}}"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "parameters",
+                  "value": "[{\"type\":\"string/=\",\"value\":[\"5e971c0e-22d8-494a-a231-2b10c5938140\"],\"id\":\"58c3c149\",\"target\":[\"variable\",[\"template-tag\",\"facility_id\"]]},{\"type\":\"string/=\",\"value\":[\"10-09-2026\"],\"id\":\"f0020b42\",\"target\":[\"variable\",[\"template-tag\",\"issue_date\"]]}]"
+                }
+              ]
+            },
+            "url": {
+              "raw": "https://analytics-care-k3s.digit.org/api/dashboard/9/dashcard/102/card/105/query/json",
+              "protocol": "https",
+              "host": [
+                "analytics-care-k3s",
+                "digit",
+                "org"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                "9",
+                "dashcard",
+                "102",
+                "card",
+                "105",
+                "query",
+                "json"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Active DDCs",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "accept-language",
+                    "value": "en-US,en;q=0.9,am;q=0.8,ar;q=0.7"
+                  },
+                  {
+                    "key": "cache-control",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "content-type",
+                    "value": "application/x-www-form-urlencoded;charset=UTF-8"
+                  },
+                  {
+                    "key": "origin",
+                    "value": "https://analytics-care-k3s.digit.org"
+                  },
+                  {
+                    "key": "pragma",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "priority",
+                    "value": "u=1, i"
+                  },
+                  {
+                    "key": "referer",
+                    "value": "https://analytics-care-k3s.digit.org/dashboard/9-dvdms-stock-export?date=10-09-2026&facility_id=5e971c0e-22d8-494a-a231-2b10c5938140&issue_id=&location_id=2a242afe-9845-4c84-843c-e2625c3adebb"
+                  },
+                  {
+                    "key": "sec-ch-ua",
+                    "value": "\"Google Chrome\";v=\"155\", \"Chromium\";v=\"155\", \"Not(A:Brand\";v=\"24\""
+                  },
+                  {
+                    "key": "sec-ch-ua-mobile",
+                    "value": "?0"
+                  },
+                  {
+                    "key": "sec-ch-ua-platform",
+                    "value": "\"macOS\""
+                  },
+                  {
+                    "key": "sec-fetch-dest",
+                    "value": "empty"
+                  },
+                  {
+                    "key": "sec-fetch-mode",
+                    "value": "cors"
+                  },
+                  {
+                    "key": "sec-fetch-site",
+                    "value": "same-origin"
+                  },
+                  {
+                    "key": "user-agent",
+                    "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36"
+                  },
+                  {
+                    "key": "x-api-key",
+                    "value": "{{metabase_api_key}}"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "parameters",
+                      "value": "[{\"type\":\"string/=\",\"value\":[\"5e971c0e-22d8-494a-a231-2b10c5938140\"],\"id\":\"58c3c149\",\"target\":[\"variable\",[\"template-tag\",\"facility_id\"]]},{\"type\":\"string/=\",\"value\":[\"10-09-2026\"],\"id\":\"f0020b42\",\"target\":[\"variable\",[\"template-tag\",\"issue_date\"]]}]"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "https://analytics-care-k3s.digit.org/api/dashboard/9/dashcard/102/card/105/query/json",
+                  "protocol": "https",
+                  "host": [
+                    "analytics-care-k3s",
+                    "digit",
+                    "org"
+                  ],
+                  "path": [
+                    "api",
+                    "dashboard",
+                    "9",
+                    "dashcard",
+                    "102",
+                    "card",
+                    "105",
+                    "query",
+                    "json"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "cache-control",
+                  "value": "max-age=0, no-cache, must-revalidate, proxy-revalidate"
+                },
+                {
+                  "key": "content-disposition",
+                  "value": "attachment; filename=\"active_ddcs_2026-10-19T13:51:05.413696332Z.json\""
+                },
+                {
+                  "key": "content-encoding",
+                  "value": "gzip"
+                },
+                {
+                  "key": "content-security-policy",
+                  "value": "font-src 'self' data:; style-src-attr 'self'; script-src 'self' 'nonce-whzlyqztZd' https://maps.google.com https://accounts.google.com https://www.google-analytics.com   'sha256-SxNB1/NQ1TUHWrwTi7scFI31VsahWQBj54W7KQZQs1Q=' 'sha256-isH538cVBUY8IMlGYGbWtBwr+cGqkc4mN6nLcA7lUjE=' 'sha256-3N2Z+Nu++/yNMVHIl863JigVmt2Nr9gt2doEMJT2Wzk='; style-src 'self' 'nonce-whzlyqztZd'   https://accounts.google.com; manifest-src 'self'; connect-src 'self' https://accounts.google.com metabase.us10.list-manage.com https://sp.metabase.com   ; img-src * 'self' data:; frame-src 'self' https://www.metabase.com/ https://metabase.com/ youtube.com *.youtube.com youtu.be *.youtu.be loom.com *.loom.com vimeo.com *.vimeo.com docs.google.com calendar.google.com airtable.com *.airtable.com typeform.com *.typeform.com canva.com *.canva.com codepen.io *.codepen.io figma.com *.figma.com grafana.com *.grafana.com miro.com *.miro.com excalidraw.com *.excalidraw.com notion.com *.notion.com atlassian.com *.atlassian.com trello.com *.trello.com asana.com *.asana.com gist.github.com linkedin.com *.linkedin.com twitter.com *.twitter.com x.com *.x.com; default-src 'none'; media-src www.metabase.com; child-src 'self' https://accounts.google.com;  frame-ancestors 'none';"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json;charset=utf-8"
+                },
+                {
+                  "key": "date",
+                  "value": "Mon, 19 Oct 2026 13:51:05 GMT"
+                },
+                {
+                  "key": "expires",
+                  "value": "Tue, 03 Jul 2001 06:00:00 GMT"
+                },
+                {
+                  "key": "last-modified",
+                  "value": "Mon, 19 Oct 2026 13:51:05 GMT"
+                },
+                {
+                  "key": "strict-transport-security",
+                  "value": "max-age=31536000"
+                },
+                {
+                  "key": "x-accel-buffering",
+                  "value": "no"
+                },
+                {
+                  "key": "x-content-type-options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "x-frame-options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "x-metabase-version",
+                  "value": "v0.63.16.8"
+                },
+                {
+                  "key": "x-permitted-cross-domain-policies",
+                  "value": "none"
+                },
+                {
+                  "key": "transfer-encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"location_id\": \"ca4e2999-0a14-45a5-a96b-d418317496ee\",\n    \"ddc\": \"General Medicine\",\n    \"location_status\": \"active\",\n    \"last_dispense\": \"2026-10-09\",\n    \"days_since_last_dispense\": 0,\n    \"dispenses_7d\": 3\n  },\n  {\n    \"location_id\": \"2a242afe-9845-4c84-843c-e2625c3adebb\",\n    \"ddc\": \"Ortho Ward\",\n    \"location_status\": \"active\",\n    \"last_dispense\": \"2026-10-09\",\n    \"days_since_last_dispense\": 0,\n    \"dispenses_7d\": 3\n  },\n  {\n    \"location_id\": \"b51cf801-b6e9-430c-b96e-f97695eba2f1\",\n    \"ddc\": \"Main Store\",\n    \"location_status\": \"active\",\n    \"last_dispense\": \"2026-10-06\",\n    \"days_since_last_dispense\": 3,\n    \"dispenses_7d\": 1\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Active DDCs Issues",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              },
+              {
+                "key": "accept-language",
+                "value": "en-US,en;q=0.9,am;q=0.8,ar;q=0.7"
+              },
+              {
+                "key": "cache-control",
+                "value": "no-cache"
+              },
+              {
+                "key": "content-type",
+                "value": "application/x-www-form-urlencoded;charset=UTF-8"
+              },
+              {
+                "key": "origin",
+                "value": "https://analytics-care-k3s.digit.org"
+              },
+              {
+                "key": "pragma",
+                "value": "no-cache"
+              },
+              {
+                "key": "priority",
+                "value": "u=1, i"
+              },
+              {
+                "key": "referer",
+                "value": "https://analytics-care-k3s.digit.org/dashboard/9-dvdms-stock-export?date=10-09-2026&facility_id=5e971c0e-22d8-494a-a231-2b10c5938140&issue_id=&location_id=2a242afe-9845-4c84-843c-e2625c3adebb"
+              },
+              {
+                "key": "sec-ch-ua",
+                "value": "\"Google Chrome\";v=\"155\", \"Chromium\";v=\"155\", \"Not(A:Brand\";v=\"24\""
+              },
+              {
+                "key": "sec-ch-ua-mobile",
+                "value": "?0"
+              },
+              {
+                "key": "sec-ch-ua-platform",
+                "value": "\"macOS\""
+              },
+              {
+                "key": "sec-fetch-dest",
+                "value": "empty"
+              },
+              {
+                "key": "sec-fetch-mode",
+                "value": "cors"
+              },
+              {
+                "key": "sec-fetch-site",
+                "value": "same-origin"
+              },
+              {
+                "key": "user-agent",
+                "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36"
+              },
+              {
+                "key": "x-api-key",
+                "value": "{{metabase_api_key}}"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "parameters",
+                  "value": "[{\"type\":\"string/=\",\"value\":[\"5e971c0e-22d8-494a-a231-2b10c5938140\"],\"id\":\"58c3c149\",\"target\":[\"variable\",[\"template-tag\",\"facility_id\"]]},{\"type\":\"string/=\",\"value\":[\"10-09-2026\"],\"id\":\"f0020b42\",\"target\":[\"variable\",[\"template-tag\",\"issue_date\"]]},{\"type\":\"string/=\",\"value\":[\"ca4e2999-0a14-45a5-a96b-d418317496ee\"],\"id\":\"ead633ad\",\"target\":[\"variable\",[\"template-tag\",\"location_id\"]]}]"
+                }
+              ]
+            },
+            "url": {
+              "raw": "https://analytics-care-k3s.digit.org/api/dashboard/9/dashcard/103/card/106/query/json",
+              "protocol": "https",
+              "host": [
+                "analytics-care-k3s",
+                "digit",
+                "org"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                "9",
+                "dashcard",
+                "103",
+                "card",
+                "106",
+                "query",
+                "json"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Active DDCs Issues",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "accept-language",
+                    "value": "en-US,en;q=0.9,am;q=0.8,ar;q=0.7"
+                  },
+                  {
+                    "key": "cache-control",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "content-type",
+                    "value": "application/x-www-form-urlencoded;charset=UTF-8"
+                  },
+                  {
+                    "key": "origin",
+                    "value": "https://analytics-care-k3s.digit.org"
+                  },
+                  {
+                    "key": "pragma",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "priority",
+                    "value": "u=1, i"
+                  },
+                  {
+                    "key": "referer",
+                    "value": "https://analytics-care-k3s.digit.org/dashboard/9-dvdms-stock-export?date=10-09-2026&facility_id=5e971c0e-22d8-494a-a231-2b10c5938140&issue_id=&location_id=2a242afe-9845-4c84-843c-e2625c3adebb"
+                  },
+                  {
+                    "key": "sec-ch-ua",
+                    "value": "\"Google Chrome\";v=\"155\", \"Chromium\";v=\"155\", \"Not(A:Brand\";v=\"24\""
+                  },
+                  {
+                    "key": "sec-ch-ua-mobile",
+                    "value": "?0"
+                  },
+                  {
+                    "key": "sec-ch-ua-platform",
+                    "value": "\"macOS\""
+                  },
+                  {
+                    "key": "sec-fetch-dest",
+                    "value": "empty"
+                  },
+                  {
+                    "key": "sec-fetch-mode",
+                    "value": "cors"
+                  },
+                  {
+                    "key": "sec-fetch-site",
+                    "value": "same-origin"
+                  },
+                  {
+                    "key": "user-agent",
+                    "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36"
+                  },
+                  {
+                    "key": "x-api-key",
+                    "value": "{{metabase_api_key}}"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "parameters",
+                      "value": "[{\"type\":\"string/=\",\"value\":[\"5e971c0e-22d8-494a-a231-2b10c5938140\"],\"id\":\"58c3c149\",\"target\":[\"variable\",[\"template-tag\",\"facility_id\"]]},{\"type\":\"string/=\",\"value\":[\"10-09-2026\"],\"id\":\"f0020b42\",\"target\":[\"variable\",[\"template-tag\",\"issue_date\"]]},{\"type\":\"string/=\",\"value\":[\"ca4e2999-0a14-45a5-a96b-d418317496ee\"],\"id\":\"ead633ad\",\"target\":[\"variable\",[\"template-tag\",\"location_id\"]]}]"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "https://analytics-care-k3s.digit.org/api/dashboard/9/dashcard/103/card/106/query/json",
+                  "protocol": "https",
+                  "host": [
+                    "analytics-care-k3s",
+                    "digit",
+                    "org"
+                  ],
+                  "path": [
+                    "api",
+                    "dashboard",
+                    "9",
+                    "dashcard",
+                    "103",
+                    "card",
+                    "106",
+                    "query",
+                    "json"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "cache-control",
+                  "value": "max-age=0, no-cache, must-revalidate, proxy-revalidate"
+                },
+                {
+                  "key": "content-disposition",
+                  "value": "attachment; filename=\"active_ddc_s_issues_2026-10-19T14:29:52.641129567Z.json\""
+                },
+                {
+                  "key": "content-encoding",
+                  "value": "gzip"
+                },
+                {
+                  "key": "content-security-policy",
+                  "value": "font-src 'self' data:; style-src-attr 'self'; script-src 'self' 'nonce-jDvSGHZWEw' https://maps.google.com https://accounts.google.com https://www.google-analytics.com   'sha256-SxNB1/NQ1TUHWrwTi7scFI31VsahWQBj54W7KQZQs1Q=' 'sha256-isH538cVBUY8IMlGYGbWtBwr+cGqkc4mN6nLcA7lUjE=' 'sha256-3N2Z+Nu++/yNMVHIl863JigVmt2Nr9gt2doEMJT2Wzk='; style-src 'self' 'nonce-jDvSGHZWEw'   https://accounts.google.com; manifest-src 'self'; connect-src 'self' https://accounts.google.com metabase.us10.list-manage.com https://sp.metabase.com   ; img-src * 'self' data:; frame-src 'self' https://www.metabase.com/ https://metabase.com/ youtube.com *.youtube.com youtu.be *.youtu.be loom.com *.loom.com vimeo.com *.vimeo.com docs.google.com calendar.google.com airtable.com *.airtable.com typeform.com *.typeform.com canva.com *.canva.com codepen.io *.codepen.io figma.com *.figma.com grafana.com *.grafana.com miro.com *.miro.com excalidraw.com *.excalidraw.com notion.com *.notion.com atlassian.com *.atlassian.com trello.com *.trello.com asana.com *.asana.com gist.github.com linkedin.com *.linkedin.com twitter.com *.twitter.com x.com *.x.com; default-src 'none'; media-src www.metabase.com; child-src 'self' https://accounts.google.com;  frame-ancestors 'none';"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json;charset=utf-8"
+                },
+                {
+                  "key": "date",
+                  "value": "Mon, 19 Oct 2026 14:29:52 GMT"
+                },
+                {
+                  "key": "expires",
+                  "value": "Tue, 03 Jul 2001 06:00:00 GMT"
+                },
+                {
+                  "key": "last-modified",
+                  "value": "Mon, 19 Oct 2026 14:29:52 GMT"
+                },
+                {
+                  "key": "strict-transport-security",
+                  "value": "max-age=31536000"
+                },
+                {
+                  "key": "x-accel-buffering",
+                  "value": "no"
+                },
+                {
+                  "key": "x-content-type-options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "x-frame-options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "x-metabase-version",
+                  "value": "v0.63.16.8"
+                },
+                {
+                  "key": "x-permitted-cross-domain-policies",
+                  "value": "none"
+                },
+                {
+                  "key": "transfer-encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"issue_id\": \"3d5f0c60-1bc8-4767-8694-4cc61777a345\",\n    \"issue_date\": \"2026-10-09\",\n    \"location_id\": \"ca4e2999-0a14-45a5-a96b-d418317496ee\",\n    \"ddc\": \"General Medicine\",\n    \"patient_id\": \"17f24c34-6efd-4f55-b0a9-384a86112f64\",\n    \"no_of_items\": 3,\n    \"total_quantity\": 63\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Active DDCs Issues details",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              },
+              {
+                "key": "accept-language",
+                "value": "en-US,en;q=0.9,am;q=0.8,ar;q=0.7"
+              },
+              {
+                "key": "cache-control",
+                "value": "no-cache"
+              },
+              {
+                "key": "content-type",
+                "value": "application/x-www-form-urlencoded;charset=UTF-8"
+              },
+              {
+                "key": "origin",
+                "value": "https://analytics-care-k3s.digit.org"
+              },
+              {
+                "key": "pragma",
+                "value": "no-cache"
+              },
+              {
+                "key": "priority",
+                "value": "u=1, i"
+              },
+              {
+                "key": "referer",
+                "value": "https://analytics-care-k3s.digit.org/dashboard/9-dvdms-stock-export?date=10-09-2026&facility_id=5e971c0e-22d8-494a-a231-2b10c5938140&issue_id=&location_id=2a242afe-9845-4c84-843c-e2625c3adebb"
+              },
+              {
+                "key": "sec-ch-ua",
+                "value": "\"Google Chrome\";v=\"155\", \"Chromium\";v=\"155\", \"Not(A:Brand\";v=\"24\""
+              },
+              {
+                "key": "sec-ch-ua-mobile",
+                "value": "?0"
+              },
+              {
+                "key": "sec-ch-ua-platform",
+                "value": "\"macOS\""
+              },
+              {
+                "key": "sec-fetch-dest",
+                "value": "empty"
+              },
+              {
+                "key": "sec-fetch-mode",
+                "value": "cors"
+              },
+              {
+                "key": "sec-fetch-site",
+                "value": "same-origin"
+              },
+              {
+                "key": "user-agent",
+                "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36"
+              },
+              {
+                "key": "x-api-key",
+                "value": "{{metabase_api_key}}"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "parameters",
+                  "value": "[{\"type\":\"string/=\",\"value\":[\"5e971c0e-22d8-494a-a231-2b10c5938140\"],\"id\":\"58c3c149\",\"target\":[\"variable\",[\"template-tag\",\"facility_id\"]]},{\"type\":\"string/=\",\"value\":[\"10-09-2026\"],\"id\":\"f0020b42\",\"target\":[\"variable\",[\"template-tag\",\"issue_date\"]]},{\"type\":\"string/=\",\"value\":[\"ca4e2999-0a14-45a5-a96b-d418317496ee\"],\"id\":\"ead633ad\",\"target\":[\"variable\",[\"template-tag\",\"location_id\"]]},{\"type\":\"string/=\",\"value\":null,\"id\":\"4d7c274\",\"target\":[\"variable\",[\"template-tag\",\"issue_id\"]]}]"
+                }
+              ]
+            },
+            "url": {
+              "raw": "https://analytics-care-k3s.digit.org/api/dashboard/9/dashcard/104/card/107/query/json",
+              "protocol": "https",
+              "host": [
+                "analytics-care-k3s",
+                "digit",
+                "org"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                "9",
+                "dashcard",
+                "104",
+                "card",
+                "107",
+                "query",
+                "json"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Active DDCs Issues details",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "accept-language",
+                    "value": "en-US,en;q=0.9,am;q=0.8,ar;q=0.7"
+                  },
+                  {
+                    "key": "cache-control",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "content-type",
+                    "value": "application/x-www-form-urlencoded;charset=UTF-8"
+                  },
+                  {
+                    "key": "origin",
+                    "value": "https://analytics-care-k3s.digit.org"
+                  },
+                  {
+                    "key": "pragma",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "priority",
+                    "value": "u=1, i"
+                  },
+                  {
+                    "key": "referer",
+                    "value": "https://analytics-care-k3s.digit.org/dashboard/9-dvdms-stock-export?date=10-09-2026&facility_id=5e971c0e-22d8-494a-a231-2b10c5938140&issue_id=&location_id=2a242afe-9845-4c84-843c-e2625c3adebb"
+                  },
+                  {
+                    "key": "sec-ch-ua",
+                    "value": "\"Google Chrome\";v=\"155\", \"Chromium\";v=\"155\", \"Not(A:Brand\";v=\"24\""
+                  },
+                  {
+                    "key": "sec-ch-ua-mobile",
+                    "value": "?0"
+                  },
+                  {
+                    "key": "sec-ch-ua-platform",
+                    "value": "\"macOS\""
+                  },
+                  {
+                    "key": "sec-fetch-dest",
+                    "value": "empty"
+                  },
+                  {
+                    "key": "sec-fetch-mode",
+                    "value": "cors"
+                  },
+                  {
+                    "key": "sec-fetch-site",
+                    "value": "same-origin"
+                  },
+                  {
+                    "key": "user-agent",
+                    "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36"
+                  },
+                  {
+                    "key": "x-api-key",
+                    "value": "{{metabase_api_key}}"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "parameters",
+                      "value": "[{\"type\":\"string/=\",\"value\":[\"5e971c0e-22d8-494a-a231-2b10c5938140\"],\"id\":\"58c3c149\",\"target\":[\"variable\",[\"template-tag\",\"facility_id\"]]},{\"type\":\"string/=\",\"value\":[\"10-09-2026\"],\"id\":\"f0020b42\",\"target\":[\"variable\",[\"template-tag\",\"issue_date\"]]},{\"type\":\"string/=\",\"value\":[\"ca4e2999-0a14-45a5-a96b-d418317496ee\"],\"id\":\"ead633ad\",\"target\":[\"variable\",[\"template-tag\",\"location_id\"]]},{\"type\":\"string/=\",\"value\":null,\"id\":\"4d7c274\",\"target\":[\"variable\",[\"template-tag\",\"issue_id\"]]}]"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "https://analytics-care-k3s.digit.org/api/dashboard/9/dashcard/104/card/107/query/json",
+                  "protocol": "https",
+                  "host": [
+                    "analytics-care-k3s",
+                    "digit",
+                    "org"
+                  ],
+                  "path": [
+                    "api",
+                    "dashboard",
+                    "9",
+                    "dashcard",
+                    "104",
+                    "card",
+                    "107",
+                    "query",
+                    "json"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "cache-control",
+                  "value": "max-age=0, no-cache, must-revalidate, proxy-revalidate"
+                },
+                {
+                  "key": "content-disposition",
+                  "value": "attachment; filename=\"ddc_issue_details_2026-10-19T14:30:26.275629527Z.json\""
+                },
+                {
+                  "key": "content-encoding",
+                  "value": "gzip"
+                },
+                {
+                  "key": "content-security-policy",
+                  "value": "font-src 'self' data:; style-src-attr 'self'; script-src 'self' 'nonce-lR1o1DyOfu' https://maps.google.com https://accounts.google.com https://www.google-analytics.com   'sha256-SxNB1/NQ1TUHWrwTi7scFI31VsahWQBj54W7KQZQs1Q=' 'sha256-isH538cVBUY8IMlGYGbWtBwr+cGqkc4mN6nLcA7lUjE=' 'sha256-3N2Z+Nu++/yNMVHIl863JigVmt2Nr9gt2doEMJT2Wzk='; style-src 'self' 'nonce-lR1o1DyOfu'   https://accounts.google.com; manifest-src 'self'; connect-src 'self' https://accounts.google.com metabase.us10.list-manage.com https://sp.metabase.com   ; img-src * 'self' data:; frame-src 'self' https://www.metabase.com/ https://metabase.com/ youtube.com *.youtube.com youtu.be *.youtu.be loom.com *.loom.com vimeo.com *.vimeo.com docs.google.com calendar.google.com airtable.com *.airtable.com typeform.com *.typeform.com canva.com *.canva.com codepen.io *.codepen.io figma.com *.figma.com grafana.com *.grafana.com miro.com *.miro.com excalidraw.com *.excalidraw.com notion.com *.notion.com atlassian.com *.atlassian.com trello.com *.trello.com asana.com *.asana.com gist.github.com linkedin.com *.linkedin.com twitter.com *.twitter.com x.com *.x.com; default-src 'none'; media-src www.metabase.com; child-src 'self' https://accounts.google.com;  frame-ancestors 'none';"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json;charset=utf-8"
+                },
+                {
+                  "key": "date",
+                  "value": "Mon, 19 Oct 2026 14:30:26 GMT"
+                },
+                {
+                  "key": "expires",
+                  "value": "Tue, 03 Jul 2001 06:00:00 GMT"
+                },
+                {
+                  "key": "last-modified",
+                  "value": "Mon, 19 Oct 2026 14:30:26 GMT"
+                },
+                {
+                  "key": "strict-transport-security",
+                  "value": "max-age=31536000"
+                },
+                {
+                  "key": "x-accel-buffering",
+                  "value": "no"
+                },
+                {
+                  "key": "x-content-type-options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "x-frame-options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "x-metabase-version",
+                  "value": "v0.63.16.8"
+                },
+                {
+                  "key": "x-permitted-cross-domain-policies",
+                  "value": "none"
+                },
+                {
+                  "key": "transfer-encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"issue_date\": \"2026-10-09\",\n    \"location_id\": \"ca4e2999-0a14-45a5-a96b-d418317496ee\",\n    \"store\": \"General Medicine\",\n    \"issue_id\": \"3d5f0c60-1bc8-4767-8694-4cc61777a345\",\n    \"patient_id\": \"17f24c34-6efd-4f55-b0a9-384a86112f64\",\n    \"product\": \"Cetirizine Tablet 10 mg\",\n    \"drug_name\": \"Chlorpheniramine Maleate 4 Mg\",\n    \"quantity\": 41,\n    \"batch_no\": \"cet001\",\n    \"expiry\": \"2026-11-07\",\n    \"drug_id\": \"10000066\",\n    \"drug_brand_id\": \"10000066\"\n  },\n  {\n    \"issue_date\": \"2026-10-09\",\n    \"location_id\": \"ca4e2999-0a14-45a5-a96b-d418317496ee\",\n    \"store\": \"General Medicine\",\n    \"issue_id\": \"3d5f0c60-1bc8-4767-8694-4cc61777a345\",\n    \"patient_id\": \"17f24c34-6efd-4f55-b0a9-384a86112f64\",\n    \"product\": \"Cetirizine Tablet 10 mg\",\n    \"drug_name\": \"Chlorpheniramine Maleate 4 Mg\",\n    \"quantity\": 1,\n    \"batch_no\": \"cet001\",\n    \"expiry\": \"2026-11-07\",\n    \"drug_id\": \"10000066\",\n    \"drug_brand_id\": \"10000066\"\n  },\n  {\n    \"issue_date\": \"2026-10-09\",\n    \"location_id\": \"ca4e2999-0a14-45a5-a96b-d418317496ee\",\n    \"store\": \"General Medicine\",\n    \"issue_id\": \"3d5f0c60-1bc8-4767-8694-4cc61777a345\",\n    \"patient_id\": \"17f24c34-6efd-4f55-b0a9-384a86112f64\",\n    \"product\": \"Paracetamol\",\n    \"drug_name\": \"Paracetamol 125 Mg / 5ml\",\n    \"quantity\": 21,\n    \"batch_no\": \"MOCK-BATCH\",\n    \"expiry\": \"2027-10-04\",\n    \"drug_id\": \"10000236\",\n    \"drug_brand_id\": \"10000236\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Internal Transfers",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              },
+              {
+                "key": "accept-language",
+                "value": "en-US,en;q=0.9,am;q=0.8,ar;q=0.7"
+              },
+              {
+                "key": "cache-control",
+                "value": "no-cache"
+              },
+              {
+                "key": "content-type",
+                "value": "application/x-www-form-urlencoded;charset=UTF-8"
+              },
+              {
+                "key": "origin",
+                "value": "https://analytics-care-k3s.digit.org"
+              },
+              {
+                "key": "pragma",
+                "value": "no-cache"
+              },
+              {
+                "key": "priority",
+                "value": "u=1, i"
+              },
+              {
+                "key": "referer",
+                "value": "https://analytics-care-k3s.digit.org/dashboard/9-dvdms-stock-export?date=10-09-2026&facility_id=5e971c0e-22d8-494a-a231-2b10c5938140&issue_id=&location_id=2a242afe-9845-4c84-843c-e2625c3adebb"
+              },
+              {
+                "key": "sec-ch-ua",
+                "value": "\"Google Chrome\";v=\"155\", \"Chromium\";v=\"155\", \"Not(A:Brand\";v=\"24\""
+              },
+              {
+                "key": "sec-ch-ua-mobile",
+                "value": "?0"
+              },
+              {
+                "key": "sec-ch-ua-platform",
+                "value": "\"macOS\""
+              },
+              {
+                "key": "sec-fetch-dest",
+                "value": "empty"
+              },
+              {
+                "key": "sec-fetch-mode",
+                "value": "cors"
+              },
+              {
+                "key": "sec-fetch-site",
+                "value": "same-origin"
+              },
+              {
+                "key": "user-agent",
+                "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36"
+              },
+              {
+                "key": "x-api-key",
+                "value": "{{metabase_api_key}}"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "parameters",
+                  "value": "[{\"type\":\"string/=\",\"value\":[\"5e971c0e-22d8-494a-a231-2b10c5938140\"],\"id\":\"58c3c149\",\"target\":[\"variable\",[\"template-tag\",\"facility_id\"]]},{\"type\":\"string/=\",\"value\":[\"10-09-2026\"],\"id\":\"f0020b42\",\"target\":[\"variable\",[\"template-tag\",\"issue_date\"]]},{\"type\":\"string/=\",\"value\":[\"2a242afe-9845-4c84-843c-e2625c3adebb\"],\"id\":\"ead633ad\",\"target\":[\"variable\",[\"template-tag\",\"location_id\"]]}]"
+                }
+              ]
+            },
+            "url": {
+              "raw": "https://analytics-care-k3s.digit.org/api/dashboard/9/dashcard/105/card/108/query/json",
+              "protocol": "https",
+              "host": [
+                "analytics-care-k3s",
+                "digit",
+                "org"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                "9",
+                "dashcard",
+                "105",
+                "card",
+                "108",
+                "query",
+                "json"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Internal Transfers",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "accept-language",
+                    "value": "en-US,en;q=0.9,am;q=0.8,ar;q=0.7"
+                  },
+                  {
+                    "key": "cache-control",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "content-type",
+                    "value": "application/x-www-form-urlencoded;charset=UTF-8"
+                  },
+                  {
+                    "key": "origin",
+                    "value": "https://analytics-care-k3s.digit.org"
+                  },
+                  {
+                    "key": "pragma",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "priority",
+                    "value": "u=1, i"
+                  },
+                  {
+                    "key": "referer",
+                    "value": "https://analytics-care-k3s.digit.org/dashboard/9-dvdms-stock-export?date=10-09-2026&facility_id=5e971c0e-22d8-494a-a231-2b10c5938140&issue_id=&location_id=2a242afe-9845-4c84-843c-e2625c3adebb"
+                  },
+                  {
+                    "key": "sec-ch-ua",
+                    "value": "\"Google Chrome\";v=\"155\", \"Chromium\";v=\"155\", \"Not(A:Brand\";v=\"24\""
+                  },
+                  {
+                    "key": "sec-ch-ua-mobile",
+                    "value": "?0"
+                  },
+                  {
+                    "key": "sec-ch-ua-platform",
+                    "value": "\"macOS\""
+                  },
+                  {
+                    "key": "sec-fetch-dest",
+                    "value": "empty"
+                  },
+                  {
+                    "key": "sec-fetch-mode",
+                    "value": "cors"
+                  },
+                  {
+                    "key": "sec-fetch-site",
+                    "value": "same-origin"
+                  },
+                  {
+                    "key": "user-agent",
+                    "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36"
+                  },
+                  {
+                    "key": "x-api-key",
+                    "value": "{{metabase_api_key}}"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "parameters",
+                      "value": "[{\"type\":\"string/=\",\"value\":[\"5e971c0e-22d8-494a-a231-2b10c5938140\"],\"id\":\"58c3c149\",\"target\":[\"variable\",[\"template-tag\",\"facility_id\"]]},{\"type\":\"string/=\",\"value\":[\"10-09-2026\"],\"id\":\"f0020b42\",\"target\":[\"variable\",[\"template-tag\",\"issue_date\"]]},{\"type\":\"string/=\",\"value\":[\"2a242afe-9845-4c84-843c-e2625c3adebb\"],\"id\":\"ead633ad\",\"target\":[\"variable\",[\"template-tag\",\"location_id\"]]}]"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "https://analytics-care-k3s.digit.org/api/dashboard/9/dashcard/105/card/108/query/json",
+                  "protocol": "https",
+                  "host": [
+                    "analytics-care-k3s",
+                    "digit",
+                    "org"
+                  ],
+                  "path": [
+                    "api",
+                    "dashboard",
+                    "9",
+                    "dashcard",
+                    "105",
+                    "card",
+                    "108",
+                    "query",
+                    "json"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "cache-control",
+                  "value": "max-age=0, no-cache, must-revalidate, proxy-revalidate"
+                },
+                {
+                  "key": "content-disposition",
+                  "value": "attachment; filename=\"internal_transfers_2026-10-19T14:30:48.011267561Z.json\""
+                },
+                {
+                  "key": "content-encoding",
+                  "value": "gzip"
+                },
+                {
+                  "key": "content-security-policy",
+                  "value": "font-src 'self' data:; style-src-attr 'self'; script-src 'self' 'nonce-9gMG9m1sm0' https://maps.google.com https://accounts.google.com https://www.google-analytics.com   'sha256-SxNB1/NQ1TUHWrwTi7scFI31VsahWQBj54W7KQZQs1Q=' 'sha256-isH538cVBUY8IMlGYGbWtBwr+cGqkc4mN6nLcA7lUjE=' 'sha256-3N2Z+Nu++/yNMVHIl863JigVmt2Nr9gt2doEMJT2Wzk='; style-src 'self' 'nonce-9gMG9m1sm0'   https://accounts.google.com; manifest-src 'self'; connect-src 'self' https://accounts.google.com metabase.us10.list-manage.com https://sp.metabase.com   ; img-src * 'self' data:; frame-src 'self' https://www.metabase.com/ https://metabase.com/ youtube.com *.youtube.com youtu.be *.youtu.be loom.com *.loom.com vimeo.com *.vimeo.com docs.google.com calendar.google.com airtable.com *.airtable.com typeform.com *.typeform.com canva.com *.canva.com codepen.io *.codepen.io figma.com *.figma.com grafana.com *.grafana.com miro.com *.miro.com excalidraw.com *.excalidraw.com notion.com *.notion.com atlassian.com *.atlassian.com trello.com *.trello.com asana.com *.asana.com gist.github.com linkedin.com *.linkedin.com twitter.com *.twitter.com x.com *.x.com; default-src 'none'; media-src www.metabase.com; child-src 'self' https://accounts.google.com;  frame-ancestors 'none';"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json;charset=utf-8"
+                },
+                {
+                  "key": "date",
+                  "value": "Mon, 19 Oct 2026 14:30:47 GMT"
+                },
+                {
+                  "key": "expires",
+                  "value": "Tue, 03 Jul 2001 06:00:00 GMT"
+                },
+                {
+                  "key": "last-modified",
+                  "value": "Mon, 19 Oct 2026 14:30:48 GMT"
+                },
+                {
+                  "key": "strict-transport-security",
+                  "value": "max-age=31536000"
+                },
+                {
+                  "key": "x-accel-buffering",
+                  "value": "no"
+                },
+                {
+                  "key": "x-content-type-options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "x-frame-options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "x-metabase-version",
+                  "value": "v0.63.16.8"
+                },
+                {
+                  "key": "x-permitted-cross-domain-policies",
+                  "value": "none"
+                },
+                {
+                  "key": "transfer-encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"transfer_date\": \"2026-10-09\",\n    \"from_store_id\": \"b51cf801-b6e9-430c-b96e-f97695eba2f1\",\n    \"from_store\": \"Main Store\",\n    \"to_store_id\": \"2a242afe-9845-4c84-843c-e2625c3adebb\",\n    \"to_store\": \"Ortho Ward\",\n    \"product\": \"Fluconazole  Tablets\",\n    \"drug_name\": \"Prednisolone 10mg\",\n    \"quantity\": 1111,\n    \"batch_no\": \"MOCK-BATCH\",\n    \"expiry\": \"2027-10-04\",\n    \"drug_id\": \"10000260\",\n    \"drug_brand_id\": \"10000260\"\n  },\n  {\n    \"transfer_date\": \"2026-10-09\",\n    \"from_store_id\": \"b51cf801-b6e9-430c-b96e-f97695eba2f1\",\n    \"from_store\": \"Main Store\",\n    \"to_store_id\": \"2a242afe-9845-4c84-843c-e2625c3adebb\",\n    \"to_store\": \"Ortho Ward\",\n    \"product\": \"Paracetamol\",\n    \"drug_name\": \"Paracetamol 125 Mg / 5ml\",\n    \"quantity\": 111,\n    \"batch_no\": \"MOCK-BATCH\",\n    \"expiry\": \"2027-10-04\",\n    \"drug_id\": \"10000236\",\n    \"drug_brand_id\": \"10000236\"\n  },\n  {\n    \"transfer_date\": \"2026-10-09\",\n    \"from_store_id\": \"2a242afe-9845-4c84-843c-e2625c3adebb\",\n    \"from_store\": \"Ortho Ward\",\n    \"to_store_id\": \"ca4e2999-0a14-45a5-a96b-d418317496ee\",\n    \"to_store\": \"General Medicine\",\n    \"product\": \"Paracetamol\",\n    \"drug_name\": \"Paracetamol 125 Mg / 5ml\",\n    \"quantity\": 81,\n    \"batch_no\": \"MOCK-BATCH\",\n    \"expiry\": \"2027-10-04\",\n    \"drug_id\": \"10000236\",\n    \"drug_brand_id\": \"10000236\"\n  }\n]"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

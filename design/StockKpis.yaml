@@ -1,0 +1,707 @@
+openapi: 3.0.3
+info:
+  title: CARE HMIS — DVDMS Integration KPI API
+  description: |
+    Read-only HTTP API exposing DVDMS (Drug & Vaccine Distribution Management System)
+    stock and dispensing KPIs from the CARE analytics (Metabase) instance.
+
+    Five endpoints form a drill-down chain:
+
+    1. `All facilities`            — which facilities exist and which are DVDMS-configured
+    2. `Active DDCs`               — Drug Dispensing Centres of one facility, with recent activity
+    3. `Active DDCs Issues`        — issue (dispense) headers for one DDC on one date
+    4. `Active DDCs Issues details`— line items of those issues
+    5. `Internal Transfers`        — stock moved between stores of the facility
+
+    **Authentication** — every request carries a Metabase API key in the `x-api-key`
+    header. There is no login step, no token exchange and no expiry.
+
+    **Two request shapes.** This API is not uniform. `All facilities` is a plain card
+    endpoint taking a raw JSON body. The other four are *dashboard-scoped* card
+    endpoints taking a form-urlencoded body whose single `parameters` field holds a
+    JSON **string**. Copy each shape verbatim; do not adapt one to the other.
+
+    **Failure returns HTTP 200.** A successful query returns a JSON array. A failed
+    query returns HTTP 200 with a JSON *object* describing the failure. Test the
+    response shape, not the status code.
+  version: 1.0.0
+  contact:
+    name: Jagankumar E
+    email: jagan.kumar@egov.org.in
+
+externalDocs:
+  description: DVDMS Integration KPI API reference (Word)
+  url: ./DVDMS-Integration-Data-API.docx
+
+servers:
+  - url: https://analytics-care-k3s.digit.org
+    description: DIGIT k3s analytics instance
+
+tags:
+  - name: Reference Data
+    description: Facility and DVDMS onboarding reference data
+  - name: Dispensing
+    description: Drug Dispensing Centre activity, issues and issue line items
+  - name: Stock Movement
+    description: Internal stock transfers between stores of a facility
+
+security:
+  - MetabaseApiKey: []
+
+paths:
+  # ---------------- Reference Data ----------------
+  /api/card/104/query/json:
+    post:
+      tags: [Reference Data]
+      summary: All facilities
+      description: |
+        Returns every facility known to the CARE instance with its DVDMS onboarding
+        state. Use it to discover `facility_id` values for the other four endpoints and
+        to tell which facilities are actually wired to DVDMS (`dvdms_status`).
+
+        **This is the only endpoint that takes a raw JSON body.**
+
+        **Observed behaviour — the `facility_id` parameter does not filter this
+        endpoint.** A call passing a single `facility_id` returned all 8 facilities,
+        including ones with a different id. Treat the response as the complete facility
+        list and filter client-side. (Metabase silently ignores a parameter the
+        underlying question does not bind, so this is consistent with the platform's
+        behaviour; confirm with the dashboard owner before relying on it.)
+      operationId: listAllFacilities
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonParameterEnvelope'
+            example:
+              parameters:
+                - type: category
+                  target: ["variable", ["template-tag", "facility_id"]]
+                  value: "5e971c0e-22d8-494a-a231-2b10c5938140"
+      responses:
+        '200':
+          description: |
+            Success (a JSON array) **or** a failed query (a JSON object). Check the shape.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/FacilityRow'
+                  - $ref: '#/components/schemas/QueryFailure'
+              examples:
+                success:
+                  summary: Two of the eight rows returned
+                  value:
+                    - facility_id: "5e971c0e-22d8-494a-a231-2b10c5938140"
+                      facility_name: "Apollo Hospitals"
+                      geo_organization: "Karnataka"
+                      institute_id: "998"
+                      institute_name: "Ramghar_DH"
+                      store_id: "99901036"
+                      store_name: "Ramghar_DH"
+                      store_location: "Main Store"
+                      supplier_id: "99901012"
+                      supplier_name: "Ramgarh_DWH"
+                      supplier_organization: "eAushadi"
+                      dvdms_status: "Configured"
+                    - facility_id: "55f1e443-4f6b-4888-93d7-e0b003b310cf"
+                      facility_name: "Bannur Goverment Hospital"
+                      geo_organization: "Karnataka"
+                      institute_id: null
+                      institute_name: null
+                      store_id: null
+                      store_name: null
+                      store_location: null
+                      supplier_id: null
+                      supplier_name: null
+                      supplier_organization: null
+                      dvdms_status: "Not onboarded"
+                failure:
+                  $ref: '#/components/examples/QueryFailureExample'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/CardNotFound'
+
+  # ---------------- Dispensing ----------------
+  /api/dashboard/9/dashcard/102/card/105/query/json:
+    post:
+      tags: [Dispensing]
+      summary: Active DDCs
+      description: |
+        Drug Dispensing Centres (DDCs) of one facility, each with its most recent
+        dispense and a 7-day dispense count. Returns the `location_id` values needed by
+        `Active DDCs Issues` and `Internal Transfers`.
+
+        `days_since_last_dispense` is relative to the server's current date, not to
+        `issue_date`.
+      operationId: listActiveDdcs
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FormParameterEnvelope'
+            example:
+              parameters: >-
+                [{"type":"string/=","value":["5e971c0e-22d8-494a-a231-2b10c5938140"],"id":"58c3c149","target":["variable",["template-tag","facility_id"]]},{"type":"string/=","value":["10-09-2026"],"id":"f0020b42","target":["variable",["template-tag","issue_date"]]}]
+      responses:
+        '200':
+          description: Success (array) or failed query (object)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/ActiveDdcRow'
+                  - $ref: '#/components/schemas/QueryFailure'
+              examples:
+                success:
+                  value:
+                    - location_id: "ca4e2999-0a14-45a5-a96b-d418317496ee"
+                      ddc: "General Medicine"
+                      location_status: "active"
+                      last_dispense: "2026-10-09"
+                      days_since_last_dispense: 0
+                      dispenses_7d: 3
+                    - location_id: "b51cf801-b6e9-430c-b96e-f97695eba2f1"
+                      ddc: "Main Store"
+                      location_status: "active"
+                      last_dispense: "2026-10-06"
+                      days_since_last_dispense: 3
+                      dispenses_7d: 1
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/CardNotFound'
+
+  /api/dashboard/9/dashcard/103/card/106/query/json:
+    post:
+      tags: [Dispensing]
+      summary: Active DDCs Issues
+      description: |
+        Issue (dispense) headers for one DDC on one date — one row per issue, carrying
+        the `issue_id` needed by `Active DDCs Issues details`.
+
+        `no_of_items` counts **line items**, not distinct products: an issue listing the
+        same drug twice from the same batch counts two items.
+      operationId: listActiveDdcIssues
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FormParameterEnvelope'
+            example:
+              parameters: >-
+                [{"type":"string/=","value":["5e971c0e-22d8-494a-a231-2b10c5938140"],"id":"58c3c149","target":["variable",["template-tag","facility_id"]]},{"type":"string/=","value":["10-09-2026"],"id":"f0020b42","target":["variable",["template-tag","issue_date"]]},{"type":"string/=","value":["ca4e2999-0a14-45a5-a96b-d418317496ee"],"id":"ead633ad","target":["variable",["template-tag","location_id"]]}]
+      responses:
+        '200':
+          description: Success (array) or failed query (object)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/DdcIssueRow'
+                  - $ref: '#/components/schemas/QueryFailure'
+              examples:
+                success:
+                  value:
+                    - issue_id: "3d5f0c60-1bc8-4767-8694-4cc61777a345"
+                      issue_date: "2026-10-09"
+                      location_id: "ca4e2999-0a14-45a5-a96b-d418317496ee"
+                      ddc: "General Medicine"
+                      patient_id: "17f24c34-6efd-4f55-b0a9-384a86112f64"
+                      no_of_items: 3
+                      total_quantity: 63
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/CardNotFound'
+
+  /api/dashboard/9/dashcard/104/card/107/query/json:
+    post:
+      tags: [Dispensing]
+      summary: Active DDCs Issues details
+      description: |
+        Line items of the issues returned by `Active DDCs Issues` — one row per drug,
+        batch and quantity dispensed.
+
+        `issue_id` is an optional fourth filter. The reference collection sends it as
+        `"value": null`, which returns every issue for the DDC and date. Prefer
+        **omitting the parameter object entirely** over sending a null value: a null is
+        not a documented "no filter" marker and its behaviour is not guaranteed.
+
+        The `store` column holds the DDC name — the same concept the other endpoints
+        call `ddc`.
+      operationId: listActiveDdcIssueDetails
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FormParameterEnvelope'
+            example:
+              parameters: >-
+                [{"type":"string/=","value":["5e971c0e-22d8-494a-a231-2b10c5938140"],"id":"58c3c149","target":["variable",["template-tag","facility_id"]]},{"type":"string/=","value":["10-09-2026"],"id":"f0020b42","target":["variable",["template-tag","issue_date"]]},{"type":"string/=","value":["ca4e2999-0a14-45a5-a96b-d418317496ee"],"id":"ead633ad","target":["variable",["template-tag","location_id"]]},{"type":"string/=","value":null,"id":"4d7c274","target":["variable",["template-tag","issue_id"]]}]
+      responses:
+        '200':
+          description: Success (array) or failed query (object)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/DdcIssueDetailRow'
+                  - $ref: '#/components/schemas/QueryFailure'
+              examples:
+                success:
+                  value:
+                    - issue_date: "2026-10-09"
+                      location_id: "ca4e2999-0a14-45a5-a96b-d418317496ee"
+                      store: "General Medicine"
+                      issue_id: "3d5f0c60-1bc8-4767-8694-4cc61777a345"
+                      patient_id: "17f24c34-6efd-4f55-b0a9-384a86112f64"
+                      product: "Cetirizine Tablet 10 mg"
+                      drug_name: "Chlorpheniramine Maleate 4 Mg"
+                      quantity: 41
+                      batch_no: "cet001"
+                      expiry: "2026-11-07"
+                      drug_id: "10000066"
+                      drug_brand_id: "10000066"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/CardNotFound'
+
+  # ---------------- Stock Movement ----------------
+  /api/dashboard/9/dashcard/105/card/108/query/json:
+    post:
+      tags: [Stock Movement]
+      summary: Internal Transfers
+      description: |
+        Stock moved between stores of the facility on the given date — one row per drug,
+        batch and quantity.
+
+        **`location_id` matches either side of the transfer.** A call filtered on one
+        location returns rows where it is the source *and* rows where it is the
+        destination, so the result is that location's full movement ledger, not its
+        outbound movements.
+      operationId: listInternalTransfers
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FormParameterEnvelope'
+            example:
+              parameters: >-
+                [{"type":"string/=","value":["5e971c0e-22d8-494a-a231-2b10c5938140"],"id":"58c3c149","target":["variable",["template-tag","facility_id"]]},{"type":"string/=","value":["10-09-2026"],"id":"f0020b42","target":["variable",["template-tag","issue_date"]]},{"type":"string/=","value":["2a242afe-9845-4c84-843c-e2625c3adebb"],"id":"ead633ad","target":["variable",["template-tag","location_id"]]}]
+      responses:
+        '200':
+          description: Success (array) or failed query (object)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/InternalTransferRow'
+                  - $ref: '#/components/schemas/QueryFailure'
+              examples:
+                success:
+                  value:
+                    - transfer_date: "2026-10-09"
+                      from_store_id: "b51cf801-b6e9-430c-b96e-f97695eba2f1"
+                      from_store: "Main Store"
+                      to_store_id: "2a242afe-9845-4c84-843c-e2625c3adebb"
+                      to_store: "Ortho Ward"
+                      product: "Fluconazole  Tablets"
+                      drug_name: "Prednisolone 10mg"
+                      quantity: 1111
+                      batch_no: "MOCK-BATCH"
+                      expiry: "2027-10-04"
+                      drug_id: "10000260"
+                      drug_brand_id: "10000260"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/CardNotFound'
+
+components:
+  securitySchemes:
+    MetabaseApiKey:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: |
+        Metabase API key, shared out of band. Read-only and scoped to these cards.
+        Never place it in a URL or commit it to source.
+
+  schemas:
+    # ---- request envelopes ----
+    JsonParameterEnvelope:
+      type: object
+      description: |
+        Raw JSON body used by `All facilities` only. Send `{"parameters": []}` to apply
+        no filters.
+      required: [parameters]
+      properties:
+        parameters:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryParameter'
+
+    FormParameterEnvelope:
+      type: object
+      description: |
+        Form-urlencoded body used by the four dashboard-scoped endpoints. The single
+        `parameters` field is a **JSON-encoded string**, not a JSON array — the body is
+        `parameters=%5B%7B%22type%22...`, and a client that posts a real JSON array here
+        will not be understood.
+      required: [parameters]
+      properties:
+        parameters:
+          type: string
+          description: JSON-encoded array of StringEqualsParameter objects
+          example: '[{"type":"string/=","value":["5e971c0e-22d8-494a-a231-2b10c5938140"],"id":"58c3c149","target":["variable",["template-tag","facility_id"]]}]'
+
+    CategoryParameter:
+      type: object
+      description: |
+        Variable-style parameter used by `All facilities`. `value` is a single string,
+        and there is no `id` field.
+      required: [type, target, value]
+      properties:
+        type:
+          type: string
+          enum: [category]
+        target:
+          type: array
+          description: '`["variable", ["template-tag", "<name>"]]`'
+          items: {}
+        value:
+          type: string
+          example: "5e971c0e-22d8-494a-a231-2b10c5938140"
+
+    StringEqualsParameter:
+      type: object
+      description: |
+        Parameter used by the four dashboard-scoped endpoints. `value` is an **array**
+        even when it holds one item, and `id` is the dashboard's parameter-mapping id,
+        which is required and fixed per template tag.
+      required: [type, target, value, id]
+      properties:
+        type:
+          type: string
+          enum: ["string/="]
+        target:
+          type: array
+          description: '`["variable", ["template-tag", "<name>"]]`'
+          items: {}
+        value:
+          type: array
+          nullable: true
+          items:
+            type: string
+          description: Single-element array; `null` is accepted but means "unfiltered"
+        id:
+          type: string
+          description: |
+            Dashboard parameter-mapping id, fixed per template tag:
+            `facility_id` → `58c3c149`, `issue_date` → `f0020b42`,
+            `location_id` → `ead633ad`, `issue_id` → `4d7c274`
+          enum: ["58c3c149", "f0020b42", "ead633ad", "4d7c274"]
+
+    # ---- response rows ----
+    FacilityRow:
+      type: object
+      description: |
+        One facility. Every DVDMS mapping column is null for a facility whose
+        `dvdms_status` is `Not onboarded`.
+      properties:
+        facility_id:
+          type: string
+          format: uuid
+          description: CARE facility external_id — the value to pass as `facility_id`
+        facility_name:
+          type: string
+          example: "Apollo Hospitals"
+        geo_organization:
+          type: string
+          nullable: true
+          description: State or ward the facility is administered under
+          example: "Karnataka"
+        institute_id:
+          type: string
+          nullable: true
+          description: DVDMS institute code; null when not onboarded
+          example: "998"
+        institute_name:
+          type: string
+          nullable: true
+          example: "Ramghar_DH"
+        store_id:
+          type: string
+          nullable: true
+          description: DVDMS store code
+          example: "99901036"
+        store_name:
+          type: string
+          nullable: true
+          example: "Ramghar_DH"
+        store_location:
+          type: string
+          nullable: true
+          example: "Main Store"
+        supplier_id:
+          type: string
+          nullable: true
+          example: "99901012"
+        supplier_name:
+          type: string
+          nullable: true
+          example: "Ramgarh_DWH"
+        supplier_organization:
+          type: string
+          nullable: true
+          description: Upstream supply system
+          example: "eAushadi"
+        dvdms_status:
+          type: string
+          description: |
+            `Configured` — facility is mapped to a DVDMS institute, store and supplier.
+            `Not onboarded` — no DVDMS mapping; the other four endpoints return no rows.
+          enum: ["Configured", "Not onboarded"]
+
+    ActiveDdcRow:
+      type: object
+      description: One Drug Dispensing Centre of the facility
+      properties:
+        location_id:
+          type: string
+          format: uuid
+          description: CARE FacilityLocation external_id — pass as `location_id`
+        ddc:
+          type: string
+          description: DDC name
+          example: "General Medicine"
+        location_status:
+          type: string
+          example: "active"
+        last_dispense:
+          type: string
+          format: date
+          nullable: true
+          description: ISO `YYYY-MM-DD` — note this differs from the request date format
+          example: "2026-10-09"
+        days_since_last_dispense:
+          type: integer
+          description: Days between `last_dispense` and the server's current date
+          example: 0
+        dispenses_7d:
+          type: integer
+          description: Dispense count over the trailing 7 days
+          example: 3
+
+    DdcIssueRow:
+      type: object
+      description: One issue (dispense) header
+      properties:
+        issue_id:
+          type: string
+          format: uuid
+          description: Pass as `issue_id` to narrow the details endpoint
+        issue_date:
+          type: string
+          format: date
+          example: "2026-10-09"
+        location_id:
+          type: string
+          format: uuid
+        ddc:
+          type: string
+          example: "General Medicine"
+        patient_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: CARE patient external_id the drugs were issued to
+        no_of_items:
+          type: integer
+          description: Number of line items (not distinct products)
+          example: 3
+        total_quantity:
+          type: integer
+          description: Sum of `quantity` across the issue's line items
+          example: 63
+
+    DdcIssueDetailRow:
+      type: object
+      description: One line item of an issue
+      properties:
+        issue_date:
+          type: string
+          format: date
+        location_id:
+          type: string
+          format: uuid
+        store:
+          type: string
+          description: DDC name — the same concept other endpoints call `ddc`
+          example: "General Medicine"
+        issue_id:
+          type: string
+          format: uuid
+        patient_id:
+          type: string
+          format: uuid
+          nullable: true
+        product:
+          type: string
+          description: Product/brand description as held in CARE
+          example: "Cetirizine Tablet 10 mg"
+        drug_name:
+          type: string
+          description: |
+            Generic/salt name as held in DVDMS. In the reference data this frequently
+            disagrees with `product` — treat the pair as two independent labels and do
+            not assume they describe the same molecule.
+          example: "Chlorpheniramine Maleate 4 Mg"
+        quantity:
+          type: integer
+          example: 41
+        batch_no:
+          type: string
+          nullable: true
+          example: "cet001"
+        expiry:
+          type: string
+          format: date
+          nullable: true
+          example: "2026-11-07"
+        drug_id:
+          type: string
+          example: "10000066"
+        drug_brand_id:
+          type: string
+          description: Equal to `drug_id` throughout the reference data
+          example: "10000066"
+
+    InternalTransferRow:
+      type: object
+      description: One drug/batch moved between two stores
+      properties:
+        transfer_date:
+          type: string
+          format: date
+          example: "2026-10-09"
+        from_store_id:
+          type: string
+          format: uuid
+        from_store:
+          type: string
+          example: "Main Store"
+        to_store_id:
+          type: string
+          format: uuid
+        to_store:
+          type: string
+          example: "Ortho Ward"
+        product:
+          type: string
+          example: "Fluconazole  Tablets"
+        drug_name:
+          type: string
+          example: "Prednisolone 10mg"
+        quantity:
+          type: integer
+          example: 1111
+        batch_no:
+          type: string
+          nullable: true
+          example: "MOCK-BATCH"
+        expiry:
+          type: string
+          format: date
+          nullable: true
+          example: "2027-10-04"
+        drug_id:
+          type: string
+          example: "10000260"
+        drug_brand_id:
+          type: string
+          example: "10000260"
+
+    # ---- errors ----
+    QueryFailure:
+      type: object
+      description: |
+        Returned with **HTTP 200** when the query itself fails. Distinguished from a
+        successful response by being an object rather than an array — check
+        `Array.isArray(body)` / `isinstance(body, list)` before reading rows.
+      properties:
+        database_id:
+          type: integer
+        started_at:
+          type: string
+          format: date-time
+        status:
+          type: string
+          example: "failed"
+        error:
+          type: string
+        via:
+          type: array
+          items:
+            type: object
+            properties:
+              status:
+                type: string
+              error:
+                type: string
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+
+  examples:
+    QueryFailureExample:
+      summary: Failed query — note this arrives with HTTP 200
+      value:
+        database_id: 2
+        started_at: "2026-10-09T10:15:00+05:30"
+        status: "failed"
+        via:
+          - status: "failed"
+            error: "Unable to substitute parameter"
+
+  responses:
+    Unauthorized:
+      description: Missing or invalid `x-api-key`
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: "Unauthenticated"
+
+    CardNotFound:
+      description: |
+        No such card, dashcard or dashboard. Most often caused by a dashcard id that
+        changed when the dashboard was edited — see the note on endpoint stability.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: "Not found."

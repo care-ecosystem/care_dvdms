@@ -13,7 +13,6 @@ from django.db import transaction
 from care_dvdms.api.services.dvdms_acknowledge_services import (
     build_acknowledge_save_payload,
     fetch_acknowledge_details,
-    fetch_acknowledge_pending_records,
     parse_item_pk_key,
     save_acknowledgement,
 )
@@ -174,11 +173,13 @@ def _upsert_inward_item_record(inward_record, item_order, user, drug_id, brand_i
     retry_backoff_max=600,
     retry_jitter=True,
 )
-def prefill_inward_record_task(self, institute_id, outward_record_id, user_id):
+def prefill_inward_record_task(self, institute_id, outward_record_id, user_id, issue_no=None):
     logger.info(
-        "Celery Task Triggered: prefill_inward_record_task | institute_id=%s outward_record_id=%s attempt=%s",
+        "Celery Task Triggered: prefill_inward_record_task | "
+        "institute_id=%s outward_record_id=%s issue_no=%s attempt=%s",
         institute_id,
         outward_record_id,
+        issue_no,
         self.request.retries + 1,
     )
 
@@ -191,12 +192,10 @@ def prefill_inward_record_task(self, institute_id, outward_record_id, user_id):
     user = get_object_or_404(User, external_id=user_id)
 
     to_store_id = outward_record.record_order.institute_store.eaushadhi_store_id
-    eaushadhi_indent_no = outward_record.eaushadhi_indent_no
-    pending_records = fetch_acknowledge_pending_records(to_store_id, eaushadhi_indent_no)
-    if not pending_records:
+    if not issue_no:
         logger.info(
-            "prefill_inward_record_task: no acknowledge-pending entry for indent_no=%s",
-            eaushadhi_indent_no,
+            "prefill_inward_record_task: no issue_no in indent status for indent_no=%s",
+            outward_record.eaushadhi_indent_no,
         )
         return
 
@@ -205,37 +204,36 @@ def prefill_inward_record_task(self, institute_id, outward_record_id, user_id):
         for item_order in outward_record.record_order.item_orders.select_related("drug")
     }
 
-    for pending_record in pending_records:
-        request_payload = {"issueNo": pending_record["issue_no"], "storeId": to_store_id}
-        sync_log = DVDMSSyncLog.objects.create(
-            institute=institute,
-            triggered_by=DVDMSSyncTriggeredBy.user,
-            sync_type=DVDMSSyncType.fetch_issue,
-            request_status=DVDMSSyncRequestStatus.pending,
-            request_payload=request_payload,
-            created_by=user,
-            updated_by=user,
-        )
+    request_payload = {"issueNo": issue_no, "storeId": to_store_id}
+    sync_log = DVDMSSyncLog.objects.create(
+        institute=institute,
+        triggered_by=DVDMSSyncTriggeredBy.user,
+        sync_type=DVDMSSyncType.fetch_issue,
+        request_status=DVDMSSyncRequestStatus.pending,
+        request_payload=request_payload,
+        created_by=user,
+        updated_by=user,
+    )
 
-        try:
-            data = fetch_acknowledge_details(pending_record["issue_no"], to_store_id)
-        except Exception as exc:
-            sync_log.request_status = DVDMSSyncRequestStatus.failure
-            sync_log.error_detail = str(exc)
-            sync_log.http_status_code = get_status_code(exc)
-            sync_log.save(update_fields=["request_status", "error_detail", "http_status_code", "modified_date"])
-            raise
-        else:
-            sync_log.request_status = DVDMSSyncRequestStatus.success
-            sync_log.response_payload = data
-            sync_log.save(update_fields=["request_status", "response_payload", "modified_date"])
+    try:
+        data = fetch_acknowledge_details(issue_no, to_store_id)
+    except Exception as exc:
+        sync_log.request_status = DVDMSSyncRequestStatus.failure
+        sync_log.error_detail = str(exc)
+        sync_log.http_status_code = get_status_code(exc)
+        sync_log.save(update_fields=["request_status", "error_detail", "http_status_code", "modified_date"])
+        raise
+    else:
+        sync_log.request_status = DVDMSSyncRequestStatus.success
+        sync_log.response_payload = data
+        sync_log.save(update_fields=["request_status", "response_payload", "modified_date"])
 
-            inward_record = _upsert_inward_record(institute, outward_record, sync_log, user, pending_record["issue_no"])
+        inward_record = _upsert_inward_record(institute, outward_record, sync_log, user, issue_no)
 
-            for item in data.get("itemList", []):
-                drug_id, brand_id = parse_item_pk_key(item["pkKey"])
-                item_order = item_orders_by_drug_id.get(drug_id)
-                _upsert_inward_item_record(inward_record, item_order, user, drug_id, brand_id, item)
+        for item in data.get("itemList", []):
+            drug_id, brand_id = parse_item_pk_key(item["pkKey"])
+            item_order = item_orders_by_drug_id.get(drug_id)
+            _upsert_inward_item_record(inward_record, item_order, user, drug_id, brand_id, item)
 
 
 @shared_task(
