@@ -191,7 +191,7 @@ def prefill_inward_record_task(self, institute_id, outward_record_id, user_id, i
     )
     user = get_object_or_404(User, external_id=user_id)
 
-    to_store_id = outward_record.record_order.institute_store.eaushadhi_store_id
+    to_store_id = outward_record.record_order.institute_supplier.eaushadhi_warehouse_id
     if not issue_no:
         logger.info(
             "prefill_inward_record_task: no issue_no in indent status for indent_no=%s",
