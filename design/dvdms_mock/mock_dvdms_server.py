@@ -222,14 +222,14 @@ class Handler(BaseHTTPRequestHandler):
             self._send_json(_track_indent(indent_no))
             return
 
-        if parsed.path == "/dwh/acknowledge-pandding/list":
+        if parsed.path == "/acknowledge-pandding/list":
             qs = parse_qs(parsed.query)
             to_store_id = qs.get("toStoreId", [None])[0]
             indent_no = qs.get("indentNo", [None])[0]
             self._send_json(_acknowledge_pending_list(to_store_id, indent_no))
             return
 
-        if parsed.path == "/dwh/acknowladge/datails":
+        if parsed.path == "/acknowladge/datails":
             qs = parse_qs(parsed.query)
             issue_no = qs.get("issueNo", [None])[0]
             store_id = qs.get("storeId", [None])[0]
@@ -245,7 +245,7 @@ class Handler(BaseHTTPRequestHandler):
             self._send_json(_save_indent(payload))
             return
 
-        if self.path == "/dwh/acknowledge/save":
+        if self.path == "/acknowledge/save":
             length = int(self.headers.get("Content-Length", 0))
             self.rfile.read(length)
             self._send_json(_save_acknowledgement())
