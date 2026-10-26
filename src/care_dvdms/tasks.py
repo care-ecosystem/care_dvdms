@@ -304,20 +304,20 @@ def save_acknowledgement_task(self, institute_id, inward_record_id, user_id, is_
             )
             return
 
-        payload = build_acknowledge_save_payload(inward_record)
-
         sync_log = DVDMSSyncLog.objects.create(
             institute=institute,
             triggered_by=DVDMSSyncTriggeredBy.user,
             sync_type=DVDMSSyncType.acknowledge_issue,
             request_status=DVDMSSyncRequestStatus.pending,
-            request_payload=payload,
             created_by=user,
             updated_by=user,
         )
 
         request_exc = None
         try:
+            payload = build_acknowledge_save_payload(inward_record)
+            sync_log.request_payload = payload
+            sync_log.save(update_fields=["request_payload", "modified_date"])
             response, http_status_code = save_acknowledgement(payload)
         except Exception as exc:
             request_exc = exc

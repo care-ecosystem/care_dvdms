@@ -1,10 +1,8 @@
 from care_dvdms.api.services.constants import (
     DVDMS_ACKNOWLEDGE_DETAILS_PATH,
     DVDMS_ACKNOWLEDGE_DETAILS_SUCCESS_STATUS,
-    DVDMS_ACKNOWLEDGE_REQUEST_TYPE,
     DVDMS_ACKNOWLEDGE_SAVE_PATH,
     DVDMS_ACKNOWLEDGE_SAVE_SUCCESS_STATUS,
-    DVDMS_DRUG_ITEM_CAT_NO,
 )
 from care_dvdms.api.services.dvdms_client import dvdms_get, dvdms_post_full
 
@@ -18,34 +16,83 @@ def fetch_acknowledge_details(issue_no, store_id):
     )
 
 
-def _build_item_pk(store_id, item):
-    return "^".join([store_id, item.drug_id, item.drug_id, item.batch or "", DVDMS_DRUG_ITEM_CAT_NO, "0", "0"])
-
-
 def build_acknowledge_save_payload(inward_record):
-    """Build the DVDMS acknowledge-save request payload for an inward record."""
-    institute_store = inward_record.outward_record.record_order.institute_store
-    store_id = institute_store.eaushadhi_store_id
-    issue_no = inward_record.eaushadhi_issue_no
-    items = list(inward_record.items.select_related("item_delivery"))
+    """Build the DVDMS acknowledge-save request payload for an inward record from its acknowledge details."""
+    details = fetch_acknowledge_details(
+        inward_record.eaushadhi_issue_no,
+        inward_record.outward_record.record_order.institute_supplier.eaushadhi_warehouse_id,
+    )
+    items_by_key = {
+        (item.drug_id, item.brand_id, item.batch): item for item in inward_record.items.select_related("item_delivery")
+    }
+    trans_no = str(details["tranceNo"])
+    store_id = str(details["storeId"])
+    to_store_id = str(details["toStoreId"])
+    req_type_id = str(details["reqTypeId"])
+    combo_val = str(details["toStoreName"])
+    remarks = inward_record.record_delivery.delivery_order.note or ""
+
+    lines = []
+    for detail in details.get("itemList", []):
+        item = items_by_key[(*parse_item_pk_key(detail["pkKey"]), detail.get("batchNo"))]
+        delivery = item.item_delivery
+        accepted = int(delivery.quantity_accepted)
+        damaged = int(delivery.quantity_damaged)
+        lines.append(
+            {
+                "detail": detail,
+                "issue": int(item.received_quantity),
+                "received": accepted + damaged,
+                "accepted": accepted,
+                "damaged": damaged,
+                "balance": int(delivery.quantity_short),
+            }
+        )
 
     return {
-        "strChk": [f"{store_id}@{issue_no}@{DVDMS_ACKNOWLEDGE_REQUEST_TYPE}@0${len(items)}"],
+        "strChk": [f"{store_id}@{trans_no}@{req_type_id}@0${len(lines)}"],
         "strAckStatus": "0",
-        "strTransNo": issue_no,
+        "strTransNo": trans_no,
         "strStoreId": store_id,
+        "strRequestTypeId": req_type_id,
+        "strRequestMode": "0",
+        "strReturnStatus": "0",
+        "strReqTypeId": req_type_id,
+        "strAckStsFlag": "1",
+        "strSaveFlg": "0",
+        "strComboVal": combo_val,
+        "combo": f"{to_store_id}^0",
+        "strPk": [line["detail"]["pkKey"] for line in lines],
+        "strIssueQty": [line["issue"] for line in lines],
         "strHospitalCode": inward_record.institute.eaushadhi_institute_id,
+        "strRemarks": remarks,
+        "strTotBkgQty": [line["damaged"] for line in lines],
+        "strBkgQty": [line["damaged"] for line in lines],
+        "strStockRegNo": [0 for _ in lines],
+        "strToBeAckQty": [line["accepted"] for line in lines],
         "strSeatId": inward_record.institute.eaushadhi_user_ref_id,
-        "combo": f"{store_id}^0",
+        "strHidVal": (
+            f"Store^{trans_no}^Date^Drug^Type^{combo_val}^{store_id}^{to_store_id}"
+            f"^{details['itameCatNo']}^00^Date^{req_type_id}^{remarks.replace('^', ' ')}^User^UserType"
+        ),
+        "strReceivedQty": [line["received"] for line in lines],
+        "strBalanceQty": [line["balance"] for line in lines],
         "itemList": [
             {
-                "strPk": _build_item_pk(store_id, item),
-                "receivedQty": str(int(item.received_quantity)),
-                "acceptedQty": str(int(item.item_delivery.quantity_accepted)),
-                "breakageQty": str(int(item.item_delivery.quantity_damaged)),
-                "shortageQty": str(int(item.item_delivery.quantity_short)),
+                "itemName": line["detail"].get("itemName"),
+                "batchNo": line["detail"].get("batchNo"),
+                "expiryDate": line["detail"].get("expiryDate"),
+                "issueQyt": str(line["issue"]),
+                "recQyt": str(line["received"]),
+                "bkgQyt": str(line["damaged"]),
+                "ackQyt": str(line["accepted"]),
+                "pkKey": line["detail"]["pkKey"],
+                "prigrammeName": line["detail"].get("prigrammeName") or "",
+                "mfgName": line["detail"].get("mfgName") or "",
+                "strStockRegNo": "0",
+                "issueQtyUnitName": line["detail"].get("issueQtyUnitName") or "Unit",
             }
-            for item in items
+            for line in lines
         ],
     }
 

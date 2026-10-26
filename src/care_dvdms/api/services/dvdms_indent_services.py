@@ -57,7 +57,7 @@ def build_save_indent_payload(record_order):
         "hstnumTostoreId": record_order.institute_supplier.eaushadhi_warehouse_id,
         "sstnumItemCatNo": DVDMS_DRUG_ITEM_CAT_NO,
         "hststrIndentPeriodValue": financial_year,
-        "gstrRemarks": str(record_order.external_id),
+        "gstrRemarks": record_order.order.note or "",
         "hstnumUrgentFlag": urgent_flag,
         "draftFlag": 0,
         "hospitalCode": record_order.institute.eaushadhi_institute_id,
