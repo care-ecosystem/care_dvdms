@@ -32,22 +32,38 @@ def build_acknowledge_save_payload(inward_record):
     combo_val = str(details["toStoreName"])
     remarks = inward_record.record_delivery.delivery_order.note or ""
 
-    lines = []
+    details_by_key = {}
     for detail in details.get("itemList", []):
-        item = items_by_key[(*parse_item_pk_key(detail["pkKey"]), detail.get("batchNo"))]
-        delivery = item.item_delivery
+        details_by_key.setdefault((*parse_item_pk_key(detail["pkKey"]), detail.get("batchNo")), []).append(detail)
+
+    lines = []
+    for key, group in details_by_key.items():
+        delivery = items_by_key[key].item_delivery
         accepted = int(delivery.quantity_accepted)
         damaged = int(delivery.quantity_damaged)
-        lines.append(
-            {
-                "detail": detail,
-                "issue": int(item.received_quantity),
-                "received": accepted + damaged,
-                "accepted": accepted,
-                "damaged": damaged,
-                "balance": int(delivery.quantity_short),
-            }
-        )
+        short = int(delivery.quantity_short)
+        # merged inward item: fill lines in order, last line takes the remainder
+        for index, detail in enumerate(group):
+            issue = int(detail.get("issueQyt") or 0)
+            if index == len(group) - 1:
+                line_accepted, line_damaged, line_short = accepted, damaged, short
+            else:
+                line_accepted = min(issue, accepted)
+                line_damaged = min(issue - line_accepted, damaged)
+                line_short = min(issue - line_accepted - line_damaged, short)
+            accepted -= line_accepted
+            damaged -= line_damaged
+            short -= line_short
+            lines.append(
+                {
+                    "detail": detail,
+                    "issue": issue,
+                    "received": line_accepted + line_damaged,
+                    "accepted": line_accepted,
+                    "damaged": line_damaged,
+                    "balance": line_short,
+                }
+            )
 
     return {
         "strChk": [f"{store_id}@{trans_no}@{req_type_id}@0${len(lines)}"],
