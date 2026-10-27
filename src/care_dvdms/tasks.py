@@ -13,7 +13,7 @@ from django.db import transaction
 from care_dvdms.api.services.dvdms_acknowledge_services import (
     build_acknowledge_save_payload,
     fetch_acknowledge_details,
-    parse_item_pk_key,
+    merge_acknowledge_items,
     save_acknowledgement,
 )
 from care_dvdms.api.services.dvdms_client import get_status_code
@@ -230,8 +230,7 @@ def prefill_inward_record_task(self, institute_id, outward_record_id, user_id, i
 
         inward_record = _upsert_inward_record(institute, outward_record, sync_log, user, issue_no)
 
-        for item in data.get("itemList", []):
-            drug_id, brand_id = parse_item_pk_key(item["pkKey"])
+        for drug_id, brand_id, item in merge_acknowledge_items(data.get("itemList", [])):
             item_order = item_orders_by_drug_id.get(drug_id)
             _upsert_inward_item_record(inward_record, item_order, user, drug_id, brand_id, item)
 

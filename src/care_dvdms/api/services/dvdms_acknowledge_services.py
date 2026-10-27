@@ -1,3 +1,5 @@
+import logging
+
 from care_dvdms.api.services.constants import (
     DVDMS_ACKNOWLEDGE_DETAILS_PATH,
     DVDMS_ACKNOWLEDGE_DETAILS_SUCCESS_STATUS,
@@ -7,6 +9,8 @@ from care_dvdms.api.services.constants import (
     DVDMS_DRUG_ITEM_CAT_NO,
 )
 from care_dvdms.api.services.dvdms_client import dvdms_get, dvdms_post_full
+
+logger = logging.getLogger(__name__)
 
 
 def fetch_acknowledge_details(issue_no, store_id):
@@ -59,3 +63,38 @@ def parse_item_pk_key(pk_key):
     """Parse an acknowledge-details itemList "pkKey" ("storeId^drugId^brandId^...") into (drug_id, brand_id)."""
     _, drug_id, brand_id = pk_key.split("^")[:3]
     return drug_id, brand_id
+
+
+def _parse_issue_quantity(value):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        logger.warning("Could not parse DVDMS issued quantity value: %s", value)
+        return 0
+
+
+def merge_acknowledge_items(item_list):
+    """Merge acknowledge-details itemList rows that share a (drug, brand, batch) identity.
+
+    DVDMS returns one row per programme/stock lot, so a single issued drug can come back more
+    than once with the same "pkKey" prefix. An inward item record is unique per ordered line, so
+    those rows are collapsed into one and their issued quantities summed - the first row wins for
+    the descriptive fields. Returns a list of (drug_id, brand_id, item) tuples.
+    """
+    merged = {}
+    for item in item_list:
+        drug_id, brand_id = parse_item_pk_key(item["pkKey"])
+        quantity = _parse_issue_quantity(item.get("issueQyt"))
+        key = (drug_id, brand_id, item.get("batchNo"))
+        existing = merged.get(key)
+        if existing is None:
+            merged[key] = (drug_id, brand_id, {**item, "issueQyt": quantity})
+        else:
+            existing[2]["issueQyt"] += quantity
+            logger.info(
+                "merge_acknowledge_items: merged pkKey=%s into pkKey=%s, issued quantity now %s",
+                item["pkKey"],
+                existing[2]["pkKey"],
+                existing[2]["issueQyt"],
+            )
+    return list(merged.values())
