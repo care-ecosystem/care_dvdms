@@ -22,9 +22,13 @@ def build_acknowledge_save_payload(inward_record):
         inward_record.eaushadhi_issue_no,
         inward_record.outward_record.record_order.institute_supplier.eaushadhi_warehouse_id,
     )
-    items_by_key = {
-        (item.drug_id, item.brand_id, item.batch): item for item in inward_record.items.select_related("item_delivery")
-    }
+    # Several issued lines can share a drug, brand and batch - the "pkKey" is the only unique identity
+    items = list(inward_record.items.select_related("item_delivery"))
+    items_by_pk_key = {item.pk_key: item for item in items if item.pk_key}
+    unkeyed_items = {}
+    for item in items:
+        if not item.pk_key:
+            unkeyed_items.setdefault((item.drug_id, item.brand_id, item.batch), item)
     trans_no = str(details["tranceNo"])
     store_id = str(details["storeId"])
     to_store_id = str(details["toStoreId"])
@@ -34,7 +38,14 @@ def build_acknowledge_save_payload(inward_record):
 
     lines = []
     for detail in details.get("itemList", []):
-        item = items_by_key[(*parse_item_pk_key(detail["pkKey"]), detail.get("batchNo"))]
+        item = items_by_pk_key.get(detail["pkKey"]) or unkeyed_items.pop(
+            (*parse_item_pk_key(detail["pkKey"]), detail.get("batchNo")), None
+        )
+        if item is None:
+            raise ValueError(
+                f"No inward item record matches pkKey {detail['pkKey']} for issue "
+                f"{inward_record.eaushadhi_issue_no}; re-run the inward prefill for this record"
+            )
         delivery = item.item_delivery
         accepted = int(delivery.quantity_accepted)
         damaged = int(delivery.quantity_damaged)

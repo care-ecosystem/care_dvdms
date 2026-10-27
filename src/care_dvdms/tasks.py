@@ -143,6 +143,7 @@ def _parse_dvdms_date(value):
 
 def _upsert_inward_item_record(inward_record, item_order, user, drug_id, brand_id, item):
     fields = {
+        "record_order_item": item_order,
         "drug_id": drug_id,
         "drug_name": item.get("itemName", ""),
         "brand_id": brand_id,
@@ -151,13 +152,9 @@ def _upsert_inward_item_record(inward_record, item_order, user, drug_id, brand_i
         "expiry_date": _parse_dvdms_date(item.get("expiryDate")),
         "received_quantity": item.get("issueQyt") or 0,
     }
-    lookup = {"inward_record": inward_record, "record_order_item": item_order}
-    if item_order is None:
-        lookup["drug_id"] = drug_id
-        lookup["brand_id"] = brand_id
-        lookup["batch"] = item.get("batchNo")
     item_record, _ = DVDMSInwardItemRecord.objects.update_or_create(
-        **lookup,
+        inward_record=inward_record,
+        pk_key=item["pkKey"],
         defaults={**fields, "updated_by": user},
         create_defaults={**fields, "created_by": user, "updated_by": user},
     )
