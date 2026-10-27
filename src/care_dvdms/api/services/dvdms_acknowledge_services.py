@@ -1,3 +1,6 @@
+import logging
+from datetime import datetime
+
 from care_dvdms.api.services.constants import (
     DVDMS_ACKNOWLEDGE_DETAILS_PATH,
     DVDMS_ACKNOWLEDGE_DETAILS_SUCCESS_STATUS,
@@ -5,6 +8,8 @@ from care_dvdms.api.services.constants import (
     DVDMS_ACKNOWLEDGE_SAVE_SUCCESS_STATUS,
 )
 from care_dvdms.api.services.dvdms_client import dvdms_get, dvdms_post_full
+
+logger = logging.getLogger(__name__)
 
 
 def fetch_acknowledge_details(issue_no, store_id):
@@ -23,7 +28,8 @@ def build_acknowledge_save_payload(inward_record):
         inward_record.outward_record.record_order.institute_supplier.eaushadhi_warehouse_id,
     )
     items_by_key = {
-        (item.drug_id, item.brand_id, item.batch): item for item in inward_record.items.select_related("item_delivery")
+        (item.drug_id, item.brand_id, item.batch, item.expiry_date, item.manufacturer): item
+        for item in inward_record.items.select_related("item_delivery")
     }
     trans_no = str(details["tranceNo"])
     store_id = str(details["storeId"])
@@ -32,12 +38,8 @@ def build_acknowledge_save_payload(inward_record):
     combo_val = str(details["toStoreName"])
     remarks = inward_record.record_delivery.delivery_order.note or ""
 
-    details_by_key = {}
-    for detail in details.get("itemList", []):
-        details_by_key.setdefault((*parse_item_pk_key(detail["pkKey"]), detail.get("batchNo")), []).append(detail)
-
     lines = []
-    for key, group in details_by_key.items():
+    for key, group in group_issue_lines(details.get("itemList", [])).items():
         delivery = items_by_key[key].item_delivery
         accepted = int(delivery.quantity_accepted)
         damaged = int(delivery.quantity_damaged)
@@ -122,3 +124,31 @@ def parse_item_pk_key(pk_key):
     """Parse an acknowledge-details itemList "pkKey" ("storeId^drugId^brandId^...") into (drug_id, brand_id)."""
     _, drug_id, brand_id = pk_key.split("^")[:3]
     return drug_id, brand_id
+
+
+def parse_dvdms_date(value):
+    if not value:
+        return None
+    try:
+        return datetime.strptime(value, "%d-%b-%Y").date()
+    except ValueError:
+        logger.warning("Could not parse DVDMS date value: %s", value)
+        return None
+
+
+def issue_line_key(line):
+    """Identity of an acknowledge-details itemList line: (drug_id, brand_id, batch, expiry_date, manufacturer)."""
+    return (
+        *parse_item_pk_key(line["pkKey"]),
+        line.get("batchNo"),
+        parse_dvdms_date(line.get("expiryDate")),
+        line.get("mfgName"),
+    )
+
+
+def group_issue_lines(item_list):
+    """Group itemList lines by issue_line_key; each group is one inward item."""
+    groups = {}
+    for line in item_list:
+        groups.setdefault(issue_line_key(line), []).append(line)
+    return groups

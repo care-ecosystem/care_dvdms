@@ -22,6 +22,10 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name='dvdmsinwarditemrecord',
-            constraint=models.UniqueConstraint(condition=models.Q(('deleted', False)), fields=('inward_record', 'drug_id', 'brand_id', 'batch'), name='uniq_inward_record_item'),
+            constraint=models.UniqueConstraint(
+                condition=models.Q(('deleted', False)),
+                fields=('inward_record', 'drug_id', 'brand_id', 'batch', 'expiry_date', 'manufacturer'),
+                name='uniq_inward_record_item'
+            ),
         ),
     ]

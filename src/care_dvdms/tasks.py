@@ -2,7 +2,6 @@
 # This file is auto-imported in apps.py ready().
 
 import logging
-from datetime import datetime
 
 import requests
 from care.users.models import User
@@ -13,7 +12,7 @@ from django.db import transaction
 from care_dvdms.api.services.dvdms_acknowledge_services import (
     build_acknowledge_save_payload,
     fetch_acknowledge_details,
-    parse_item_pk_key,
+    group_issue_lines,
     save_acknowledgement,
 )
 from care_dvdms.api.services.dvdms_client import get_status_code
@@ -131,29 +130,20 @@ def _upsert_inward_record(institute, outward_record, sync_log, user, issue_no):
     return inward_record
 
 
-def _parse_dvdms_date(value):
-    if not value:
-        return None
-    try:
-        return datetime.strptime(value, "%d-%b-%Y").date()
-    except ValueError:
-        logger.warning("Could not parse DVDMS date value: %s", value)
-        return None
-
-
-def _upsert_inward_item_record(inward_record, item_order, user, drug_id, brand_id, item):
+def _upsert_inward_item_record(inward_record, item_order, user, key, item, received_quantity):
+    drug_id, brand_id, batch, expiry_date, manufacturer = key
     fields = {
         "record_order_item": item_order,
         "drug_name": item.get("itemName", ""),
-        "manufacturer": item.get("mfgName"),
-        "expiry_date": _parse_dvdms_date(item.get("expiryDate")),
-        "received_quantity": item.get("issueQyt") or 0,
+        "received_quantity": received_quantity,
     }
     item_record, _ = DVDMSInwardItemRecord.objects.update_or_create(
         inward_record=inward_record,
         drug_id=drug_id,
         brand_id=brand_id,
-        batch=item.get("batchNo"),
+        batch=batch,
+        expiry_date=expiry_date,
+        manufacturer=manufacturer,
         defaults={**fields, "updated_by": user},
         create_defaults={**fields, "created_by": user, "updated_by": user},
     )
@@ -226,18 +216,10 @@ def prefill_inward_record_task(self, institute_id, outward_record_id, user_id, i
 
         inward_record = _upsert_inward_record(institute, outward_record, sync_log, user, issue_no)
 
-        merged_items = {}
-        for item in data.get("itemList", []):
-            key = (*parse_item_pk_key(item["pkKey"]), item.get("batchNo"))
-            issue_qty = int(item.get("issueQyt") or 0)
-            if key in merged_items:
-                merged_items[key]["issueQyt"] += issue_qty
-            else:
-                merged_items[key] = {**item, "issueQyt": issue_qty}
-
-        for (drug_id, brand_id, _), item in merged_items.items():
-            item_order = item_orders_by_drug_id.get(drug_id)
-            _upsert_inward_item_record(inward_record, item_order, user, drug_id, brand_id, item)
+        for key, lines in group_issue_lines(data.get("itemList", [])).items():
+            item_order = item_orders_by_drug_id.get(key[0])
+            received_quantity = sum(int(line.get("issueQyt") or 0) for line in lines)
+            _upsert_inward_item_record(inward_record, item_order, user, key, lines[0], received_quantity)
 
 
 @shared_task(

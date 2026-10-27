@@ -43,7 +43,7 @@ class DVDMSInwardItemRecord(EMRBaseModel):
         verbose_name_plural = "DVDMS Inward Item Records"
         constraints = [
             models.UniqueConstraint(
-                fields=["inward_record", "drug_id", "brand_id", "batch"],
+                fields=["inward_record", "drug_id", "brand_id", "batch", "expiry_date", "manufacturer"],
                 condition=models.Q(deleted=False),
                 name="uniq_inward_record_item",
             ),
