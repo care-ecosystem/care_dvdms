@@ -26,6 +26,7 @@ class DVDMSInwardItemRecord(EMRBaseModel):
         blank=True,
         related_name="inward_item_records",
     )
+    pk_key = models.CharField(max_length=255, null=True, blank=True)
     drug_id = models.CharField(max_length=50)
     drug_name = models.CharField(max_length=500)
     brand_id = models.CharField(max_length=50, null=True, blank=True)
@@ -42,15 +43,14 @@ class DVDMSInwardItemRecord(EMRBaseModel):
     class Meta:
         verbose_name_plural = "DVDMS Inward Item Records"
         constraints = [
+            # DVDMS issues one line per programme/stock lot, so a single ordered item can come back
+            # as several lines sharing a drug, brand and batch but differing in manufacturer, expiry
+            # or programme. The "pkKey" is the line identity DVDMS itself uses, so each line is kept
+            # as its own record rather than collapsing onto the ordered item.
             models.UniqueConstraint(
-                fields=["inward_record", "record_order_item"],
+                fields=["inward_record", "pk_key"],
                 condition=models.Q(deleted=False),
-                name="uniq_inward_record_item",
-            ),
-            models.UniqueConstraint(
-                fields=["inward_record", "drug_id", "brand_id", "batch"],
-                condition=models.Q(deleted=False, record_order_item__isnull=True),
-                name="uniq_inward_record_unmatched_item",
+                name="uniq_inward_record_item_pk_key",
             ),
         ]
 
