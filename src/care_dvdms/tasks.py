@@ -143,21 +143,17 @@ def _parse_dvdms_date(value):
 
 def _upsert_inward_item_record(inward_record, item_order, user, drug_id, brand_id, item):
     fields = {
-        "drug_id": drug_id,
+        "record_order_item": item_order,
         "drug_name": item.get("itemName", ""),
-        "brand_id": brand_id,
-        "batch": item.get("batchNo"),
-        "manufacturer": item.get("mfgName"),
         "expiry_date": _parse_dvdms_date(item.get("expiryDate")),
         "received_quantity": item.get("issueQyt") or 0,
     }
-    lookup = {"inward_record": inward_record, "record_order_item": item_order}
-    if item_order is None:
-        lookup["drug_id"] = drug_id
-        lookup["brand_id"] = brand_id
-        lookup["batch"] = item.get("batchNo")
     item_record, _ = DVDMSInwardItemRecord.objects.update_or_create(
-        **lookup,
+        inward_record=inward_record,
+        drug_id=drug_id,
+        brand_id=brand_id,
+        batch=item.get("batchNo"),
+        manufacturer=item.get("mfgName"),
         defaults={**fields, "updated_by": user},
         create_defaults={**fields, "created_by": user, "updated_by": user},
     )
@@ -230,8 +226,20 @@ def prefill_inward_record_task(self, institute_id, outward_record_id, user_id, i
 
         inward_record = _upsert_inward_record(institute, outward_record, sync_log, user, issue_no)
 
+        # An item record is identified by its lot - drug, brand, batch and manufacturer.
+        items_by_lot = {}
         for item in data.get("itemList", []):
             drug_id, brand_id = parse_item_pk_key(item["pkKey"])
+            lot = (drug_id, brand_id, item.get("batchNo"), item.get("mfgName"))
+            if lot in items_by_lot:
+                msg = (
+                    f"Issued lines {items_by_lot[lot]['pkKey']} and {item['pkKey']} for issue {issue_no} "
+                    f"share a drug, brand, batch and manufacturer and cannot be stored separately"
+                )
+                raise ValueError(msg)
+            items_by_lot[lot] = item
+
+        for (drug_id, brand_id, _batch, _manufacturer), item in items_by_lot.items():
             item_order = item_orders_by_drug_id.get(drug_id)
             _upsert_inward_item_record(inward_record, item_order, user, drug_id, brand_id, item)
 
