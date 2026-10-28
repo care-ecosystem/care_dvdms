@@ -28,6 +28,7 @@ class DVDMSRecordOrderFilters(filters.FilterSet):
     order = filters.UUIDFilter(field_name="order__external_id")
     status = MultiSelectFilter(field_name="status")
     care_indent_no = filters.CharFilter(field_name="care_indent_no")
+    supplier = filters.UUIDFilter(field_name="institute_supplier__supplier__external_id")
 
 
 @extend_schema(tags=["DVDMS: Record Order"])
