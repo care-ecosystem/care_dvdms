@@ -1414,6 +1414,13 @@ paths:
               type: string
               enum: [draft, pending, approved, rejected, completed, failed, cancelled]
           example: [pending, failed]
+        - name: supplier
+          in: query
+          required: false
+          description: Filter by CARE supplier organization UUID (the institute supplier mapping's `supplier`)
+          schema:
+            type: string
+            format: uuid
         - name: ordering
           in: query
           required: false
