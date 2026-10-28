@@ -22,7 +22,7 @@ def build_acknowledge_save_payload(inward_record):
         inward_record.eaushadhi_issue_no,
         inward_record.outward_record.record_order.institute_supplier.eaushadhi_warehouse_id,
     )
-    # Several issued lines can share a drug, brand, manufacturer and batch when the stock comes from different
+    # An issued line is matched to its record by lot - drug, brand, batch and manufacturer
     items_by_lot = {
         (item.drug_id, item.brand_id, item.batch, item.manufacturer): item
         for item in inward_record.items.select_related("item_delivery")
@@ -35,6 +35,7 @@ def build_acknowledge_save_payload(inward_record):
     remarks = inward_record.record_delivery.delivery_order.note or ""
 
     lines = []
+    matched_items = set()
     for detail in details.get("itemList", []):
         item = items_by_lot.get((*parse_item_pk_key(detail["pkKey"]), detail.get("batchNo"), detail.get("mfgName")))
         if item is None:
@@ -42,6 +43,12 @@ def build_acknowledge_save_payload(inward_record):
                 f"No inward item record matches pkKey {detail['pkKey']} for issue "
                 f"{inward_record.eaushadhi_issue_no}; re-run the inward prefill for this record"
             )
+        if item.pk in matched_items:
+            raise ValueError(
+                f"Issued line {detail['pkKey']} for issue {inward_record.eaushadhi_issue_no} matches an "
+                f"inward item record already used by another line; re-run the inward prefill for this record"
+            )
+        matched_items.add(item.pk)
         delivery = item.item_delivery
         accepted = int(delivery.quantity_accepted)
         damaged = int(delivery.quantity_damaged)

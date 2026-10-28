@@ -226,8 +226,20 @@ def prefill_inward_record_task(self, institute_id, outward_record_id, user_id, i
 
         inward_record = _upsert_inward_record(institute, outward_record, sync_log, user, issue_no)
 
+        # An item record is identified by its lot - drug, brand, batch and manufacturer.
+        items_by_lot = {}
         for item in data.get("itemList", []):
             drug_id, brand_id = parse_item_pk_key(item["pkKey"])
+            lot = (drug_id, brand_id, item.get("batchNo"), item.get("mfgName"))
+            if lot in items_by_lot:
+                msg = (
+                    f"Issued lines {items_by_lot[lot]['pkKey']} and {item['pkKey']} for issue {issue_no} "
+                    f"share a drug, brand, batch and manufacturer and cannot be stored separately"
+                )
+                raise ValueError(msg)
+            items_by_lot[lot] = item
+
+        for (drug_id, brand_id, _batch, _manufacturer), item in items_by_lot.items():
             item_order = item_orders_by_drug_id.get(drug_id)
             _upsert_inward_item_record(inward_record, item_order, user, drug_id, brand_id, item)
 
