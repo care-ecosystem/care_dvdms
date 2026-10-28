@@ -144,17 +144,16 @@ def _parse_dvdms_date(value):
 def _upsert_inward_item_record(inward_record, item_order, user, drug_id, brand_id, item):
     fields = {
         "record_order_item": item_order,
-        "drug_id": drug_id,
         "drug_name": item.get("itemName", ""),
-        "brand_id": brand_id,
-        "batch": item.get("batchNo"),
-        "manufacturer": item.get("mfgName"),
         "expiry_date": _parse_dvdms_date(item.get("expiryDate")),
         "received_quantity": item.get("issueQyt") or 0,
     }
     item_record, _ = DVDMSInwardItemRecord.objects.update_or_create(
         inward_record=inward_record,
-        pk_key=item["pkKey"],
+        drug_id=drug_id,
+        brand_id=brand_id,
+        batch=item.get("batchNo"),
+        manufacturer=item.get("mfgName"),
         defaults={**fields, "updated_by": user},
         create_defaults={**fields, "created_by": user, "updated_by": user},
     )

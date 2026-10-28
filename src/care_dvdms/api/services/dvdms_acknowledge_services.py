@@ -22,13 +22,11 @@ def build_acknowledge_save_payload(inward_record):
         inward_record.eaushadhi_issue_no,
         inward_record.outward_record.record_order.institute_supplier.eaushadhi_warehouse_id,
     )
-    # Several issued lines can share a drug, brand and batch - the "pkKey" is the only unique identity
-    items = list(inward_record.items.select_related("item_delivery"))
-    items_by_pk_key = {item.pk_key: item for item in items if item.pk_key}
-    unkeyed_items = {}
-    for item in items:
-        if not item.pk_key:
-            unkeyed_items.setdefault((item.drug_id, item.brand_id, item.batch), item)
+    # Several issued lines can share a drug, brand, manufacturer and batch when the stock comes from different
+    items_by_lot = {
+        (item.drug_id, item.brand_id, item.batch, item.manufacturer): item
+        for item in inward_record.items.select_related("item_delivery")
+    }
     trans_no = str(details["tranceNo"])
     store_id = str(details["storeId"])
     to_store_id = str(details["toStoreId"])
@@ -38,9 +36,7 @@ def build_acknowledge_save_payload(inward_record):
 
     lines = []
     for detail in details.get("itemList", []):
-        item = items_by_pk_key.get(detail["pkKey"]) or unkeyed_items.pop(
-            (*parse_item_pk_key(detail["pkKey"]), detail.get("batchNo")), None
-        )
+        item = items_by_lot.get((*parse_item_pk_key(detail["pkKey"]), detail.get("batchNo"), detail.get("mfgName")))
         if item is None:
             raise ValueError(
                 f"No inward item record matches pkKey {detail['pkKey']} for issue "
