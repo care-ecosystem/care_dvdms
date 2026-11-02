@@ -4,6 +4,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 
+from care_dvdms.models.dvdms_institute import DVDMSInstitute
 from care_dvdms.models.dvdms_prescription_sequence import DVDMSPrescriptionSequence
 
 
@@ -37,7 +38,9 @@ def generate_dvdms_prescription_id(prescription):
 
 @receiver(post_save, sender=MedicationRequestPrescription)
 def set_dvdms_prescription_id(sender, instance, created, **kwargs):
-    if not created or "dvdms_prescription_id" in instance.meta:
+    if not created or "eaushadhi_prescription_id" in instance.meta:
         return
-    instance.meta["dvdms_prescription_id"] = generate_dvdms_prescription_id(instance)
+    if not DVDMSInstitute.objects.filter(facility_id=instance.encounter.facility_id, deleted=False).exists():
+        return
+    instance.meta["eaushadhi_prescription_id"] = generate_dvdms_prescription_id(instance)
     MedicationRequestPrescription.objects.filter(pk=instance.pk).update(meta=instance.meta)

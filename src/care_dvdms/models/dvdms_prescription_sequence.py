@@ -2,7 +2,7 @@ from django.db import models
 
 
 class DVDMSPrescriptionSequence(models.Model):
-    """Per-(facility, year) counter backing dvdms_prescription_id generation."""
+    """Per-(facility, year) counter backing eaushadhi_prescription_id generation."""
 
     facility = models.ForeignKey(
         "facility.Facility",
