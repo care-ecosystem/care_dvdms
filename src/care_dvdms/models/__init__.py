@@ -8,6 +8,7 @@ from care_dvdms.models.dvdms_inward_record import DVDMSInwardRecord  # noqa: F40
 from care_dvdms.models.dvdms_outward_record_order import (  # noqa: F401
     DVDMSOutwardRecordOrder,
 )
+from care_dvdms.models.dvdms_prescription_sequence import DVDMSPrescriptionSequence  # noqa: F401
 from care_dvdms.models.dvdms_product_mapping import DVDMSProductMapping  # noqa: F401
 from care_dvdms.models.dvdms_record_delivery import DVDMSRecordDelivery  # noqa: F401
 from care_dvdms.models.dvdms_record_item_delivery import (  # noqa: F401
