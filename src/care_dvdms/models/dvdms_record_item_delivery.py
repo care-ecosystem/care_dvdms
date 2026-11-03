@@ -22,10 +22,13 @@ class DVDMSRecordItemDelivery(EMRBaseModel):
         on_delete=models.PROTECT,
         related_name="item_delivery",
     )
+    # Empty when nothing was accepted: CARE supply deliveries need a quantity of at least 1.
     supply_delivery = models.OneToOneField(
         "emr.SupplyDelivery",
         on_delete=models.PROTECT,
         related_name="dvdms_record_item_delivery",
+        null=True,
+        blank=True,
     )
     quantity_dispatched = models.DecimalField(max_digits=12, decimal_places=2)
     quantity_accepted = models.DecimalField(max_digits=12, decimal_places=2)

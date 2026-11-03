@@ -3383,6 +3383,9 @@ paths:
       summary: Update record item delivery
       description: |
         Update a record item delivery (e.g., update quantities or status).
+        `supply_delivery` and quantities can only be changed while the item delivery is in `draft` status.
+        Supplying `supply_delivery` re-links the item delivery to another SupplyDelivery on the same
+        delivery order; the client retires the old supply delivery (entered_in_error) in the same batch.
       operationId: updateRecordItemDelivery
       parameters:
         - name: institute_id
@@ -3490,15 +3493,31 @@ paths:
                 created_date: "2026-08-13T09:03:00.000Z"
                 modified_date: "2026-08-13T09:02:00.000Z"
         '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          description: Record item delivery not found
+          description: Bad Request - validation error, or the item delivery is not in draft status
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error: "Only draft record item deliveries can be edited"
+                code: "RECORD_ITEM_DELIVERY_NOT_DRAFT"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Record item delivery not found, or supply delivery not found on this delivery order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflict - the supply delivery is already linked to another record item delivery
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "This supply delivery is already linked to another record item delivery"
+                code: "SUPPLY_DELIVERY_ALREADY_LINKED"
         '500':
           $ref: '#/components/responses/InternalServerError'
 
@@ -5813,6 +5832,10 @@ components:
       type: object
       description: Input for updating a record item delivery
       properties:
+        supply_delivery:
+          type: string
+          format: uuid
+          description: SupplyDelivery UUID to re-link to; must belong to the record delivery's delivery order (draft only)
         quantity_accepted:
           type: number
           format: decimal
