@@ -2002,6 +2002,13 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: outward_record
+          in: query
+          required: false
+          description: Outward record UUID to filter inwards records by
+          schema:
+            type: string
+            format: uuid
         - name: limit
           in: query
           description: Number of results to return per page
