@@ -1,5 +1,6 @@
 from care.emr.api.viewsets.base import EMRBaseViewSet
 from care.emr.models.supply_delivery import SupplyDelivery
+from care.emr.resources.inventory.supply_delivery.spec import SupplyDeliveryStatusOptions
 from care.security.authorization.base import AuthorizationController
 from care.utils.shortcuts import get_object_or_404
 from django.db import IntegrityError, transaction
@@ -18,8 +19,13 @@ from care_dvdms.models.dvdms_institute import DVDMSInstitute
 from care_dvdms.models.dvdms_inward_item_record import DVDMSInwardItemRecord, DVDMSInwardItemRecordStatus
 from care_dvdms.models.dvdms_inward_record import DVDMSInwardRecord
 from care_dvdms.models.dvdms_record_delivery import DVDMSRecordDelivery, DVDMSRecordDeliveryStatus
-from care_dvdms.models.dvdms_record_item_delivery import DVDMSRecordItemDelivery
+from care_dvdms.models.dvdms_record_item_delivery import DVDMSRecordItemDelivery, DVDMSRecordItemDeliveryStatus
 from care_dvdms.tasks import save_acknowledgement_task
+
+RETIRED_SUPPLY_DELIVERY_STATUSES = (
+    SupplyDeliveryStatusOptions.abandoned.value,
+    SupplyDeliveryStatusOptions.entered_in_error.value,
+)
 
 
 def _validate_quantities(dispatched, accepted, damaged, short):
@@ -36,6 +42,30 @@ def _validate_quantities(dispatched, accepted, damaged, short):
             {
                 "error": "quantity_accepted + quantity_damaged + quantity_short cannot exceed quantity_dispatched",
                 "code": "QUANTITY_OVERFLOW",
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    return None
+
+
+def _validate_supply_delivery_link(accepted, supply_delivery):
+    if (accepted > 0) != (supply_delivery is not None):
+        return Response(
+            {
+                "error": "A supply delivery is needed exactly when quantity_accepted is above 0",
+                "code": "SUPPLY_DELIVERY_QUANTITY_MISMATCH",
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    return None
+
+
+def _validate_retired(supply_delivery):
+    if supply_delivery and supply_delivery.status not in RETIRED_SUPPLY_DELIVERY_STATUSES:
+        return Response(
+            {
+                "error": "Abandon the current supply delivery before replacing or removing it",
+                "code": "CURRENT_SUPPLY_DELIVERY_ACTIVE",
             },
             status=status.HTTP_400_BAD_REQUEST,
         )
@@ -159,6 +189,9 @@ class DVDMSRecordItemDeliveryViewSet(EMRBaseViewSet):
         )
         if error:
             return error
+        error = _validate_supply_delivery_link(spec.quantity_accepted, spec.supply_delivery)
+        if error:
+            return error
 
         inward_record_item = get_object_or_404(
             DVDMSInwardItemRecord,
@@ -166,10 +199,14 @@ class DVDMSRecordItemDeliveryViewSet(EMRBaseViewSet):
             inward_record=inward_record,
             deleted=False,
         )
-        supply_delivery = get_object_or_404(
-            SupplyDelivery,
-            external_id=spec.supply_delivery,
-            order=record_delivery.delivery_order,
+        supply_delivery = (
+            get_object_or_404(
+                SupplyDelivery,
+                external_id=spec.supply_delivery,
+                order=record_delivery.delivery_order,
+            )
+            if spec.supply_delivery
+            else None
         )
 
         try:
@@ -216,7 +253,31 @@ class DVDMSRecordItemDeliveryViewSet(EMRBaseViewSet):
             external_id=item_delivery_id,
         )
 
+        is_content_change = spec.supply_delivery is not None or any(
+            value is not None for value in (spec.quantity_accepted, spec.quantity_damaged, spec.quantity_short)
+        )
+        if is_content_change and item_delivery.status != DVDMSRecordItemDeliveryStatus.draft:
+            return Response(
+                {
+                    "error": "Only draft record item deliveries can be edited",
+                    "code": "RECORD_ITEM_DELIVERY_NOT_DRAFT",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         update_fields = ["updated_by", "modified_date"]
+        if spec.supply_delivery is not None:
+            error = _validate_retired(item_delivery.supply_delivery)
+            if error:
+                return error
+            item_delivery.supply_delivery = get_object_or_404(
+                SupplyDelivery.objects.select_related("supplied_item__product_knowledge"),
+                external_id=spec.supply_delivery,
+                order_id=item_delivery.record_delivery.delivery_order_id,
+                supply_request_id=item_delivery.inward_record_item.record_order_item.supply_request_id,
+                status=SupplyDeliveryStatusOptions.in_progress.value,
+            )
+            update_fields.append("supply_delivery")
         if spec.quantity_accepted is not None:
             item_delivery.quantity_accepted = spec.quantity_accepted
             update_fields.append("quantity_accepted")
@@ -230,17 +291,41 @@ class DVDMSRecordItemDeliveryViewSet(EMRBaseViewSet):
             item_delivery.status = spec.status
             update_fields.append("status")
 
+        if (
+            item_delivery.quantity_accepted == 0
+            and item_delivery.supply_delivery is not None
+            and spec.supply_delivery is None
+        ):
+            error = _validate_retired(item_delivery.supply_delivery)
+            if error:
+                return error
+            item_delivery.supply_delivery = None
+            update_fields.append("supply_delivery")
+
         error = _validate_quantities(
             item_delivery.quantity_dispatched,
             item_delivery.quantity_accepted,
             item_delivery.quantity_damaged,
             item_delivery.quantity_short,
+        ) or (
+            is_content_change
+            and _validate_supply_delivery_link(item_delivery.quantity_accepted, item_delivery.supply_delivery)
         )
         if error:
             return error
 
         item_delivery.updated_by = request.user
-        item_delivery.save(update_fields=update_fields)
+        try:
+            with transaction.atomic():
+                item_delivery.save(update_fields=update_fields)
+        except IntegrityError:
+            return Response(
+                {
+                    "error": "This supply delivery is already linked to another record item delivery",
+                    "code": "SUPPLY_DELIVERY_ALREADY_LINKED",
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
 
         _sync_inward_item_status(item_delivery)
 

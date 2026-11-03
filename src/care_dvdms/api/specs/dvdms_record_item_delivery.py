@@ -44,20 +44,24 @@ class DVDMSRecordItemDeliveryListSpec(EMRResource):
             "expiry_date": obj.inward_record_item.expiry_date,
         }
         supply_delivery = obj.supply_delivery
-        mapping["supply_delivery"] = {
-            "id": supply_delivery.external_id,
-            "status": supply_delivery.status,
-            "modified_date": supply_delivery.modified_date,
-            "supplied_item_condition": supply_delivery.supplied_item_condition,
-            "supplied_item_pack_quantity": supply_delivery.supplied_item_pack_quantity,
-            "supplied_item_pack_size": supply_delivery.supplied_item_pack_size,
-            "supplied_item_quantity": supply_delivery.supplied_item_quantity,
-        }
+        mapping["supply_delivery"] = (
+            {
+                "id": supply_delivery.external_id,
+                "status": supply_delivery.status,
+                "modified_date": supply_delivery.modified_date,
+                "supplied_item_condition": supply_delivery.supplied_item_condition,
+                "supplied_item_pack_quantity": supply_delivery.supplied_item_pack_quantity,
+                "supplied_item_pack_size": supply_delivery.supplied_item_pack_size,
+                "supplied_item_quantity": supply_delivery.supplied_item_quantity,
+            }
+            if supply_delivery
+            else None
+        )
         mapping["record_delivery"] = {
             "id": obj.record_delivery.external_id,
             "status": obj.record_delivery.status,
         }
-        product = supply_delivery.supplied_item
+        product = supply_delivery.supplied_item if supply_delivery else None
         mapping["product"] = {"id": product.external_id} if product else None
         mapping["product_knowledge"] = (
             {"id": product.product_knowledge.external_id, "name": product.product_knowledge.name}
@@ -86,7 +90,7 @@ class DVDMSRecordItemDeliveryCreateSpec(EMRResource):
     ]
 
     inward_record_item: UUID4
-    supply_delivery: UUID4
+    supply_delivery: UUID4 | None = None
     quantity_dispatched: Decimal = Field(max_digits=12, decimal_places=2)
     quantity_accepted: Decimal = Field(max_digits=12, decimal_places=2)
     quantity_damaged: Decimal = Field(max_digits=12, decimal_places=2)
@@ -111,6 +115,7 @@ class DVDMSRecordItemDeliveryUpdateSpec(EMRResource):
         "history",
     ]
 
+    supply_delivery: UUID4 | None = None
     quantity_accepted: Decimal | None = Field(default=None, max_digits=12, decimal_places=2)
     quantity_damaged: Decimal | None = Field(default=None, max_digits=12, decimal_places=2)
     quantity_short: Decimal | None = Field(default=None, max_digits=12, decimal_places=2)
