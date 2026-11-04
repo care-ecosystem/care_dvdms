@@ -2440,6 +2440,141 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+  /institute/{institute_id}/product-mappings/available-product-knowledge/:
+    get:
+      tags:
+        - Product Mapping
+      summary: List product knowledge available for mapping
+      description: |
+        Retrieve a paginated list of CARE products that can be mapped for this institute.
+
+        Includes active ProductKnowledge that is instance-level or belongs to the institute's
+        facility (the same scope accepted by create/update product mapping). Products that
+        already carry a `default_mapping` in this institute are excluded.
+
+        Results are ordered by `-modified_date`.
+      operationId: listAvailableProductKnowledge
+      parameters:
+        - name: institute_id
+          in: path
+          required: true
+          description: Institute UUID
+          schema:
+            type: string
+            format: uuid
+        - name: name
+          in: query
+          required: false
+          description: Filter by product name (trigram similarity)
+          schema:
+            type: string
+        - name: alternate_names
+          in: query
+          required: false
+          description: Filter by alternate names (trigram similarity)
+          schema:
+            type: string
+        - name: product_type
+          in: query
+          required: false
+          description: Filter by product type (case-insensitive)
+          schema:
+            type: string
+            example: "medication"
+        - name: alternate_identifier
+          in: query
+          required: false
+          description: Filter by alternate identifier (case-insensitive exact match)
+          schema:
+            type: string
+        - name: facility_is_null
+          in: query
+          required: false
+          description: "true for instance-level products only, false for facility products only"
+          schema:
+            type: boolean
+        - name: category
+          in: query
+          required: false
+          description: Filter by resource category slug of the institute's facility
+          schema:
+            type: string
+            example: "analgesics"
+        - name: limit
+          in: query
+          description: Number of results to return per page
+          schema:
+            type: integer
+            default: 10
+            example: 10
+        - name: offset
+          in: query
+          description: Number of results to skip
+          schema:
+            type: integer
+            default: 0
+            example: 0
+      responses:
+        '200':
+          description: Available product knowledge retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - count
+                  - results
+                properties:
+                  count:
+                    type: integer
+                    description: Total number of available product knowledge
+                    example: 1
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ProductKnowledgeRead'
+              example:
+                count: 1
+                results:
+                  - id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                    alternate_identifier: null
+                    status: "active"
+                    product_type: "medication"
+                    code: null
+                    base_unit:
+                      code: "mg"
+                      display: "milligram"
+                      system: "care/ucum"
+                    name: "Paracetamol 500mg tablet"
+                    names: []
+                    storage_guidelines: []
+                    definitional: null
+                    is_instance_level: false
+                    category:
+                      id: "8a1b2c3d-4e5f-6789-a0b1-c2d3e4f5a6b7"
+                      title: "Analgesics"
+                      slug: "analgesics"
+                    slug_config:
+                      facility: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                      slug_value: "paracetamol-500mg-tablet"
+                    slug: "f-3fa85f64-5717-4562-b3fc-2c963f66afa6-paracetamol-500mg-tablet"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Not authorized to use DVDMS plugin for this facility
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Institute not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   /institute/{institute_id}/product-mappings/{product_mapping_id}/:
     patch:
       tags:

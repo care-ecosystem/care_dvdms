@@ -1,9 +1,11 @@
 from collections import defaultdict
 
 from care.emr.api.viewsets.base import EMRBaseViewSet
+from care.emr.api.viewsets.inventory.product_knowledge import ProductKnowledgeFilters
 from care.emr.models.product_knowledge import ProductKnowledge
 from care.emr.models.supply_request import SupplyRequest
 from care.emr.resources.inventory.product_knowledge.spec import (
+    ProductKnowledgeReadSpec,
     ProductKnowledgeStatusOptions,
 )
 from care.security.authorization.base import AuthorizationController
@@ -71,9 +73,12 @@ class DVDMSProductMappingViewSet(DVDMSDrugLookupMixin, EMRBaseViewSet):
         if not AuthorizationController.call("can_manage_dvdms_integration", self.request.user, institute.facility):
             raise PermissionDenied("You are not authorized to manage DVDMS plugin for this facility")
 
+    def _institute_product_knowledge(self, institute):
+        return ProductKnowledge.objects.filter(Q(facility__isnull=True) | Q(facility=institute.facility))
+
     def _get_active_product_knowledge(self, institute, product_knowledge_id):
         product_knowledge = get_object_or_404(
-            ProductKnowledge.objects.filter(Q(facility__isnull=True) | Q(facility=institute.facility)),
+            self._institute_product_knowledge(institute),
             external_id=product_knowledge_id,
         )
         if product_knowledge.status != ProductKnowledgeStatusOptions.active.value:
@@ -93,6 +98,28 @@ class DVDMSProductMappingViewSet(DVDMSDrugLookupMixin, EMRBaseViewSet):
         paginator = self.pagination_class()
         page = paginator.paginate_queryset(queryset, request)
         results = [DVDMSProductMappingListSpec.serialize(o).to_json() for o in page]
+        return paginator.get_paginated_response(results)
+
+    def available_product_knowledge(self, request, *args, **kwargs):
+        institute = self.get_institute()
+        self._authorize_facility(institute)
+        mapped = DVDMSProductMapping.objects.filter(
+            institute=institute,
+            mapping_type=DVDMSProductMappingType.default_mapping,
+            deleted=False,
+        ).values("product_knowledge_id")
+        queryset = (
+            self._institute_product_knowledge(institute)
+            .filter(status=ProductKnowledgeStatusOptions.active.value)
+            .exclude(id__in=mapped)
+            .order_by("-modified_date")
+        )
+        if category := request.GET.get("category"):
+            queryset = queryset.filter(category__slug=category, category__facility=institute.facility)
+        queryset = ProductKnowledgeFilters(request.GET, queryset=queryset).qs
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(queryset, request)
+        results = [ProductKnowledgeReadSpec.serialize(o).to_json() for o in page]
         return paginator.get_paginated_response(results)
 
     def create(self, request, *args, **kwargs):
