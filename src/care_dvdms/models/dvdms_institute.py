@@ -10,7 +10,7 @@ class DVDMSInstitute(EMRBaseModel):
         on_delete=models.PROTECT,
         related_name="dvdms_institute",
     )
-    eaushadhi_institute_id = models.CharField(max_length=50, unique=True)
+    eaushadhi_institute_id = models.CharField(max_length=50)
     eaushadhi_institute_name = models.CharField(max_length=255)
     eaushadhi_user_ref_id = models.CharField(max_length=50)
     schema_version = models.CharField(max_length=10, default="1.0")

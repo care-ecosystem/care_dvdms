@@ -2,6 +2,7 @@ from care.emr.api.viewsets.base import EMRBaseViewSet
 from care.security.authorization.base import AuthorizationController
 from care.utils.shortcuts import get_object_or_404
 from django.db import IntegrityError
+from django_filters import rest_framework as filters
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.exceptions import NotFound, PermissionDenied
@@ -24,6 +25,10 @@ SELECT_RELATED_FIELDS = (
 )
 
 
+class DVDMSInwardRecordFilters(filters.FilterSet):
+    outward_record = filters.UUIDFilter(field_name="outward_record__external_id")
+
+
 @extend_schema(tags=["DVDMS: Inward Record"])
 class DVDMSInwardRecordViewSet(EMRBaseViewSet):
     """
@@ -33,7 +38,8 @@ class DVDMSInwardRecordViewSet(EMRBaseViewSet):
 
     database_model = DVDMSInwardRecord
     lookup_field = "external_id"
-    filter_backends = [OrderingFilter]
+    filterset_class = DVDMSInwardRecordFilters
+    filter_backends = [filters.DjangoFilterBackend, OrderingFilter]
     ordering_fields = ["created_date", "modified_date"]
 
     def get_institute(self):
