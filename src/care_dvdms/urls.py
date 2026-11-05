@@ -225,6 +225,11 @@ urlpatterns = [
         name="dvdms-product-mapping-list",
     ),
     re_path(
+        r"^institute/(?P<institute_id>[^/.]+)/product-mappings/available-product-knowledge/$",
+        DVDMSProductMappingViewSet.as_view({"get": "available_product_knowledge"}),
+        name="dvdms-available-product-knowledge",
+    ),
+    re_path(
         r"^institute/(?P<institute_id>[^/.]+)/product-mappings/(?P<external_id>[^/.]+)/$",
         DVDMSProductMappingViewSet.as_view(
             {
