@@ -43,6 +43,23 @@ class DVDMSLookupViewSet(ViewSet):
         if not AuthorizationController.call("can_use_dvdms_integration", request.user, institute.facility):
             raise PermissionDenied("You are not authorized to use DVDMS plugin for this facility")
 
+    def _matches_institute(self, row, institute, hospital_code_field, seat_id_field):
+        """Narrow a DVDMS master-data row to this institute, honouring the lookup filter settings.
+
+        A field name of None means the DVDMS payload does not carry that identifier at all.
+        """
+        if (
+            settings.DVDMS_LOOKUP_FILTER_BY_HOSPITAL_CODE
+            and hospital_code_field
+            and str(row.get(hospital_code_field)) != institute.eaushadhi_institute_id
+        ):
+            return False
+        return not (
+            settings.DVDMS_LOOKUP_FILTER_BY_SEAT_ID
+            and seat_id_field
+            and str(row.get(seat_id_field)) != institute.eaushadhi_user_ref_id
+        )
+
     def groups(self, request, *args, **kwargs):
         institute = self.get_institute()
         self.check_permissions_for_institute(request, institute)
@@ -64,10 +81,7 @@ class DVDMSLookupViewSet(ViewSet):
             cache.set(DVDMS_GROUPS_CACHE_KEY, groups, settings.DVDMS_LOOKUP_CACHE_TTL)
 
         results = [
-            group
-            for group in groups
-            if str(group.get("gnumHospitalCode")) == institute.eaushadhi_institute_id
-            and str(group.get("gnumSeatid")) == institute.eaushadhi_user_ref_id
+            group for group in groups if self._matches_institute(group, institute, "gnumHospitalCode", "gnumSeatid")
         ]
 
         return Response(results)
@@ -92,12 +106,7 @@ class DVDMSLookupViewSet(ViewSet):
                 )
             cache.set(DVDMS_UNITS_CACHE_KEY, units, settings.DVDMS_LOOKUP_CACHE_TTL)
 
-        results = [
-            unit
-            for unit in units
-            if str(unit.get("gnumHospitalCode")) == institute.eaushadhi_institute_id
-            and str(unit.get("gnumSeatid")) == institute.eaushadhi_user_ref_id
-        ]
+        results = [unit for unit in units if self._matches_institute(unit, institute, "gnumHospitalCode", "gnumSeatid")]
 
         return Response(results)
 
@@ -137,8 +146,7 @@ class DVDMSLookupViewSet(ViewSet):
         results = [
             drug
             for drug in drugs
-            if str(drug.get("gnum_hospital_code")) == institute.eaushadhi_institute_id
-            and str(drug.get("gnum_seatid")) == institute.eaushadhi_user_ref_id
+            if self._matches_institute(drug, institute, "gnum_hospital_code", "gnum_seatid")
             and str(drug.get("sstnum_item_cat_no")) == DVDMS_DRUG_ITEM_CAT_NO
             and str(drug.get("hstnum_group_id")) == hstnum_group_id
             and (not hstnum_subgroup_id or str(drug.get("hstnum_subgroup_id")) == hstnum_subgroup_id)
@@ -173,7 +181,7 @@ class DVDMSLookupViewSet(ViewSet):
             store
             for store in stores
             if (not from_store_id or str(store.get("hstnumStoreId")) == from_store_id)
-            and str(store.get("gnumSeatid")) == institute.eaushadhi_user_ref_id
+            and self._matches_institute(store, institute, None, "gnumSeatid")
         ]
 
         return Response(results)
@@ -208,8 +216,7 @@ class DVDMSLookupViewSet(ViewSet):
         results = [
             subgroup
             for subgroup in subgroups
-            if str(subgroup.get("gnumHospitalCode")) == institute.eaushadhi_institute_id
-            and str(subgroup.get("gnumSeatid")) == institute.eaushadhi_user_ref_id
+            if self._matches_institute(subgroup, institute, "gnumHospitalCode", "gnumSeatid")
             and str(subgroup.get("hstnumGroupId")) == str(group_id)
         ]
 
