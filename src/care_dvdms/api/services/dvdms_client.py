@@ -75,7 +75,8 @@ def describe_error(exc):
     """Describe a failed DVDMS call for storage and display.
 
     DVDMS answers a rejected request with HTTP 200 and a non-success status in the body, so the
-    body is the only place the reason appears. `code` lets a client tell an unreachable DVDMS from one that answered and refused, without parsing the message.
+    body is the only place the reason appears. `code` lets a client tell an unreachable DVDMS
+    from one that answered and refused, without parsing the message.
     """
     response = getattr(exc, "response", None)
     if isinstance(exc, requests.exceptions.RequestException) and response is None:

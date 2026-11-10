@@ -46,6 +46,7 @@ class DVDMSInwardRecordListSpec(EMRResource):
     eaushadhi_indent_no: str | None = None
     created_at: datetime.datetime | None = None
     eaushadhi_issue_status: str | None = None
+    meta: dict | None = None
     sync_log_id: str | None = None
 
     def to_json(self):
