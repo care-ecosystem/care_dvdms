@@ -15,6 +15,7 @@ class DVDMSOutwardRecordOrderListSpec(EMRResource):
     status: str | None = None
     eaushadhi_indent_no: str | None = None
     eaushadhi_indent_status: str | None = None
+    meta: dict | None = None
     sync_log_id: UUID4 | None = None
     created_by: dict | None = None
     updated_by: dict | None = None

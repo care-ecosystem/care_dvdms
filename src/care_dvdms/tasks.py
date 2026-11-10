@@ -9,6 +9,7 @@ from care.users.models import User
 from care.utils.shortcuts import get_object_or_404
 from celery import shared_task
 from django.db import transaction
+from django.utils import timezone
 
 from care_dvdms.api.services.dvdms_acknowledge_services import (
     build_acknowledge_save_payload,
@@ -16,7 +17,7 @@ from care_dvdms.api.services.dvdms_acknowledge_services import (
     parse_item_pk_key,
     save_acknowledgement,
 )
-from care_dvdms.api.services.dvdms_client import get_status_code
+from care_dvdms.api.services.dvdms_client import describe_error, get_status_code
 from care_dvdms.api.services.dvdms_indent_services import build_save_indent_payload, save_indent
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
 from care_dvdms.models.dvdms_inward_item_record import DVDMSInwardItemRecord
@@ -37,13 +38,15 @@ from care_dvdms.settings import plugin_settings as settings
 logger = logging.getLogger(__name__)
 
 
-def _upsert_outward_record(record_order, sync_log, user, outward_status, indent_no=None):
+def _upsert_outward_record(record_order, sync_log, user, outward_status, indent_no=None, meta=None):
+    meta = meta if meta is not None else {}
     outward_record, created = DVDMSOutwardRecordOrder.objects.get_or_create(
         record_order=record_order,
         defaults={
             "status": outward_status,
             "eaushadhi_indent_no": indent_no,
             "sync_log": sync_log,
+            "meta": meta,
             "created_by": user,
             "updated_by": user,
         },
@@ -51,8 +54,9 @@ def _upsert_outward_record(record_order, sync_log, user, outward_status, indent_
     if not created:
         outward_record.status = outward_status
         outward_record.sync_log = sync_log
+        outward_record.meta = meta
         outward_record.updated_by = user
-        update_fields = ["status", "sync_log", "updated_by", "modified_date"]
+        update_fields = ["status", "sync_log", "meta", "updated_by", "modified_date"]
         if indent_no is not None:
             outward_record.eaushadhi_indent_no = indent_no
             update_fields.append("eaushadhi_indent_no")
@@ -96,15 +100,47 @@ def save_indent_task(self, institute_id, record_order_id, user_id):
     try:
         indent_no, response, http_status_code = save_indent(payload)
     except Exception as exc:
+        error = describe_error(exc)
+        logger.warning(
+            "save_indent_task failed | record_order=%s code=%s status=%s message=%s",
+            record_order_id,
+            error["code"],
+            error["status_code"],
+            error["message"],
+        )
         sync_log.request_status = DVDMSSyncRequestStatus.failure
-        sync_log.error_detail = str(exc)
-        sync_log.http_status_code = get_status_code(exc)
-        sync_log.save(update_fields=["request_status", "error_detail", "http_status_code", "modified_date"])
+        sync_log.error_detail = error["message"]
+        sync_log.http_status_code = error["status_code"]
+        sync_log.response_payload = error["detail"]
+        sync_log.retry_count = self.request.retries
+        sync_log.save(
+            update_fields=[
+                "request_status",
+                "error_detail",
+                "http_status_code",
+                "response_payload",
+                "retry_count",
+                "modified_date",
+            ]
+        )
 
         record_order.status = DVDMSRecordOrderStatus.failed
         record_order.save(update_fields=["status", "modified_date"])
 
-        _upsert_outward_record(record_order, sync_log, user, DVDMSOutwardRecordOrderStatus.failed)
+        _upsert_outward_record(
+            record_order,
+            sync_log,
+            user,
+            DVDMSOutwardRecordOrderStatus.failed,
+            meta={
+                "error": {
+                    **error,
+                    "attempt": self.request.retries + 1,
+                    "failed_at": timezone.now().isoformat(),
+                    "sync_log_id": str(sync_log.external_id),
+                }
+            },
+        )
         raise
     else:
         sync_log.request_status = DVDMSSyncRequestStatus.success

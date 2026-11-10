@@ -30,3 +30,9 @@ DVDMS_ACKNOWLEDGE_SAVE_SUCCESS_STATUS = 200
 
 CARE_INDENT_NO_FACILITY_WIDTH = 3
 CARE_INDENT_NO_SEQ_WIDTH = 4  # minimum width, not a hard cap - grows past 9999 rather than failing
+
+# Error codes surfaced to clients on a failed DVDMS call
+DVDMS_ERROR_CODE_UNREACHABLE = "DVDMS_UNREACHABLE"  # no response - DVDMS down, DNS, timeout
+DVDMS_ERROR_CODE_REJECTED = "DVDMS_REJECTED"  # DVDMS answered and refused the request
+DVDMS_ERROR_CODE_INTERNAL = "INTERNAL_ERROR"  # the failure was on our side
+DVDMS_ERROR_TEXT_LIMIT = 2000  # cap on a non-JSON error body kept for display
