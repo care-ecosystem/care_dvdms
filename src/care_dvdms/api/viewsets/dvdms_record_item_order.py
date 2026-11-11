@@ -20,6 +20,7 @@ from care_dvdms.models.dvdms_drug import DVDMSDrug
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
 from care_dvdms.models.dvdms_record_item_order import DVDMSRecordItemOrder
 from care_dvdms.models.dvdms_record_order import DVDMSRecordOrder, DVDMSRecordOrderStatus
+from care_dvdms.utils.request_order import require_pending_request_order
 
 SELECT_RELATED_FIELDS = (
     "institute",
@@ -87,6 +88,7 @@ class DVDMSRecordItemOrderViewSet(DVDMSDrugLookupMixin, EMRBaseViewSet):
             raise PermissionDenied("You are not authorized to manage DVDMS plugin for this facility")
 
     def _check_mutable(self, record_order):
+        require_pending_request_order(record_order.order)
         if record_order.status == DVDMSRecordOrderStatus.approved:
             return Response(
                 {"error": "This order has already been approved and its items are locked"},

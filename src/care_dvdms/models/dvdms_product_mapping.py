@@ -6,6 +6,12 @@ from care_dvdms.models.dvdms_drug import DVDMSDrug
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
 
 
+class DVDMSProductMappingArchiveReason(models.TextChoices):
+    """Why a mapping was archived, recorded in `archived_reason`."""
+
+    product_archived = "PRODUCT_ARCHIVED"
+
+
 class DVDMSProductMappingType(models.TextChoices):
     default_mapping = "default_mapping"
     manual_mapping = "manual_mapping"
@@ -36,13 +42,20 @@ class DVDMSProductMapping(EMRBaseModel):
     )
     usage_count = models.IntegerField(default=0)
     last_used_date = models.DateTimeField(null=True, blank=True)
+    archived = models.BooleanField(default=False, db_index=True)
+    archived_reason = models.CharField(
+        max_length=50,
+        choices=DVDMSProductMappingArchiveReason.choices,
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         verbose_name_plural = "DVDMS Product Mappings"
         constraints = [
             models.UniqueConstraint(
                 fields=["institute", "eaushadhi_drug_id"],
-                condition=models.Q(deleted=False),
+                condition=models.Q(deleted=False, archived=False),
                 name="uniq_institute_eaushadhi_drug_id",
             ),
         ]

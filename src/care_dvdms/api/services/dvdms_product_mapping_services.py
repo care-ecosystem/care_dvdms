@@ -24,6 +24,7 @@ def _find_product_mapping(institute, product_knowledge_id, drug_spec):
             drug__sub_group_id=drug_spec.sub_group_id,
             drug__name=drug_spec.name,
             deleted=False,
+            archived=False,
         )
         .order_by("-usage_count", "-modified_date")
         .first()

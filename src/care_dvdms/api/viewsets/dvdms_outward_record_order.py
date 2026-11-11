@@ -9,7 +9,6 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 
-from care_dvdms.api.services.dvdms_client import get_status_code
 from care_dvdms.api.services.dvdms_indent_services import build_track_indent_params, track_indent
 from care_dvdms.api.specs.dvdms_outward_record_order import (
     DVDMSOutwardRecordOrderListSpec,
@@ -24,6 +23,7 @@ from care_dvdms.models.dvdms_sync_log import (
     DVDMSSyncType,
 )
 from care_dvdms.tasks import prefill_inward_record_task
+from care_dvdms.utils.sync_errors import record_sync_failure, store_record_error
 
 SELECT_RELATED_FIELDS = (
     "record_order",
@@ -129,20 +129,15 @@ class DVDMSOutwardRecordOrderViewSet(EMRBaseViewSet):
         try:
             response, http_status_code = track_indent(params)
         except requests.exceptions.Timeout as exc:
-            sync_log.request_status = DVDMSSyncRequestStatus.failure
-            sync_log.error_detail = str(exc)
-            sync_log.http_status_code = get_status_code(exc)
-            sync_log.save(update_fields=["request_status", "error_detail", "http_status_code", "modified_date"])
+            store_record_error(outward_record, request.user, record_sync_failure(sync_log, exc))
             return Response(
                 {"error": "DVDMS did not respond in time. Please try again.", "code": "DVDMS_TIMEOUT"},
                 status=status.HTTP_504_GATEWAY_TIMEOUT,
             )
         except requests.exceptions.RequestException as exc:
-            sync_log.request_status = DVDMSSyncRequestStatus.failure
-            sync_log.error_detail = str(exc)
-            failed_status_code = get_status_code(exc)
-            sync_log.http_status_code = failed_status_code
-            sync_log.save(update_fields=["request_status", "error_detail", "http_status_code", "modified_date"])
+            error = record_sync_failure(sync_log, exc)
+            store_record_error(outward_record, request.user, error)
+            failed_status_code = error["status_code"]
             if failed_status_code in (401, 403):
                 return Response(
                     {"error": "DVDMS rejected the request credentials.", "code": "DVDMS_AUTH_FAILED"},

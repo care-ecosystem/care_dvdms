@@ -44,6 +44,7 @@ class DVDMSProductMappingFilters(filters.FilterSet):
     eaushadhi_drug_id = filters.CharFilter(field_name="drug__drug_id")
     product_knowledge_id = filters.UUIDFilter(field_name="product_knowledge__external_id")
     mapping_type = filters.CharFilter(field_name="mapping_type")
+    archived = filters.BooleanFilter(field_name="archived")
 
 
 @extend_schema(tags=["DVDMS: Product Mapping"])
@@ -88,9 +89,10 @@ class DVDMSProductMappingViewSet(DVDMSDrugLookupMixin, EMRBaseViewSet):
     def get_queryset(self):
         institute = self.get_institute()
         self._authorize_facility(institute)
-        return DVDMSProductMapping.objects.filter(institute=institute, deleted=False).select_related(
-            *SELECT_RELATED_FIELDS
-        )
+        queryset = DVDMSProductMapping.objects.filter(institute=institute, deleted=False)
+        if not (self.action == "list" and "archived" in self.request.query_params):
+            queryset = queryset.filter(archived=False)
+        return queryset.select_related(*SELECT_RELATED_FIELDS)
 
     def list(self, request, *args, **kwargs):
         """GET /institute/{institute_id}/product-mappings/ - List product mappings"""
@@ -107,6 +109,7 @@ class DVDMSProductMappingViewSet(DVDMSDrugLookupMixin, EMRBaseViewSet):
             institute=institute,
             mapping_type=DVDMSProductMappingType.default_mapping,
             deleted=False,
+            archived=False,
         ).values("product_knowledge_id")
         queryset = (
             self._institute_product_knowledge(institute)
@@ -138,7 +141,7 @@ class DVDMSProductMappingViewSet(DVDMSDrugLookupMixin, EMRBaseViewSet):
             institute = DVDMSInstitute.objects.select_for_update().get(pk=institute.pk)
 
             if DVDMSProductMapping.objects.filter(
-                institute=institute, eaushadhi_drug_id=details.drug_id, deleted=False
+                institute=institute, eaushadhi_drug_id=details.drug_id, deleted=False, archived=False
             ).exists():
                 return Response(
                     {"error": "Product mapping already exists for this drug"},
@@ -187,6 +190,7 @@ class DVDMSProductMappingViewSet(DVDMSDrugLookupMixin, EMRBaseViewSet):
                 external_id=product_mapping_id,
                 institute=institute,
                 deleted=False,
+                archived=False,
             )
 
             update_fields = ["updated_by", "modified_date"]
@@ -195,7 +199,7 @@ class DVDMSProductMappingViewSet(DVDMSDrugLookupMixin, EMRBaseViewSet):
                 new_drug_id = details.drug_id
                 if new_drug_id != product_mapping.drug.drug_id:
                     conflict = DVDMSProductMapping.objects.filter(
-                        institute=institute, eaushadhi_drug_id=new_drug_id, deleted=False
+                        institute=institute, eaushadhi_drug_id=new_drug_id, deleted=False, archived=False
                     ).exclude(pk=product_mapping.pk)
                     if conflict.exists():
                         return Response(
@@ -271,6 +275,7 @@ class DVDMSRecordOrderProductMappingViewSet(EMRBaseViewSet):
             institute=institute,
             mapping_type=DVDMSProductMappingType.default_mapping,
             deleted=False,
+            archived=False,
         ).values("product_knowledge_id")
         return (
             SupplyRequest.objects.filter(
@@ -296,6 +301,7 @@ class DVDMSRecordOrderProductMappingViewSet(EMRBaseViewSet):
                 product_knowledge_id__in=product_knowledge_ids,
                 mapping_type=DVDMSProductMappingType.default_mapping,
                 deleted=False,
+                archived=False,
             )
             .select_related(*SELECT_RELATED_FIELDS)
             .order_by("-modified_date")

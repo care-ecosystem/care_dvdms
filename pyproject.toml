@@ -1,6 +1,6 @@
 [project]
 name = "care_dvdms"  # TODO: rename to care_yourplugin
-version = "0.1.0"
+version = "0.1.1"
 description = "A CARE backend plugin."  # TODO: describe your plugin
 readme = "README.md"
 authors = [

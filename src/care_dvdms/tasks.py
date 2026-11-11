@@ -16,7 +16,6 @@ from care_dvdms.api.services.dvdms_acknowledge_services import (
     parse_item_pk_key,
     save_acknowledgement,
 )
-from care_dvdms.api.services.dvdms_client import get_status_code
 from care_dvdms.api.services.dvdms_indent_services import build_save_indent_payload, save_indent
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
 from care_dvdms.models.dvdms_inward_item_record import DVDMSInwardItemRecord
@@ -33,17 +32,20 @@ from care_dvdms.models.dvdms_sync_log import (
     DVDMSSyncType,
 )
 from care_dvdms.settings import plugin_settings as settings
+from care_dvdms.utils.sync_errors import record_sync_failure, store_record_error
 
 logger = logging.getLogger(__name__)
 
 
-def _upsert_outward_record(record_order, sync_log, user, outward_status, indent_no=None):
+def _upsert_outward_record(record_order, sync_log, user, outward_status, indent_no=None, meta=None):
+    meta = meta if meta is not None else {}
     outward_record, created = DVDMSOutwardRecordOrder.objects.get_or_create(
         record_order=record_order,
         defaults={
             "status": outward_status,
             "eaushadhi_indent_no": indent_no,
             "sync_log": sync_log,
+            "meta": meta,
             "created_by": user,
             "updated_by": user,
         },
@@ -51,8 +53,9 @@ def _upsert_outward_record(record_order, sync_log, user, outward_status, indent_
     if not created:
         outward_record.status = outward_status
         outward_record.sync_log = sync_log
+        outward_record.meta = meta
         outward_record.updated_by = user
-        update_fields = ["status", "sync_log", "updated_by", "modified_date"]
+        update_fields = ["status", "sync_log", "meta", "updated_by", "modified_date"]
         if indent_no is not None:
             outward_record.eaushadhi_indent_no = indent_no
             update_fields.append("eaushadhi_indent_no")
@@ -96,15 +99,25 @@ def save_indent_task(self, institute_id, record_order_id, user_id):
     try:
         indent_no, response, http_status_code = save_indent(payload)
     except Exception as exc:
-        sync_log.request_status = DVDMSSyncRequestStatus.failure
-        sync_log.error_detail = str(exc)
-        sync_log.http_status_code = get_status_code(exc)
-        sync_log.save(update_fields=["request_status", "error_detail", "http_status_code", "modified_date"])
+        error = record_sync_failure(sync_log, exc, attempt=self.request.retries + 1)
+        logger.warning(
+            "save_indent_task failed | record_order=%s code=%s status=%s message=%s",
+            record_order_id,
+            error["code"],
+            error["status_code"],
+            error["message"],
+        )
 
         record_order.status = DVDMSRecordOrderStatus.failed
         record_order.save(update_fields=["status", "modified_date"])
 
-        _upsert_outward_record(record_order, sync_log, user, DVDMSOutwardRecordOrderStatus.failed)
+        _upsert_outward_record(
+            record_order,
+            sync_log,
+            user,
+            DVDMSOutwardRecordOrderStatus.failed,
+            meta={"error": error},
+        )
         raise
     else:
         sync_log.request_status = DVDMSSyncRequestStatus.success
@@ -120,8 +133,8 @@ def save_indent_task(self, institute_id, record_order_id, user_id):
         )
 
 
-def _upsert_inward_record(institute, outward_record, sync_log, user, issue_no):
-    fields = {"outward_record": outward_record, "sync_log": sync_log}
+def _upsert_inward_record(institute, outward_record, sync_log, user, issue_no, meta=None):
+    fields = {"outward_record": outward_record, "sync_log": sync_log, "meta": meta if meta is not None else {}}
     inward_record, _ = DVDMSInwardRecord.objects.update_or_create(
         institute=institute,
         eaushadhi_issue_no=issue_no,
@@ -214,10 +227,20 @@ def prefill_inward_record_task(self, institute_id, outward_record_id, user_id, i
     try:
         data = fetch_acknowledge_details(issue_no, to_store_id)
     except Exception as exc:
-        sync_log.request_status = DVDMSSyncRequestStatus.failure
-        sync_log.error_detail = str(exc)
-        sync_log.http_status_code = get_status_code(exc)
-        sync_log.save(update_fields=["request_status", "error_detail", "http_status_code", "modified_date"])
+        error = record_sync_failure(sync_log, exc, attempt=self.request.retries + 1)
+        logger.warning(
+            "prefill_inward_record_task failed | issue_no=%s code=%s status=%s message=%s",
+            issue_no,
+            error["code"],
+            error["status_code"],
+            error["message"],
+        )
+        # The inward record only exists once this call has succeeded at least once, so an earlier
+        # failure is kept on the outward record instead - the UI reads whichever it is showing.
+        existing_inward = DVDMSInwardRecord.objects.filter(
+            institute=institute, eaushadhi_issue_no=issue_no, deleted=False
+        ).first()
+        store_record_error(existing_inward or outward_record, user, error)
         raise
     else:
         sync_log.request_status = DVDMSSyncRequestStatus.success
@@ -329,11 +352,16 @@ def save_acknowledgement_task(self, institute_id, inward_record_id, user_id, is_
             response, http_status_code = save_acknowledgement(payload)
         except Exception as exc:
             request_exc = exc
-            sync_log.request_status = DVDMSSyncRequestStatus.failure
-            sync_log.error_detail = str(exc)
-            sync_log.http_status_code = get_status_code(exc)
-            sync_log.save(update_fields=["request_status", "error_detail", "http_status_code", "modified_date"])
+            error = record_sync_failure(sync_log, exc, attempt=self.request.retries + 1)
+            logger.warning(
+                "save_acknowledgement_task failed | inward_record=%s code=%s status=%s message=%s",
+                inward_record_id,
+                error["code"],
+                error["status_code"],
+                error["message"],
+            )
         else:
+            error = None
             sync_log.request_status = DVDMSSyncRequestStatus.success
             sync_log.response_payload = response
             sync_log.http_status_code = http_status_code
@@ -342,8 +370,9 @@ def save_acknowledgement_task(self, institute_id, inward_record_id, user_id, is_
         _sync_acknowledgement_status(record_delivery, sync_log, user)
 
         inward_record.sync_log = sync_log
+        inward_record.meta = {"error": error} if error else {}
         inward_record.updated_by = user
-        inward_record.save(update_fields=["sync_log", "updated_by", "modified_date"])
+        inward_record.save(update_fields=["sync_log", "meta", "updated_by", "modified_date"])
 
     if request_exc is not None:
         raise request_exc

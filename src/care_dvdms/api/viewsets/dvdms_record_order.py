@@ -22,6 +22,7 @@ from care_dvdms.models.dvdms_record_order import DVDMSRecordOrder, DVDMSRecordOr
 from care_dvdms.models.dvdms_store import DVDMSStore
 from care_dvdms.models.dvdms_supplier import DVDMSSupplier
 from care_dvdms.tasks import save_indent_task
+from care_dvdms.utils.request_order import require_pending_request_order
 
 
 class DVDMSRecordOrderFilters(filters.FilterSet):
@@ -88,6 +89,7 @@ class DVDMSRecordOrderViewSet(EMRBaseViewSet):
         spec = DVDMSRecordOrderCreateSpec(**request.data)
 
         order = get_object_or_404(RequestOrder, external_id=spec.order, destination__facility=institute.facility)
+        require_pending_request_order(order)
         institute_store = get_object_or_404(
             DVDMSStore.objects.select_related("location"),
             external_id=spec.institute_store,
@@ -147,6 +149,10 @@ class DVDMSRecordOrderViewSet(EMRBaseViewSet):
                 institute=institute,
                 deleted=False,
             )
+
+
+            if spec.status != DVDMSRecordOrderStatus.cancelled:
+                require_pending_request_order(record_order.order)
 
             if spec.status == DVDMSRecordOrderStatus.cancelled and record_order.status != DVDMSRecordOrderStatus.draft:
                 return Response(

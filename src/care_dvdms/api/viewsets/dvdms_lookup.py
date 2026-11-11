@@ -46,7 +46,8 @@ class DVDMSLookupViewSet(ViewSet):
     def _matches_institute(self, row, institute, hospital_code_field, seat_id_field):
         """Narrow a DVDMS master-data row to this institute, honouring the lookup filter settings.
 
-        A field name of None means the DVDMS payload does not carry that identifier at all.
+        A field name of None means that identifier is not matched on for this lookup - either the
+        DVDMS payload does not carry it, or the lookup is deliberately not narrowed by it.
         """
         if (
             settings.DVDMS_LOOKUP_FILTER_BY_HOSPITAL_CODE
@@ -106,7 +107,8 @@ class DVDMSLookupViewSet(ViewSet):
                 )
             cache.set(DVDMS_UNITS_CACHE_KEY, units, settings.DVDMS_LOOKUP_CACHE_TTL)
 
-        results = [unit for unit in units if self._matches_institute(unit, institute, "gnumHospitalCode", "gnumSeatid")]
+        # Units are shared across an institute's seats, so they are not narrowed by seat id.
+        results = [unit for unit in units if self._matches_institute(unit, institute, "gnumHospitalCode", None)]
 
         return Response(results)
 

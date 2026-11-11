@@ -18,6 +18,8 @@ class DVDMSProductMappingListSpec(EMRResource):
     mapping_type: str | None = None
     usage_count: int | None = None
     last_used_date: datetime.datetime | None = None
+    archived: bool | None = None
+    archived_reason: str | None = None
     created_by: dict | None = None
     updated_by: dict | None = None
     created_date: datetime.datetime | None = None

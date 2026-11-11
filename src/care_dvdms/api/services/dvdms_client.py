@@ -2,6 +2,12 @@ import logging
 
 import requests
 
+from care_dvdms.api.services.constants import (
+    DVDMS_ERROR_CODE_INTERNAL,
+    DVDMS_ERROR_CODE_REJECTED,
+    DVDMS_ERROR_CODE_UNREACHABLE,
+    DVDMS_ERROR_TEXT_LIMIT,
+)
 from care_dvdms.settings import plugin_settings as settings
 
 logger = logging.getLogger(__name__)
@@ -52,3 +58,37 @@ def get_status_code(exc):
     """Extract the HTTP status code from a DVDMS request exception, if any."""
     response = getattr(exc, "response", None)
     return response.status_code if response is not None else None
+
+
+def get_response_body(exc):
+    """Extract DVDMS's response body from a request exception - parsed JSON, else trimmed text."""
+    response = getattr(exc, "response", None)
+    if response is None:
+        return None
+    try:
+        return response.json()
+    except ValueError:
+        return (response.text or "")[:DVDMS_ERROR_TEXT_LIMIT] or None
+
+
+def describe_error(exc):
+    """Describe a failed DVDMS call for storage and display.
+
+    DVDMS answers a rejected request with HTTP 200 and a non-success status in the body, so the
+    body is the only place the reason appears. `code` lets a client tell an unreachable DVDMS
+    from one that answered and refused, without parsing the message.
+    """
+    response = getattr(exc, "response", None)
+    if isinstance(exc, requests.exceptions.RequestException) and response is None:
+        code = DVDMS_ERROR_CODE_UNREACHABLE
+    elif isinstance(exc, requests.exceptions.RequestException):
+        code = DVDMS_ERROR_CODE_REJECTED
+    else:
+        code = DVDMS_ERROR_CODE_INTERNAL
+    return {
+        "code": code,
+        "message": str(exc) or exc.__class__.__name__,
+        "type": exc.__class__.__name__,
+        "status_code": get_status_code(exc),
+        "detail": get_response_body(exc),
+    }
