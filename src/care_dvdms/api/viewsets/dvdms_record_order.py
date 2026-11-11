@@ -1,8 +1,5 @@
 from care.emr.api.viewsets.base import EMRBaseViewSet
 from care.emr.models.supply_request import RequestOrder
-from care.emr.resources.inventory.supply_request.request_order import (
-    SupplyRequestOrderStatusOptions,
-)
 from care.security.authorization.base import AuthorizationController
 from care.utils.filters.multiselect import MultiSelectFilter
 from care.utils.shortcuts import get_object_or_404
@@ -10,7 +7,7 @@ from django.db import IntegrityError, transaction
 from django_filters import rest_framework as filters
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
-from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
+from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 
@@ -25,6 +22,7 @@ from care_dvdms.models.dvdms_record_order import DVDMSRecordOrder, DVDMSRecordOr
 from care_dvdms.models.dvdms_store import DVDMSStore
 from care_dvdms.models.dvdms_supplier import DVDMSSupplier
 from care_dvdms.tasks import save_indent_task
+from care_dvdms.utils.request_order import require_pending_request_order
 
 
 class DVDMSRecordOrderFilters(filters.FilterSet):
@@ -91,8 +89,7 @@ class DVDMSRecordOrderViewSet(EMRBaseViewSet):
         spec = DVDMSRecordOrderCreateSpec(**request.data)
 
         order = get_object_or_404(RequestOrder, external_id=spec.order, destination__facility=institute.facility)
-        if order.status != SupplyRequestOrderStatusOptions.pending.value:
-            raise ValidationError(f"Request order is not pending. Current status: {order.status}")
+        require_pending_request_order(order)
         institute_store = get_object_or_404(
             DVDMSStore.objects.select_related("location"),
             external_id=spec.institute_store,
@@ -152,6 +149,10 @@ class DVDMSRecordOrderViewSet(EMRBaseViewSet):
                 institute=institute,
                 deleted=False,
             )
+
+
+            if spec.status != DVDMSRecordOrderStatus.cancelled:
+                require_pending_request_order(record_order.order)
 
             if spec.status == DVDMSRecordOrderStatus.cancelled and record_order.status != DVDMSRecordOrderStatus.draft:
                 return Response(
