@@ -6,6 +6,7 @@ from care.emr.models.supply_request import RequestOrder
 from care.emr.resources.inventory.product_knowledge.spec import ProductKnowledgeStatusOptions
 from care.emr.resources.inventory.supply_request.request_order import SupplyRequestOrderStatusOptions
 from django.db import connection
+from django.db.models import Q
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
@@ -102,16 +103,29 @@ DEAD_REQUEST_ORDER_STATUSES = {
 def cancel_record_order_on_dead_order(sender, instance, **kwargs):
     """Cancel the DVDMS record order once its request order can no longer be fulfilled.
 
-    Cancelling also releases the request order under `uniq_order_active_record_order`, so a
-    replacement record order can be raised against it if the order is later revived.
+    A record order whose indent DVDMS has already accepted is left alone - see below. Cancelling
+    the rest releases the request order under `uniq_order_active_record_order`, so a replacement
+    record order can be raised against it if the order is later revived.
     """
     if instance.status not in DEAD_REQUEST_ORDER_STATUSES:
         return
 
-    cancelled = (
-        DVDMSRecordOrder.objects.filter(order=instance)
-        .exclude(status=DVDMSRecordOrderStatus.cancelled)
-        .update(status=DVDMSRecordOrderStatus.cancelled, modified_date=timezone.now())
+    candidates = DVDMSRecordOrder.objects.filter(order=instance).exclude(status=DVDMSRecordOrderStatus.cancelled)
+
+    sent_to_dvdms = Q(outward_record__eaushadhi_indent_no__isnull=False) & ~Q(outward_record__eaushadhi_indent_no="")
+    for record_order in candidates.filter(sent_to_dvdms).select_related("outward_record"):
+        logger.warning(
+            "Request order %s is %s but DVDMS record order %s already holds indent %s - "
+            "leaving it as %s; reconcile with DVDMS manually",
+            instance.external_id,
+            instance.status,
+            record_order.external_id,
+            record_order.outward_record.eaushadhi_indent_no,
+            record_order.status,
+        )
+
+    cancelled = candidates.exclude(sent_to_dvdms).update(
+        status=DVDMSRecordOrderStatus.cancelled, modified_date=timezone.now()
     )
     if cancelled:
         logger.info(
