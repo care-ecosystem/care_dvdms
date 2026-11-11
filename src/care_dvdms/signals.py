@@ -12,12 +12,12 @@ from django.dispatch import receiver
 from django.utils import timezone
 
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
+from care_dvdms.models.dvdms_outward_record_order import DVDMSOutwardRecordOrderStatus
 from care_dvdms.models.dvdms_prescription_sequence import DVDMSPrescriptionSequence
 from care_dvdms.models.dvdms_product_mapping import (
     DVDMSProductMapping,
     DVDMSProductMappingArchiveReason,
 )
-from care_dvdms.models.dvdms_outward_record_order import DVDMSOutwardRecordOrderStatus
 from care_dvdms.models.dvdms_record_order import DVDMSRecordOrder, DVDMSRecordOrderStatus
 
 logger = logging.getLogger(__name__)
