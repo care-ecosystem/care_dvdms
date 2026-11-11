@@ -2,7 +2,9 @@ import logging
 
 from care.emr.models.medication_request import MedicationRequestPrescription
 from care.emr.models.product_knowledge import ProductKnowledge
+from care.emr.models.supply_request import RequestOrder
 from care.emr.resources.inventory.product_knowledge.spec import ProductKnowledgeStatusOptions
+from care.emr.resources.inventory.supply_request.request_order import SupplyRequestOrderStatusOptions
 from django.db import connection
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -14,6 +16,7 @@ from care_dvdms.models.dvdms_product_mapping import (
     DVDMSProductMapping,
     DVDMSProductMappingArchiveReason,
 )
+from care_dvdms.models.dvdms_record_order import DVDMSRecordOrder, DVDMSRecordOrderStatus
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +86,37 @@ def deactivate_product_mappings_on_archive(sender, instance, **kwargs):
         logger.info(
             "Archived %s DVDMS product mapping(s): product knowledge %s is %s",
             archived,
+            instance.external_id,
+            instance.status,
+        )
+
+
+#: A request order in one of these states will never be fulfilled.
+DEAD_REQUEST_ORDER_STATUSES = {
+    SupplyRequestOrderStatusOptions.abandoned.value,
+    SupplyRequestOrderStatusOptions.entered_in_error.value,
+}
+
+
+@receiver(post_save, sender=RequestOrder)
+def cancel_record_order_on_dead_order(sender, instance, **kwargs):
+    """Cancel the DVDMS record order once its request order can no longer be fulfilled.
+
+    Cancelling also releases the request order under `uniq_order_active_record_order`, so a
+    replacement record order can be raised against it if the order is later revived.
+    """
+    if instance.status not in DEAD_REQUEST_ORDER_STATUSES:
+        return
+
+    cancelled = (
+        DVDMSRecordOrder.objects.filter(order=instance)
+        .exclude(status=DVDMSRecordOrderStatus.cancelled)
+        .update(status=DVDMSRecordOrderStatus.cancelled, modified_date=timezone.now())
+    )
+    if cancelled:
+        logger.info(
+            "Cancelled %s DVDMS record order(s): request order %s is %s",
+            cancelled,
             instance.external_id,
             instance.status,
         )

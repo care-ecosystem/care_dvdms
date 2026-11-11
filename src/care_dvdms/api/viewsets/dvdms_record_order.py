@@ -1,5 +1,8 @@
 from care.emr.api.viewsets.base import EMRBaseViewSet
 from care.emr.models.supply_request import RequestOrder
+from care.emr.resources.inventory.supply_request.request_order import (
+    SupplyRequestOrderStatusOptions,
+)
 from care.security.authorization.base import AuthorizationController
 from care.utils.filters.multiselect import MultiSelectFilter
 from care.utils.shortcuts import get_object_or_404
@@ -7,7 +10,7 @@ from django.db import IntegrityError, transaction
 from django_filters import rest_framework as filters
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
-from rest_framework.exceptions import NotFound, PermissionDenied
+from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 
@@ -88,6 +91,8 @@ class DVDMSRecordOrderViewSet(EMRBaseViewSet):
         spec = DVDMSRecordOrderCreateSpec(**request.data)
 
         order = get_object_or_404(RequestOrder, external_id=spec.order, destination__facility=institute.facility)
+        if order.status != SupplyRequestOrderStatusOptions.pending.value:
+            raise ValidationError(f"Request order is not pending. Current status: {order.status}")
         institute_store = get_object_or_404(
             DVDMSStore.objects.select_related("location"),
             external_id=spec.institute_store,
