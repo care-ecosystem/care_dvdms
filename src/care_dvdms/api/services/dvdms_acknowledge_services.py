@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from care_dvdms.api.services.constants import (
     DVDMS_ACKNOWLEDGE_DETAILS_PATH,
     DVDMS_ACKNOWLEDGE_DETAILS_SUCCESS_STATUS,
@@ -22,11 +24,11 @@ def build_acknowledge_save_payload(inward_record):
         inward_record.eaushadhi_issue_no,
         inward_record.outward_record.record_order.institute_supplier.eaushadhi_warehouse_id,
     )
-    # An issued line is matched to its record by lot - drug, brand, batch and manufacturer
-    items_by_lot = {
-        (item.drug_id, item.brand_id, item.batch, item.manufacturer): item
-        for item in inward_record.items.select_related("item_delivery")
-    }
+    # An issued line is matched to its records by lot - drug, brand, batch and manufacturer. A lot has one
+    # record per item order it was split across, and their quantities are summed into the line.
+    items_by_lot = defaultdict(list)
+    for item in inward_record.items.select_related("item_delivery"):
+        items_by_lot[(item.drug_id, item.brand_id, item.batch, item.manufacturer)].append(item)
     trans_no = str(details["tranceNo"])
     store_id = str(details["storeId"])
     to_store_id = str(details["toStoreId"])
@@ -35,31 +37,31 @@ def build_acknowledge_save_payload(inward_record):
     remarks = inward_record.record_delivery.delivery_order.note or ""
 
     lines = []
-    matched_items = set()
+    matched_lots = set()
     for detail in details.get("itemList", []):
-        item = items_by_lot.get((*parse_item_pk_key(detail["pkKey"]), detail.get("batchNo"), detail.get("mfgName")))
-        if item is None:
+        lot = (*parse_item_pk_key(detail["pkKey"]), detail.get("batchNo"), detail.get("mfgName"))
+        items = items_by_lot.get(lot)
+        if not items:
             raise ValueError(
                 f"No inward item record matches pkKey {detail['pkKey']} for issue "
                 f"{inward_record.eaushadhi_issue_no}; re-run the inward prefill for this record"
             )
-        if item.pk in matched_items:
+        if lot in matched_lots:
             raise ValueError(
                 f"Issued line {detail['pkKey']} for issue {inward_record.eaushadhi_issue_no} matches an "
                 f"inward item record already used by another line; re-run the inward prefill for this record"
             )
-        matched_items.add(item.pk)
-        delivery = item.item_delivery
-        accepted = int(delivery.quantity_accepted)
-        damaged = int(delivery.quantity_damaged)
+        matched_lots.add(lot)
+        accepted = int(sum(item.item_delivery.quantity_accepted for item in items))
+        damaged = int(sum(item.item_delivery.quantity_damaged for item in items))
         lines.append(
             {
                 "detail": detail,
-                "issue": int(item.received_quantity),
+                "issue": int(sum(item.received_quantity for item in items)),
                 "received": accepted + damaged,
                 "accepted": accepted,
                 "damaged": damaged,
-                "balance": int(delivery.quantity_short),
+                "balance": int(sum(item.item_delivery.quantity_short for item in items)),
             }
         )
 

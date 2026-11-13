@@ -170,25 +170,34 @@ class DVDMSOutwardRecordOrderViewSet(EMRBaseViewSet):
             sync_log.save(update_fields=["request_status", "response_payload", "http_status_code", "modified_date"])
 
             data = response.get("data", {})
-            previous_status = outward_record.eaushadhi_indent_status
-            outward_record.sync_log = sync_log
-            outward_record.eaushadhi_indent_status = data.get("indentStatus")
-            outward_record.updated_by = request.user
-            outward_record.save(update_fields=["sync_log", "eaushadhi_indent_status", "updated_by", "modified_date"])
 
-            if outward_record.eaushadhi_indent_status == "Issued" and previous_status != "Issued":
-                institute_id = str(institute.external_id)
-                outward_record_id = str(outward_record.external_id)
-                user_id = str(request.user.external_id)
-                issue_no = str(data["issueNo"]) if data.get("issueNo") else None
-                transaction.on_commit(
-                    lambda: prefill_inward_record_task.delay(
-                        institute_id=institute_id,
-                        outward_record_id=outward_record_id,
-                        user_id=user_id,
-                        issue_no=issue_no,
-                    )
+            with transaction.atomic():
+                outward_record = (
+                    DVDMSOutwardRecordOrder.objects.select_for_update(of=("self",), no_key=True)
+                    .select_related(*SELECT_RELATED_FIELDS)
+                    .get(pk=outward_record.pk)
                 )
+                previous_status = outward_record.eaushadhi_indent_status
+                outward_record.sync_log = sync_log
+                outward_record.eaushadhi_indent_status = data.get("indentStatus")
+                outward_record.updated_by = request.user
+                outward_record.save(
+                    update_fields=["sync_log", "eaushadhi_indent_status", "updated_by", "modified_date"]
+                )
+
+                if outward_record.eaushadhi_indent_status == "Issued" and previous_status != "Issued":
+                    institute_id = str(institute.external_id)
+                    outward_record_id = str(outward_record.external_id)
+                    user_id = str(request.user.external_id)
+                    issue_no = str(data["issueNo"]) if data.get("issueNo") else None
+                    transaction.on_commit(
+                        lambda: prefill_inward_record_task.delay(
+                            institute_id=institute_id,
+                            outward_record_id=outward_record_id,
+                            user_id=user_id,
+                            issue_no=issue_no,
+                        )
+                    )
 
             result = DVDMSOutwardRecordOrderListSpec.serialize(outward_record)
             return Response(result.to_json(), status=status.HTTP_200_OK)
