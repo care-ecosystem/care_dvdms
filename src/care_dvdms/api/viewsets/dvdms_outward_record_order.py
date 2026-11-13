@@ -170,6 +170,12 @@ class DVDMSOutwardRecordOrderViewSet(EMRBaseViewSet):
             sync_log.save(update_fields=["request_status", "response_payload", "http_status_code", "modified_date"])
 
             data = response.get("data", {})
+
+            outward_record = (
+                DVDMSOutwardRecordOrder.objects.select_for_update(of=("self",), no_key=True)
+                .select_related(*SELECT_RELATED_FIELDS)
+                .get(pk=outward_record.pk)
+            )
             previous_status = outward_record.eaushadhi_indent_status
             outward_record.sync_log = sync_log
             outward_record.eaushadhi_indent_status = data.get("indentStatus")
