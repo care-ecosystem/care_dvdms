@@ -2,7 +2,9 @@
 # This file is auto-imported in apps.py ready().
 
 import logging
+from collections import defaultdict
 from datetime import datetime
+from decimal import Decimal
 
 import requests
 from care.users.models import User
@@ -154,15 +156,41 @@ def _parse_dvdms_date(value):
         return None
 
 
-def _upsert_inward_item_record(inward_record, item_order, user, drug_id, brand_id, item):
+def _split_lots(lots, item_orders):
+    """Split a drug's issued lots across its item orders, filling each up to its requested quantity in turn.
+
+    Returns (lot, item, item_order, quantity) parts. Any over-issue goes to the last item order.
+    """
+    if not item_orders:
+        return [(lot, item, None, Decimal(str(item.get("issueQyt") or 0))) for lot, item in lots]
+
+    remaining = [Decimal(str(item_order.supply_request.quantity or 0)) for item_order in item_orders]
+    last = len(item_orders) - 1
+    index = 0
+    parts = []
+    for lot, item in lots:
+        quantity = Decimal(str(item.get("issueQyt") or 0))
+        while True:
+            while index < last and remaining[index] <= 0:
+                index += 1
+            share = quantity if index == last else min(quantity, remaining[index])
+            parts.append((lot, item, item_orders[index], share))
+            remaining[index] -= share
+            quantity -= share
+            if quantity <= 0:
+                break
+    return parts
+
+
+def _upsert_inward_item_record(inward_record, item_order, user, drug_id, brand_id, item, quantity):
     fields = {
-        "record_order_item": item_order,
         "drug_name": item.get("itemName", ""),
         "expiry_date": _parse_dvdms_date(item.get("expiryDate")),
-        "received_quantity": item.get("issueQyt") or 0,
+        "received_quantity": quantity,
     }
     item_record, _ = DVDMSInwardItemRecord.objects.update_or_create(
         inward_record=inward_record,
+        record_order_item=item_order,
         drug_id=drug_id,
         brand_id=brand_id,
         batch=item.get("batchNo"),
@@ -208,10 +236,9 @@ def prefill_inward_record_task(self, institute_id, outward_record_id, user_id, i
         )
         return
 
-    item_orders_by_drug_id = {
-        item_order.drug.drug_id: item_order
-        for item_order in outward_record.record_order.item_orders.select_related("drug")
-    }
+    item_orders_by_drug_id = defaultdict(list)
+    for item_order in outward_record.record_order.item_orders.select_related("drug", "supply_request").order_by("id"):
+        item_orders_by_drug_id[item_order.drug.drug_id].append(item_order)
 
     request_payload = {"issueNo": issue_no, "storeId": to_store_id}
     sync_log = DVDMSSyncLog.objects.create(
@@ -262,9 +289,15 @@ def prefill_inward_record_task(self, institute_id, outward_record_id, user_id, i
                 raise ValueError(msg)
             items_by_lot[lot] = item
 
-        for (drug_id, brand_id, _batch, _manufacturer), item in items_by_lot.items():
-            item_order = item_orders_by_drug_id.get(drug_id)
-            _upsert_inward_item_record(inward_record, item_order, user, drug_id, brand_id, item)
+        lots_by_drug_id = defaultdict(list)
+        for lot, item in items_by_lot.items():
+            lots_by_drug_id[lot[0]].append((lot, item))
+
+        for drug_id, lots in lots_by_drug_id.items():
+            for (_, brand_id, _batch, _manufacturer), item, item_order, quantity in _split_lots(
+                lots, item_orders_by_drug_id.get(drug_id, [])
+            ):
+                _upsert_inward_item_record(inward_record, item_order, user, drug_id, brand_id, item, quantity)
 
 
 @shared_task(
