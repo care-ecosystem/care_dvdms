@@ -43,8 +43,9 @@ class DVDMSInwardItemRecord(EMRBaseModel):
         verbose_name_plural = "DVDMS Inward Item Records"
         constraints = [
             #  DVDMS may return multiple stock lots for one item, differing by manufacturer.
+            #  A lot is split into one row per item order when several item orders share its drug.
             models.UniqueConstraint(
-                fields=["inward_record", "drug_id", "brand_id", "batch", "manufacturer"],
+                fields=["inward_record", "record_order_item", "drug_id", "brand_id", "batch", "manufacturer"],
                 condition=models.Q(deleted=False),
                 name="uniq_inward_record_item_lot",
             ),

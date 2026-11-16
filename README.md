@@ -35,6 +35,35 @@ python manage.py makemigrations care_dvdms
 python manage.py migrate
 ```
 
+## Configuration Variables
+
+Set via `PLUGIN_CONFIGS["care_dvdms"]` in CARE settings (see `plug_config_example.py`), or as environment variables.
+
+### Mandatory
+
+| Variable | Type | Description |
+|----------|------|-------------|
+| `DVDMS_API_ENDPOINT` | string | Base URL of the DVDMS / e-Aushadhi API |
+| `DVDMS_AUTH_TOKEN` | string | Token used in the `Authorization` header |
+
+### Optional
+
+| Variable | Type | Default | Description |
+|----------|------|---------|-------------|
+| `DVDMS_AUTH_TOKEN_TYPE` | string | `Basic` | Auth scheme prefix for the `Authorization` header |
+| `DVDMS_API_CONNECT_TIMEOUT` | int | `10` | Connection timeout (seconds) for DVDMS API calls |
+| `DVDMS_API_READ_TIMEOUT` | int | `30` | Read timeout (seconds) for DVDMS API calls |
+| `DVDMS_API_RETRY_COUNT` | int | `3` | Max retries for DVDMS sync tasks |
+| `DVDMS_LOOKUP_CACHE_TTL` | int | `86400` | Cache TTL (seconds) for master-data lookups |
+| `DVDMS_LOOKUP_FILTER_BY_HOSPITAL_CODE` | bool | `True` | Filter lookup master data by hospital code |
+| `DVDMS_LOOKUP_FILTER_BY_SEAT_ID` | bool | `True` | Filter lookup master data by seat ID |
+
+### GitHub Actions Secrets
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `CARE_REPO_DISPATCH_TOKEN` | Yes | Token used to dispatch a build event to the CARE backend repo |
+
 ## Architecture
 
 This template demonstrates the full plugin pattern:

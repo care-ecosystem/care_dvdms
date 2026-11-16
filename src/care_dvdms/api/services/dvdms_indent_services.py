@@ -17,10 +17,16 @@ INDENT_NO_PATTERN = re.compile(DVDMS_INDENT_NO_PATTERN, re.IGNORECASE)
 
 def _build_selected_param_values(record_order):
     # Rate/InHandQty/Availableqty/ReorderLevel aren't tracked in our models yet, sent as 0.
-    values = []
+    # DVDMS rejects duplicate drugs in one indent, so quantities are summed per drug_id.
+    consolidated = {}
     for item_order in record_order.item_orders.select_related("drug", "supply_request"):
         drug = item_order.drug
         quantity = int(item_order.supply_request.quantity or 0)
+        _, total = consolidated.get(drug.drug_id, (drug, 0))
+        consolidated[drug.drug_id] = (drug, total + quantity)
+
+    values = []
+    for drug, quantity in consolidated.values():
         values.append(
             "#".join(
                 str(v)
