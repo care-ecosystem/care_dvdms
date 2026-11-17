@@ -25,6 +25,11 @@ class DVDMSStore(EMRBaseModel):
         verbose_name_plural = "DVDMS Stores"
         constraints = [
             models.UniqueConstraint(
+                fields=["eaushadhi_store_id"],
+                condition=models.Q(deleted=False),
+                name="uniq_eaushadhi_store_id",
+            ),
+            models.UniqueConstraint(
                 fields=["institute", "location"],
                 condition=models.Q(deleted=False),
                 name="uniq_institute_location",
