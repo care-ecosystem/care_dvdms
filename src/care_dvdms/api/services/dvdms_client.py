@@ -8,12 +8,17 @@ from care_dvdms.api.services.constants import (
     DVDMS_ERROR_CODE_UNREACHABLE,
     DVDMS_ERROR_TEXT_LIMIT,
 )
+from care_dvdms.api.services.dvdms_response_schemas import (
+    DVDMSRejectionResponse,
+    response_changed_error,
+    validate_response,
+)
 from care_dvdms.settings import plugin_settings as settings
 
 logger = logging.getLogger(__name__)
 
 
-def _dvdms_request(method, path, success_status, **kwargs):
+def _dvdms_request(method, path, success_status, schema=None, **kwargs):
     url = settings.DVDMS_API_ENDPOINT.rstrip("/") + path
     headers = {
         "Authorization": f"{settings.DVDMS_AUTH_TOKEN_TYPE} {settings.DVDMS_AUTH_TOKEN}",
@@ -25,17 +30,24 @@ def _dvdms_request(method, path, success_status, **kwargs):
     response = requests.request(method, url, headers=headers, timeout=timeout, **kwargs)
     response.raise_for_status()
 
-    body = response.json()
-    if body.get("status") != success_status:
+    try:
+        body = response.json()
+    except ValueError:
+        content_type = response.headers.get("Content-Type")
+        raise response_changed_error(path, f"<body>: not JSON (content-type={content_type})", response) from None
+    if not isinstance(body, dict) or body.get("status") != success_status:
+        validate_response(path, DVDMSRejectionResponse, body, response)
         raise requests.exceptions.RequestException(
             body.get("message", "DVDMS API request failed"), response=response
         )
+    if schema is not None:
+        validate_response(path, schema, body, response)
 
     return body, response.status_code
 
 
-def dvdms_get(path, success_status, params=None):
-    body, _ = _dvdms_request("GET", path, success_status, params=params)
+def dvdms_get(path, success_status, params=None, schema=None):
+    body, _ = _dvdms_request("GET", path, success_status, schema=schema, params=params)
     return body.get("data", [])
 
 
