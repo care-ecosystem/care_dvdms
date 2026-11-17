@@ -5,11 +5,13 @@ import requests
 from care_dvdms.api.services.constants import (
     DVDMS_ERROR_CODE_INTERNAL,
     DVDMS_ERROR_CODE_REJECTED,
+    DVDMS_ERROR_CODE_RESPONSE_CHANGED,
     DVDMS_ERROR_CODE_UNREACHABLE,
     DVDMS_ERROR_TEXT_LIMIT,
 )
 from care_dvdms.api.services.dvdms_response_schemas import (
     DVDMSRejectionResponse,
+    DVDMSResponseChangedError,
     response_changed_error,
     validate_response,
 )
@@ -51,9 +53,9 @@ def dvdms_get(path, success_status, params=None, schema=None):
     return body.get("data", [])
 
 
-def dvdms_get_full(path, success_status, params=None):
+def dvdms_get_full(path, success_status, params=None, schema=None):
     """Like dvdms_get, but returns the full response body and HTTP status code."""
-    return _dvdms_request("GET", path, success_status, params=params)
+    return _dvdms_request("GET", path, success_status, schema=schema, params=params)
 
 
 def dvdms_post(path, success_status, payload=None):
@@ -61,9 +63,9 @@ def dvdms_post(path, success_status, payload=None):
     return body.get("data", [])
 
 
-def dvdms_post_full(path, success_status, payload=None):
+def dvdms_post_full(path, success_status, payload=None, schema=None):
     """Like dvdms_post, but returns the full response body and HTTP status code."""
-    return _dvdms_request("POST", path, success_status, json=payload)
+    return _dvdms_request("POST", path, success_status, schema=schema, json=payload)
 
 
 def get_status_code(exc):
@@ -91,7 +93,9 @@ def describe_error(exc):
     from one that answered and refused, without parsing the message.
     """
     response = getattr(exc, "response", None)
-    if isinstance(exc, requests.exceptions.RequestException) and response is None:
+    if isinstance(exc, DVDMSResponseChangedError):
+        code = DVDMS_ERROR_CODE_RESPONSE_CHANGED
+    elif isinstance(exc, requests.exceptions.RequestException) and response is None:
         code = DVDMS_ERROR_CODE_UNREACHABLE
     elif isinstance(exc, requests.exceptions.RequestException):
         code = DVDMS_ERROR_CODE_REJECTED
