@@ -69,7 +69,7 @@ class DVDMSStoreViewSet(EMRBaseViewSet):
             conflict = conflict.exclude(pk=exclude_pk)
         if conflict.exists():
             return None, Response(
-                {"error": "This store is already mapped for this institute"},
+                {"error": "This location is already mapped for this institute"},
                 status=status.HTTP_409_CONFLICT,
             )
         return location, None
@@ -109,6 +109,7 @@ class DVDMSStoreViewSet(EMRBaseViewSet):
                     eaushadhi_store_id=spec.eaushadhi_store_id,
                     eaushadhi_store_name=spec.eaushadhi_store_name,
                     is_default=spec.is_default,
+                    meta=spec.meta or {},
                     created_by=request.user,
                     updated_by=request.user,
                 )
@@ -118,8 +119,13 @@ class DVDMSStoreViewSet(EMRBaseViewSet):
                     {"error": "Only one store can be marked as default per institute"},
                     status=status.HTTP_409_CONFLICT,
                 )
+            if "uniq_eaushadhi_store_id" in str(exc):
+                return Response(
+                    {"error": "This eAushadhi store is already mapped"},
+                    status=status.HTTP_409_CONFLICT,
+                )
             return Response(
-                {"error": "This store is already mapped for this institute"},
+                {"error": "This location is already mapped for this institute"},
                 status=status.HTTP_409_CONFLICT,
             )
 
@@ -173,6 +179,9 @@ class DVDMSStoreViewSet(EMRBaseViewSet):
         if spec.is_default is not None:
             store_mapping.is_default = spec.is_default
             update_fields.append("is_default")
+        if spec.meta is not None:
+            store_mapping.meta = spec.meta
+            update_fields.append("meta")
         store_mapping.updated_by = request.user
 
         try:
@@ -184,8 +193,13 @@ class DVDMSStoreViewSet(EMRBaseViewSet):
                     {"error": "Only one store can be marked as default per institute"},
                     status=status.HTTP_409_CONFLICT,
                 )
+            if "uniq_eaushadhi_store_id" in str(exc):
+                return Response(
+                    {"error": "This eAushadhi store is already mapped"},
+                    status=status.HTTP_409_CONFLICT,
+                )
             return Response(
-                {"error": "This store is already mapped for this institute"},
+                {"error": "This location is already mapped for this institute"},
                 status=status.HTTP_409_CONFLICT,
             )
 
