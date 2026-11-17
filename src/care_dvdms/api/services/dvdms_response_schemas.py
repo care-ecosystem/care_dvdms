@@ -4,10 +4,11 @@ from collections import Counter
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from functools import cache
-from typing import Annotated, Literal, get_args
+from typing import Annotated, get_args
 
 import requests
 from pydantic import AfterValidator, BaseModel, ConfigDict, TypeAdapter, ValidationError, model_validator
+from pydantic_core import PydanticCustomError
 
 from care_dvdms.api.services.constants import DVDMS_DRUG_ITEM_CAT_NO, DVDMS_INDENT_NO_PATTERN
 
@@ -105,12 +106,22 @@ class DVDMSUnitListResponse(DVDMSSuccessResponse):
     data: Used[list[DVDMSUnit]]
 
 
+WARN_ONLY = "dvdms_warn_only"  # error type that is only logged as a warning, even on a used field
+
+
+def _is_drug_category(category):
+    # The full list may hold other categories; the drug lookup keeps only this one.
+    if category != DVDMS_DRUG_ITEM_CAT_NO:
+        raise PydanticCustomError(WARN_ONLY, f"not '{DVDMS_DRUG_ITEM_CAT_NO}' (not a drug item)")
+    return category
+
+
 class DVDMSDrug(DVDMSExactSchema):
     hstnum_item_id: Used[int]
     gnum_hospital_code: Used[int]
     hstnum_group_id: Used[int]
     hstnum_subgroup_id: Used[int]
-    sstnum_item_cat_no: Used[Literal[DVDMS_DRUG_ITEM_CAT_NO]]
+    sstnum_item_cat_no: Used[Annotated[str, AfterValidator(_is_drug_category)]]
     hststr_item_name: Used[str]
     hstnum_batchno_req: int
     hstnum_expirydate_req: int
@@ -335,6 +346,8 @@ def _used_fields(schema):
 
 
 def _is_used(error, used_fields):
+    if error["type"] == WARN_ONLY:
+        return False
     name = next((part for part in reversed(error["loc"]) if isinstance(part, str)), None)
     return name is None or name in used_fields  # None: the body itself
 
