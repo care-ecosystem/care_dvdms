@@ -10,6 +10,7 @@ from care_dvdms.api.services.constants import (
     DVDMS_URGENT_PRIORITIES,
 )
 from care_dvdms.api.services.dvdms_client import dvdms_get_full, dvdms_post_full
+from care_dvdms.api.services.dvdms_response_schemas import DVDMSIndentStatusResponse, DVDMSSaveIndentResponse
 from care_dvdms.utils.financial_year import financial_year_range_from_digits
 
 INDENT_NO_PATTERN = re.compile(DVDMS_INDENT_NO_PATTERN, re.IGNORECASE)
@@ -73,7 +74,9 @@ def build_save_indent_payload(record_order):
 
 def save_indent(payload):
     """Call the DVDMS save-indent API. Returns (indent_no, raw_response, http_status_code)."""
-    response, http_status_code = dvdms_post_full(DVDMS_SAVE_INDENT_PATH, DVDMS_SAVE_INDENT_SUCCESS_STATUS, payload)
+    response, http_status_code = dvdms_post_full(
+        DVDMS_SAVE_INDENT_PATH, DVDMS_SAVE_INDENT_SUCCESS_STATUS, payload, schema=DVDMSSaveIndentResponse
+    )
     match = INDENT_NO_PATTERN.search(response.get("message", ""))
     indent_no = match.group(1) if match else None
     return indent_no, response, http_status_code
@@ -89,4 +92,6 @@ def build_track_indent_params(outward_record):
 
 def track_indent(params):
     """Call the DVDMS track-indent API. Returns (raw_response, http_status_code)."""
-    return dvdms_get_full(DVDMS_TRACK_INDENT_PATH, DVDMS_TRACK_INDENT_SUCCESS_STATUS, params=params)
+    return dvdms_get_full(
+        DVDMS_TRACK_INDENT_PATH, DVDMS_TRACK_INDENT_SUCCESS_STATUS, params=params, schema=DVDMSIndentStatusResponse
+    )
