@@ -1,0 +1,2021 @@
+{
+  "info": {
+    "_postman_id": "64e1c373-5d2b-406f-b7a5-7a53ef39a264",
+    "name": "CDAC KPIs - DVDMS Integration Copy",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "8437237",
+    "_collection_link": "https://go.postman.co/collection/8437237-64e1c373-5d2b-406f-b7a5-7a53ef39a264?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "KPIs",
+      "item": [
+        {
+          "name": "Facility, Store and DDC Status",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              },
+              {
+                "key": "accept-language",
+                "value": "en-US,en;q=0.9,am;q=0.8,ar;q=0.7"
+              },
+              {
+                "key": "cache-control",
+                "value": "no-cache"
+              },
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
+              {
+                "key": "origin",
+                "value": "https://govt-staging-data.ohc.network"
+              },
+              {
+                "key": "pragma",
+                "value": "no-cache"
+              },
+              {
+                "key": "priority",
+                "value": "u=1, i"
+              },
+              {
+                "key": "referer",
+                "value": "https://govt-staging-data.ohc.network/dashboard/9-dvdms-stock-kpis-final-export-6-nov?date=2026-11-06&location=&store_id="
+              },
+              {
+                "key": "sec-ch-ua",
+                "value": "\"Not-A.Brand\";v=\"99\", \"Google Chrome\";v=\"157\", \"Chromium\";v=\"157\""
+              },
+              {
+                "key": "sec-ch-ua-mobile",
+                "value": "?0"
+              },
+              {
+                "key": "sec-ch-ua-platform",
+                "value": "\"macOS\""
+              },
+              {
+                "key": "sec-fetch-dest",
+                "value": "empty"
+              },
+              {
+                "key": "sec-fetch-mode",
+                "value": "cors"
+              },
+              {
+                "key": "sec-fetch-site",
+                "value": "same-origin"
+              },
+              {
+                "key": "user-agent",
+                "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36"
+              },
+              {
+                "key": "Cookie",
+                "value": "metabase.DEVICE=a6e71feb-f161-4e1b-8ff3-5e1c19684c1f; metabase.TIMEOUT=alive; metabase.SESSION=bc510bc6-7be9-40ee-8a48-b1e5bf7ffae3",
+                "disabled": true
+              },
+              {
+                "key": "x-api-key",
+                "value": "{{metabase_api_key}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ignore_cache\": false,\n  \"collection_preview\": false,\n  \"parameters\": [\n    {\n      \"id\": \"2efc1080-a6f4-43ec-9861-8e7320ed89ba\",\n      \"type\": \"date/single\",\n      \"value\": \"2026-11-06\",\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"report_date\"\n        ]\n      ]\n    },\n    {\n      \"id\": \"56ec2e8b-a3f1-40a9-80af-066c507efb83\",\n      \"type\": \"string/=\",\n      \"value\": null,\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"store_id\"\n        ]\n      ]\n    },\n    {\n      \"id\": \"946ff1aa-c140-40ee-b477-0e3b3afe2821\",\n      \"type\": \"boolean/=\",\n      \"value\": [\n        true\n      ],\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"institute_mapped\"\n        ]\n      ]\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://govt-staging-data.ohc.network/api/card/98/query/json",
+              "protocol": "https",
+              "host": [
+                "govt-staging-data",
+                "ohc",
+                "network"
+              ],
+              "path": [
+                "api",
+                "card",
+                "98",
+                "query",
+                "json"
+              ],
+              "query": [
+                {
+                  "key": "",
+                  "value": "https://analytics-care-k3s.digit.org/api/card/104/query/json",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Facility, Store and DDC Status",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "accept-language",
+                    "value": "en-US,en;q=0.9,am;q=0.8,ar;q=0.7"
+                  },
+                  {
+                    "key": "cache-control",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "content-type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "origin",
+                    "value": "https://govt-staging-data.ohc.network"
+                  },
+                  {
+                    "key": "pragma",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "priority",
+                    "value": "u=1, i"
+                  },
+                  {
+                    "key": "referer",
+                    "value": "https://govt-staging-data.ohc.network/dashboard/9-dvdms-stock-kpis-final-export-6-nov?date=2026-11-06&location=&store_id="
+                  },
+                  {
+                    "key": "sec-ch-ua",
+                    "value": "\"Not-A.Brand\";v=\"99\", \"Google Chrome\";v=\"157\", \"Chromium\";v=\"157\""
+                  },
+                  {
+                    "key": "sec-ch-ua-mobile",
+                    "value": "?0"
+                  },
+                  {
+                    "key": "sec-ch-ua-platform",
+                    "value": "\"macOS\""
+                  },
+                  {
+                    "key": "sec-fetch-dest",
+                    "value": "empty"
+                  },
+                  {
+                    "key": "sec-fetch-mode",
+                    "value": "cors"
+                  },
+                  {
+                    "key": "sec-fetch-site",
+                    "value": "same-origin"
+                  },
+                  {
+                    "key": "user-agent",
+                    "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36"
+                  },
+                  {
+                    "key": "Cookie",
+                    "value": "metabase.DEVICE=a6e71feb-f161-4e1b-8ff3-5e1c19684c1f; metabase.TIMEOUT=alive; metabase.SESSION=bc510bc6-7be9-40ee-8a48-b1e5bf7ffae3",
+                    "disabled": true
+                  },
+                  {
+                    "key": "x-api-key",
+                    "value": "{{metabase_api_key}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"ignore_cache\": false,\n  \"collection_preview\": false,\n  \"parameters\": [\n    {\n      \"id\": \"2efc1080-a6f4-43ec-9861-8e7320ed89ba\",\n      \"type\": \"date/single\",\n      \"value\": \"2026-11-06\",\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"report_date\"\n        ]\n      ]\n    },\n    {\n      \"id\": \"56ec2e8b-a3f1-40a9-80af-066c507efb83\",\n      \"type\": \"string/=\",\n      \"value\": null,\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"store_id\"\n        ]\n      ]\n    },\n    {\n      \"id\": \"946ff1aa-c140-40ee-b477-0e3b3afe2821\",\n      \"type\": \"boolean/=\",\n      \"value\": [\n        true\n      ],\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"institute_mapped\"\n        ]\n      ]\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "https://govt-staging-data.ohc.network/api/card/98/query/json",
+                  "protocol": "https",
+                  "host": [
+                    "govt-staging-data",
+                    "ohc",
+                    "network"
+                  ],
+                  "path": [
+                    "api",
+                    "card",
+                    "98",
+                    "query",
+                    "json"
+                  ],
+                  "query": [
+                    {
+                      "key": "",
+                      "value": "https://analytics-care-k3s.digit.org/api/card/104/query/json",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "date",
+                  "value": "Tue, 17 Nov 2026 09:30:28 GMT"
+                },
+                {
+                  "key": "x-frame-options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "access-control-allow-headers",
+                  "value": "*"
+                },
+                {
+                  "key": "access-control-max-age",
+                  "value": "60"
+                },
+                {
+                  "key": "x-accel-buffering",
+                  "value": "no"
+                },
+                {
+                  "key": "last-modified",
+                  "value": "Tue, 17 Nov 2026 09:30:28 GMT"
+                },
+                {
+                  "key": "strict-transport-security",
+                  "value": "max-age=31536000"
+                },
+                {
+                  "key": "content-disposition",
+                  "value": "attachment; filename=\"facility__store_and_ddc_status_2026-11-17T09:30:28.5977215Z.json\""
+                },
+                {
+                  "key": "x-permitted-cross-domain-policies",
+                  "value": "none"
+                },
+                {
+                  "key": "cache-control",
+                  "value": "max-age=0, no-cache, must-revalidate, proxy-revalidate"
+                },
+                {
+                  "key": "access-control-expose-headers",
+                  "value": "Content-Disposition, X-Metabase-Anti-CSRF-Token, X-Metabase-Version, Mcp-Session-Id"
+                },
+                {
+                  "key": "x-content-type-options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "content-security-policy",
+                  "value": "font-src 'self' data:; style-src-attr 'self'; script-src 'self' 'nonce-E81YheIOWZ' https://maps.google.com https://accounts.google.com    'sha256-SxNB1/NQ1TUHWrwTi7scFI31VsahWQBj54W7KQZQs1Q=' 'sha256-isH538cVBUY8IMlGYGbWtBwr+cGqkc4mN6nLcA7lUjE=' 'sha256-3N2Z+Nu++/yNMVHIl863JigVmt2Nr9gt2doEMJT2Wzk='; style-src 'self' 'nonce-E81YheIOWZ'   https://accounts.google.com; manifest-src 'self'; connect-src 'self' https://accounts.google.com metabase.us10.list-manage.com    ; img-src * 'self' data:; frame-src 'self' https://www.metabase.com/ https://metabase.com/ youtube.com *.youtube.com youtu.be *.youtu.be loom.com *.loom.com vimeo.com *.vimeo.com docs.google.com calendar.google.com airtable.com *.airtable.com typeform.com *.typeform.com canva.com *.canva.com codepen.io *.codepen.io figma.com *.figma.com grafana.com *.grafana.com miro.com *.miro.com excalidraw.com *.excalidraw.com notion.com *.notion.com atlassian.com *.atlassian.com trello.com *.trello.com asana.com *.asana.com gist.github.com linkedin.com *.linkedin.com twitter.com *.twitter.com x.com *.x.com; default-src 'none'; media-src www.metabase.com; child-src 'self' https://accounts.google.com;  frame-ancestors 'none';"
+                },
+                {
+                  "key": "x-metabase-version",
+                  "value": "v0.63.13"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json;charset=utf-8"
+                },
+                {
+                  "key": "content-encoding",
+                  "value": "gzip"
+                },
+                {
+                  "key": "expires",
+                  "value": "Tue, 03 Jul 2001 06:00:00 GMT"
+                },
+                {
+                  "key": "access-control-allow-methods",
+                  "value": "*"
+                },
+                {
+                  "key": "via",
+                  "value": "1.1 google"
+                },
+                {
+                  "key": "transfer-encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"FACILITY_NAME\": \"Apr 6: Test Mandu\",\n    \"DISTRICT_NAME\": \"Ramgarh\",\n    \"INSTITUTE_NAME\": \"CHC_Mandu\",\n    \"HOSPITAL_UNIQUE_ID\": null,\n    \"FACILITY_ACTIVE_STATUS\": \"Inactive\",\n    \"STORE_ID\": null,\n    \"STORE_NAME\": null,\n    \"STORE_TYPE\": null,\n    \"STORE_ACTIVE_STATUS\": null,\n    \"PARENT_STORE_ID\": null,\n    \"PARENT_STORE_NAME\": null,\n    \"PARENT_STORE_TYPE\": null,\n    \"ACTIVE_DDC_COUNT\": 0,\n    \"INACTIVE_DDC_COUNT\": 0,\n    \"TOTAL_DDC_COUNT\": 0\n  },\n  {\n    \"FACILITY_NAME\": \"CHC Gola\",\n    \"DISTRICT_NAME\": \"Bokaro\",\n    \"INSTITUTE_NAME\": \"CHC Gola\",\n    \"HOSPITAL_UNIQUE_ID\": null,\n    \"FACILITY_ACTIVE_STATUS\": \"Active\",\n    \"STORE_ID\": \"99901068\",\n    \"STORE_NAME\": \"Mandu_Chc\",\n    \"STORE_TYPE\": null,\n    \"STORE_ACTIVE_STATUS\": \"Active\",\n    \"PARENT_STORE_ID\": \"99901012\",\n    \"PARENT_STORE_NAME\": \"Ramgarh_DWH\",\n    \"PARENT_STORE_TYPE\": null,\n    \"ACTIVE_DDC_COUNT\": 1,\n    \"INACTIVE_DDC_COUNT\": 0,\n    \"TOTAL_DDC_COUNT\": 1\n  },\n  {\n    \"FACILITY_NAME\": \"CHC Mandu\",\n    \"DISTRICT_NAME\": \"Bokaro\",\n    \"INSTITUTE_NAME\": \"Mandu_CHC\",\n    \"HOSPITAL_UNIQUE_ID\": null,\n    \"FACILITY_ACTIVE_STATUS\": \"Inactive\",\n    \"STORE_ID\": null,\n    \"STORE_NAME\": null,\n    \"STORE_TYPE\": null,\n    \"STORE_ACTIVE_STATUS\": null,\n    \"PARENT_STORE_ID\": null,\n    \"PARENT_STORE_NAME\": null,\n    \"PARENT_STORE_TYPE\": null,\n    \"ACTIVE_DDC_COUNT\": 0,\n    \"INACTIVE_DDC_COUNT\": 0,\n    \"TOTAL_DDC_COUNT\": 0\n  },\n  {\n    \"FACILITY_NAME\": \"DVDMS\",\n    \"DISTRICT_NAME\": \"Alappuzha\",\n    \"INSTITUTE_NAME\": \"DVDMS Test Institute\",\n    \"HOSPITAL_UNIQUE_ID\": \"IN1410000231\",\n    \"FACILITY_ACTIVE_STATUS\": \"Active\",\n    \"STORE_ID\": \"99901223\",\n    \"STORE_NAME\": \"Gola_Chc\",\n    \"STORE_TYPE\": null,\n    \"STORE_ACTIVE_STATUS\": \"Active\",\n    \"PARENT_STORE_ID\": \"99901012\",\n    \"PARENT_STORE_NAME\": \"Ramgarh_DWH\",\n    \"PARENT_STORE_TYPE\": null,\n    \"ACTIVE_DDC_COUNT\": 3,\n    \"INACTIVE_DDC_COUNT\": 0,\n    \"TOTAL_DDC_COUNT\": 3\n  },\n  {\n    \"FACILITY_NAME\": \"GHC CHC\",\n    \"DISTRICT_NAME\": \"Ernakulam\",\n    \"INSTITUTE_NAME\": \"Ram DH\",\n    \"HOSPITAL_UNIQUE_ID\": null,\n    \"FACILITY_ACTIVE_STATUS\": \"Inactive\",\n    \"STORE_ID\": null,\n    \"STORE_NAME\": null,\n    \"STORE_TYPE\": null,\n    \"STORE_ACTIVE_STATUS\": null,\n    \"PARENT_STORE_ID\": null,\n    \"PARENT_STORE_NAME\": null,\n    \"PARENT_STORE_TYPE\": null,\n    \"ACTIVE_DDC_COUNT\": 0,\n    \"INACTIVE_DDC_COUNT\": 0,\n    \"TOTAL_DDC_COUNT\": 0\n  },\n  {\n    \"FACILITY_NAME\": \"SADAR HOSPITAL\",\n    \"DISTRICT_NAME\": \"Ramgarh\",\n    \"INSTITUTE_NAME\": \"Ramarh_DH\",\n    \"HOSPITAL_UNIQUE_ID\": null,\n    \"FACILITY_ACTIVE_STATUS\": \"Active\",\n    \"STORE_ID\": \"99901036\",\n    \"STORE_NAME\": \"Ramghar_DH\",\n    \"STORE_TYPE\": null,\n    \"STORE_ACTIVE_STATUS\": \"Active\",\n    \"PARENT_STORE_ID\": \"99901012\",\n    \"PARENT_STORE_NAME\": \"Ramgarh_DWH\",\n    \"PARENT_STORE_TYPE\": null,\n    \"ACTIVE_DDC_COUNT\": 1,\n    \"INACTIVE_DDC_COUNT\": 2,\n    \"TOTAL_DDC_COUNT\": 3\n  },\n  {\n    \"FACILITY_NAME\": \"Sadar Hospital, Ramgarh\",\n    \"DISTRICT_NAME\": \"Ramgarh\",\n    \"INSTITUTE_NAME\": \"CHC Ramarh\",\n    \"HOSPITAL_UNIQUE_ID\": null,\n    \"FACILITY_ACTIVE_STATUS\": \"Active\",\n    \"STORE_ID\": \"99901109\",\n    \"STORE_NAME\": \"Ramgarh_Chc\",\n    \"STORE_TYPE\": null,\n    \"STORE_ACTIVE_STATUS\": \"Active\",\n    \"PARENT_STORE_ID\": \"99901012\",\n    \"PARENT_STORE_NAME\": \"Ramgarh_DWH\",\n    \"PARENT_STORE_TYPE\": null,\n    \"ACTIVE_DDC_COUNT\": 2,\n    \"INACTIVE_DDC_COUNT\": 0,\n    \"TOTAL_DDC_COUNT\": 2\n  },\n  {\n    \"FACILITY_NAME\": \"TeleICU\",\n    \"DISTRICT_NAME\": \"Mysuru\",\n    \"INSTITUTE_NAME\": \" \",\n    \"HOSPITAL_UNIQUE_ID\": \"IN2910001986\",\n    \"FACILITY_ACTIVE_STATUS\": \"Active\",\n    \"STORE_ID\": null,\n    \"STORE_NAME\": null,\n    \"STORE_TYPE\": null,\n    \"STORE_ACTIVE_STATUS\": null,\n    \"PARENT_STORE_ID\": null,\n    \"PARENT_STORE_NAME\": null,\n    \"PARENT_STORE_TYPE\": null,\n    \"ACTIVE_DDC_COUNT\": 0,\n    \"INACTIVE_DDC_COUNT\": 1,\n    \"TOTAL_DDC_COUNT\": 1\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Active DDCs - Dispensing by User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              },
+              {
+                "key": "accept-language",
+                "value": "en-US,en;q=0.9,am;q=0.8,ar;q=0.7"
+              },
+              {
+                "key": "cache-control",
+                "value": "no-cache"
+              },
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
+              {
+                "key": "origin",
+                "value": "https://govt-staging-data.ohc.network"
+              },
+              {
+                "key": "pragma",
+                "value": "no-cache"
+              },
+              {
+                "key": "priority",
+                "value": "u=1, i"
+              },
+              {
+                "key": "referer",
+                "value": "https://govt-staging-data.ohc.network/question/99-active-ddcs-dispensing-by-user?store_id=&dispense_date=2026-11-06"
+              },
+              {
+                "key": "sec-ch-ua",
+                "value": "\"Not-A.Brand\";v=\"99\", \"Google Chrome\";v=\"157\", \"Chromium\";v=\"157\""
+              },
+              {
+                "key": "sec-ch-ua-mobile",
+                "value": "?0"
+              },
+              {
+                "key": "sec-ch-ua-platform",
+                "value": "\"macOS\""
+              },
+              {
+                "key": "sec-fetch-dest",
+                "value": "empty"
+              },
+              {
+                "key": "sec-fetch-mode",
+                "value": "cors"
+              },
+              {
+                "key": "sec-fetch-site",
+                "value": "same-origin"
+              },
+              {
+                "key": "user-agent",
+                "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36"
+              },
+              {
+                "key": "x-api-key",
+                "value": "{{metabase_api_key}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ignore_cache\": false,\n  \"collection_preview\": false,\n  \"parameters\": [\n    {\n      \"id\": \"c1a39b34-0acf-4e7b-b59c-fe92c0e1c4b1\",\n      \"type\": \"string/=\",\n      \"value\": \"99901109\",\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"store_id\"\n        ]\n      ]\n    },\n    {\n      \"id\": \"c13d70e0-0e0b-4442-89f2-c90c7a711138\",\n      \"type\": \"date/single\",\n      \"value\": \"2026-11-06\",\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"dispense_date\"\n        ]\n      ]\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://govt-staging-data.ohc.network/api/card/99/query/json",
+              "protocol": "https",
+              "host": [
+                "govt-staging-data",
+                "ohc",
+                "network"
+              ],
+              "path": [
+                "api",
+                "card",
+                "99",
+                "query",
+                "json"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Active DDCs - Dispensing by User",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "accept-language",
+                    "value": "en-US,en;q=0.9,am;q=0.8,ar;q=0.7"
+                  },
+                  {
+                    "key": "cache-control",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "content-type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "origin",
+                    "value": "https://govt-staging-data.ohc.network"
+                  },
+                  {
+                    "key": "pragma",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "priority",
+                    "value": "u=1, i"
+                  },
+                  {
+                    "key": "referer",
+                    "value": "https://govt-staging-data.ohc.network/question/99-active-ddcs-dispensing-by-user?store_id=&dispense_date=2026-11-06"
+                  },
+                  {
+                    "key": "sec-ch-ua",
+                    "value": "\"Not-A.Brand\";v=\"99\", \"Google Chrome\";v=\"157\", \"Chromium\";v=\"157\""
+                  },
+                  {
+                    "key": "sec-ch-ua-mobile",
+                    "value": "?0"
+                  },
+                  {
+                    "key": "sec-ch-ua-platform",
+                    "value": "\"macOS\""
+                  },
+                  {
+                    "key": "sec-fetch-dest",
+                    "value": "empty"
+                  },
+                  {
+                    "key": "sec-fetch-mode",
+                    "value": "cors"
+                  },
+                  {
+                    "key": "sec-fetch-site",
+                    "value": "same-origin"
+                  },
+                  {
+                    "key": "user-agent",
+                    "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36"
+                  },
+                  {
+                    "key": "x-api-key",
+                    "value": "{{metabase_api_key}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"ignore_cache\": false,\n  \"collection_preview\": false,\n  \"parameters\": [\n    {\n      \"id\": \"c1a39b34-0acf-4e7b-b59c-fe92c0e1c4b1\",\n      \"type\": \"string/=\",\n      \"value\": \"99901109\",\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"store_id\"\n        ]\n      ]\n    },\n    {\n      \"id\": \"c13d70e0-0e0b-4442-89f2-c90c7a711138\",\n      \"type\": \"date/single\",\n      \"value\": \"2026-11-06\",\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"dispense_date\"\n        ]\n      ]\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "https://govt-staging-data.ohc.network/api/card/99/query/json",
+                  "protocol": "https",
+                  "host": [
+                    "govt-staging-data",
+                    "ohc",
+                    "network"
+                  ],
+                  "path": [
+                    "api",
+                    "card",
+                    "99",
+                    "query",
+                    "json"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "date",
+                  "value": "Tue, 17 Nov 2026 09:31:28 GMT"
+                },
+                {
+                  "key": "x-frame-options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "access-control-allow-headers",
+                  "value": "*"
+                },
+                {
+                  "key": "access-control-max-age",
+                  "value": "60"
+                },
+                {
+                  "key": "x-accel-buffering",
+                  "value": "no"
+                },
+                {
+                  "key": "last-modified",
+                  "value": "Tue, 17 Nov 2026 09:31:28 GMT"
+                },
+                {
+                  "key": "strict-transport-security",
+                  "value": "max-age=31536000"
+                },
+                {
+                  "key": "content-disposition",
+                  "value": "attachment; filename=\"active_ddcs___dispensing_by_user_2026-11-17T09:31:28.936390871Z.json\""
+                },
+                {
+                  "key": "x-permitted-cross-domain-policies",
+                  "value": "none"
+                },
+                {
+                  "key": "cache-control",
+                  "value": "max-age=0, no-cache, must-revalidate, proxy-revalidate"
+                },
+                {
+                  "key": "access-control-expose-headers",
+                  "value": "Content-Disposition, X-Metabase-Anti-CSRF-Token, X-Metabase-Version, Mcp-Session-Id"
+                },
+                {
+                  "key": "x-content-type-options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "content-security-policy",
+                  "value": "font-src 'self' data:; style-src-attr 'self'; script-src 'self' 'nonce-Pm0Hnj2OEa' https://maps.google.com https://accounts.google.com    'sha256-SxNB1/NQ1TUHWrwTi7scFI31VsahWQBj54W7KQZQs1Q=' 'sha256-isH538cVBUY8IMlGYGbWtBwr+cGqkc4mN6nLcA7lUjE=' 'sha256-3N2Z+Nu++/yNMVHIl863JigVmt2Nr9gt2doEMJT2Wzk='; style-src 'self' 'nonce-Pm0Hnj2OEa'   https://accounts.google.com; manifest-src 'self'; connect-src 'self' https://accounts.google.com metabase.us10.list-manage.com    ; img-src * 'self' data:; frame-src 'self' https://www.metabase.com/ https://metabase.com/ youtube.com *.youtube.com youtu.be *.youtu.be loom.com *.loom.com vimeo.com *.vimeo.com docs.google.com calendar.google.com airtable.com *.airtable.com typeform.com *.typeform.com canva.com *.canva.com codepen.io *.codepen.io figma.com *.figma.com grafana.com *.grafana.com miro.com *.miro.com excalidraw.com *.excalidraw.com notion.com *.notion.com atlassian.com *.atlassian.com trello.com *.trello.com asana.com *.asana.com gist.github.com linkedin.com *.linkedin.com twitter.com *.twitter.com x.com *.x.com; default-src 'none'; media-src www.metabase.com; child-src 'self' https://accounts.google.com;  frame-ancestors 'none';"
+                },
+                {
+                  "key": "x-metabase-version",
+                  "value": "v0.63.13"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json;charset=utf-8"
+                },
+                {
+                  "key": "content-encoding",
+                  "value": "gzip"
+                },
+                {
+                  "key": "expires",
+                  "value": "Tue, 03 Jul 2001 06:00:00 GMT"
+                },
+                {
+                  "key": "access-control-allow-methods",
+                  "value": "*"
+                },
+                {
+                  "key": "via",
+                  "value": "1.1 google"
+                },
+                {
+                  "key": "transfer-encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"STORE_ID\": \"99901109\",\n    \"STORE_NAME\": \"Ramgarh_Chc\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Pharmacy - Counter 1\",\n    \"USER_ID\": \"jagan\",\n    \"USER_NAME\": \"Jagan E\",\n    \"USER_ACTIVE_STATUS\": \"Active\",\n    \"LATEST_LOGIN_DATE\": \"2026-11-17T09:31:10.664507Z\",\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"NUMBER_OF_DISPENSES\": 1\n  },\n  {\n    \"STORE_ID\": \"99901109\",\n    \"STORE_NAME\": \"Ramgarh_Chc\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Pharmacy - Counter 2\",\n    \"USER_ID\": \"jagan\",\n    \"USER_NAME\": \"Jagan E\",\n    \"USER_ACTIVE_STATUS\": \"Active\",\n    \"LATEST_LOGIN_DATE\": \"2026-11-17T09:31:10.664507Z\",\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"NUMBER_OF_DISPENSES\": 1\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Active DDC Issues - Prescription-wise",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              },
+              {
+                "key": "accept-language",
+                "value": "en-US,en;q=0.9,am;q=0.8,ar;q=0.7"
+              },
+              {
+                "key": "cache-control",
+                "value": "no-cache"
+              },
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
+              {
+                "key": "origin",
+                "value": "https://govt-staging-data.ohc.network"
+              },
+              {
+                "key": "pragma",
+                "value": "no-cache"
+              },
+              {
+                "key": "priority",
+                "value": "u=1, i"
+              },
+              {
+                "key": "referer",
+                "value": "https://govt-staging-data.ohc.network/dashboard/9-dvdms-stock-kpis-final-export-6-nov?date=2026-11-06&location=&store_id="
+              },
+              {
+                "key": "sec-ch-ua",
+                "value": "\"Not-A.Brand\";v=\"99\", \"Google Chrome\";v=\"157\", \"Chromium\";v=\"157\""
+              },
+              {
+                "key": "sec-ch-ua-mobile",
+                "value": "?0"
+              },
+              {
+                "key": "sec-ch-ua-platform",
+                "value": "\"macOS\""
+              },
+              {
+                "key": "sec-fetch-dest",
+                "value": "empty"
+              },
+              {
+                "key": "sec-fetch-mode",
+                "value": "cors"
+              },
+              {
+                "key": "sec-fetch-site",
+                "value": "same-origin"
+              },
+              {
+                "key": "user-agent",
+                "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36"
+              },
+              {
+                "key": "x-api-key",
+                "value": "{{metabase_api_key}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ignore_cache\": false,\n  \"collection_preview\": false,\n  \"parameters\": [\n    {\n      \"id\": \"360232f5-49af-464d-88ed-b4891114113c\",\n      \"type\": \"string/=\",\n      \"value\": null,\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"store_id\"\n        ]\n      ]\n    },\n    {\n      \"id\": \"5d3a3755-7843-4668-99a4-bfb251a49d63\",\n      \"type\": \"date/single\",\n      \"value\": \"2026-11-06\",\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"dispense_date\"\n        ]\n      ]\n    },\n    {\n      \"id\": \"68a1938f-6cb6-451e-be68-8dc7465dcc2d\",\n      \"type\": \"string/=\",\n      \"value\": null,\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"location_name\"\n        ]\n      ]\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://govt-staging-data.ohc.network/api/card/100/query/json",
+              "protocol": "https",
+              "host": [
+                "govt-staging-data",
+                "ohc",
+                "network"
+              ],
+              "path": [
+                "api",
+                "card",
+                "100",
+                "query",
+                "json"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Active DDC Issues - Prescription-wise",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "accept-language",
+                    "value": "en-US,en;q=0.9,am;q=0.8,ar;q=0.7"
+                  },
+                  {
+                    "key": "cache-control",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "content-type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "origin",
+                    "value": "https://govt-staging-data.ohc.network"
+                  },
+                  {
+                    "key": "pragma",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "priority",
+                    "value": "u=1, i"
+                  },
+                  {
+                    "key": "referer",
+                    "value": "https://govt-staging-data.ohc.network/dashboard/9-dvdms-stock-kpis-final-export-6-nov?date=2026-11-06&location=&store_id="
+                  },
+                  {
+                    "key": "sec-ch-ua",
+                    "value": "\"Not-A.Brand\";v=\"99\", \"Google Chrome\";v=\"157\", \"Chromium\";v=\"157\""
+                  },
+                  {
+                    "key": "sec-ch-ua-mobile",
+                    "value": "?0"
+                  },
+                  {
+                    "key": "sec-ch-ua-platform",
+                    "value": "\"macOS\""
+                  },
+                  {
+                    "key": "sec-fetch-dest",
+                    "value": "empty"
+                  },
+                  {
+                    "key": "sec-fetch-mode",
+                    "value": "cors"
+                  },
+                  {
+                    "key": "sec-fetch-site",
+                    "value": "same-origin"
+                  },
+                  {
+                    "key": "user-agent",
+                    "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36"
+                  },
+                  {
+                    "key": "x-api-key",
+                    "value": "{{metabase_api_key}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"ignore_cache\": false,\n  \"collection_preview\": false,\n  \"parameters\": [\n    {\n      \"id\": \"360232f5-49af-464d-88ed-b4891114113c\",\n      \"type\": \"string/=\",\n      \"value\": null,\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"store_id\"\n        ]\n      ]\n    },\n    {\n      \"id\": \"5d3a3755-7843-4668-99a4-bfb251a49d63\",\n      \"type\": \"date/single\",\n      \"value\": \"2026-11-06\",\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"dispense_date\"\n        ]\n      ]\n    },\n    {\n      \"id\": \"68a1938f-6cb6-451e-be68-8dc7465dcc2d\",\n      \"type\": \"string/=\",\n      \"value\": null,\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"location_name\"\n        ]\n      ]\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "https://govt-staging-data.ohc.network/api/card/100/query/json",
+                  "protocol": "https",
+                  "host": [
+                    "govt-staging-data",
+                    "ohc",
+                    "network"
+                  ],
+                  "path": [
+                    "api",
+                    "card",
+                    "100",
+                    "query",
+                    "json"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "date",
+                  "value": "Tue, 17 Nov 2026 09:37:09 GMT"
+                },
+                {
+                  "key": "x-frame-options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "access-control-allow-headers",
+                  "value": "*"
+                },
+                {
+                  "key": "access-control-max-age",
+                  "value": "60"
+                },
+                {
+                  "key": "x-accel-buffering",
+                  "value": "no"
+                },
+                {
+                  "key": "last-modified",
+                  "value": "Tue, 17 Nov 2026 09:37:09 GMT"
+                },
+                {
+                  "key": "strict-transport-security",
+                  "value": "max-age=31536000"
+                },
+                {
+                  "key": "content-disposition",
+                  "value": "attachment; filename=\"active_ddc_issues___prescription_wise_2026-11-17T09:37:09.371909002Z.json\""
+                },
+                {
+                  "key": "x-permitted-cross-domain-policies",
+                  "value": "none"
+                },
+                {
+                  "key": "cache-control",
+                  "value": "max-age=0, no-cache, must-revalidate, proxy-revalidate"
+                },
+                {
+                  "key": "access-control-expose-headers",
+                  "value": "Content-Disposition, X-Metabase-Anti-CSRF-Token, X-Metabase-Version, Mcp-Session-Id"
+                },
+                {
+                  "key": "x-content-type-options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "content-security-policy",
+                  "value": "font-src 'self' data:; style-src-attr 'self'; script-src 'self' 'nonce-RzNjPO1YSA' https://maps.google.com https://accounts.google.com    'sha256-SxNB1/NQ1TUHWrwTi7scFI31VsahWQBj54W7KQZQs1Q=' 'sha256-isH538cVBUY8IMlGYGbWtBwr+cGqkc4mN6nLcA7lUjE=' 'sha256-3N2Z+Nu++/yNMVHIl863JigVmt2Nr9gt2doEMJT2Wzk='; style-src 'self' 'nonce-RzNjPO1YSA'   https://accounts.google.com; manifest-src 'self'; connect-src 'self' https://accounts.google.com metabase.us10.list-manage.com    ; img-src * 'self' data:; frame-src 'self' https://www.metabase.com/ https://metabase.com/ youtube.com *.youtube.com youtu.be *.youtu.be loom.com *.loom.com vimeo.com *.vimeo.com docs.google.com calendar.google.com airtable.com *.airtable.com typeform.com *.typeform.com canva.com *.canva.com codepen.io *.codepen.io figma.com *.figma.com grafana.com *.grafana.com miro.com *.miro.com excalidraw.com *.excalidraw.com notion.com *.notion.com atlassian.com *.atlassian.com trello.com *.trello.com asana.com *.asana.com gist.github.com linkedin.com *.linkedin.com twitter.com *.twitter.com x.com *.x.com; default-src 'none'; media-src www.metabase.com; child-src 'self' https://accounts.google.com;  frame-ancestors 'none';"
+                },
+                {
+                  "key": "x-metabase-version",
+                  "value": "v0.63.13"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json;charset=utf-8"
+                },
+                {
+                  "key": "content-encoding",
+                  "value": "gzip"
+                },
+                {
+                  "key": "expires",
+                  "value": "Tue, 03 Jul 2001 06:00:00 GMT"
+                },
+                {
+                  "key": "access-control-allow-methods",
+                  "value": "*"
+                },
+                {
+                  "key": "via",
+                  "value": "1.1 google"
+                },
+                {
+                  "key": "transfer-encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_NAME\": \"Ramghar_DH\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Male Ward\",\n    \"PRESCRIPTION_ID\": null,\n    \"PRESCRIPTION_DATE\": \"2026-10-07\",\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260002381\",\n    \"ABHA_ID\": null,\n    \"PATIENT_GENDER\": \"male\",\n    \"PATIENT_AGE\": 32,\n    \"NUMBER_OF_ITEMS\": 2\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_NAME\": \"Ramghar_DH\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Male Ward\",\n    \"PRESCRIPTION_ID\": null,\n    \"PRESCRIPTION_DATE\": \"2026-09-05\",\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260002381\",\n    \"ABHA_ID\": null,\n    \"PATIENT_GENDER\": \"male\",\n    \"PATIENT_AGE\": 32,\n    \"NUMBER_OF_ITEMS\": 1\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_NAME\": \"Ramghar_DH\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Male Ward\",\n    \"PRESCRIPTION_ID\": null,\n    \"PRESCRIPTION_DATE\": \"2026-09-05\",\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260002381\",\n    \"ABHA_ID\": null,\n    \"PATIENT_GENDER\": \"male\",\n    \"PATIENT_AGE\": 32,\n    \"NUMBER_OF_ITEMS\": 1\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_NAME\": \"Ramghar_DH\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Male Ward\",\n    \"PRESCRIPTION_ID\": null,\n    \"PRESCRIPTION_DATE\": \"2026-09-05\",\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260002381\",\n    \"ABHA_ID\": null,\n    \"PATIENT_GENDER\": \"male\",\n    \"PATIENT_AGE\": 32,\n    \"NUMBER_OF_ITEMS\": 1\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_NAME\": \"Ramghar_DH\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Male Ward\",\n    \"PRESCRIPTION_ID\": null,\n    \"PRESCRIPTION_DATE\": \"2026-09-05\",\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260002381\",\n    \"ABHA_ID\": null,\n    \"PATIENT_GENDER\": \"male\",\n    \"PATIENT_AGE\": 32,\n    \"NUMBER_OF_ITEMS\": 1\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_NAME\": \"Ramghar_DH\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Male Ward\",\n    \"PRESCRIPTION_ID\": null,\n    \"PRESCRIPTION_DATE\": \"2026-10-29\",\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260002445\",\n    \"ABHA_ID\": null,\n    \"PATIENT_GENDER\": \"female\",\n    \"PATIENT_AGE\": 22,\n    \"NUMBER_OF_ITEMS\": 1\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_NAME\": \"Ramghar_DH\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Male Ward\",\n    \"PRESCRIPTION_ID\": \"RX0000626000002\",\n    \"PRESCRIPTION_DATE\": \"2026-11-06\",\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260002454\",\n    \"ABHA_ID\": null,\n    \"PATIENT_GENDER\": \"male\",\n    \"PATIENT_AGE\": 22,\n    \"NUMBER_OF_ITEMS\": 1\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_NAME\": \"Ramghar_DH\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Male Ward\",\n    \"PRESCRIPTION_ID\": \"RX0000626000006\",\n    \"PRESCRIPTION_DATE\": \"2026-11-06\",\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260002430\",\n    \"ABHA_ID\": \"91-2320-0601-5175\",\n    \"PATIENT_GENDER\": \"male\",\n    \"PATIENT_AGE\": 3,\n    \"NUMBER_OF_ITEMS\": 1\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_NAME\": \"Ramghar_DH\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Male Ward\",\n    \"PRESCRIPTION_ID\": \"RX0000626000003\",\n    \"PRESCRIPTION_DATE\": \"2026-11-06\",\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260002454\",\n    \"ABHA_ID\": null,\n    \"PATIENT_GENDER\": \"male\",\n    \"PATIENT_AGE\": 22,\n    \"NUMBER_OF_ITEMS\": 1\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_NAME\": \"Ramghar_DH\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Male Ward\",\n    \"PRESCRIPTION_ID\": \"RX0000626000005\",\n    \"PRESCRIPTION_DATE\": \"2026-11-06\",\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260002445\",\n    \"ABHA_ID\": null,\n    \"PATIENT_GENDER\": \"female\",\n    \"PATIENT_AGE\": 22,\n    \"NUMBER_OF_ITEMS\": 1\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_NAME\": \"Ramghar_DH\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Male Ward\",\n    \"PRESCRIPTION_ID\": \"RX0000626000004\",\n    \"PRESCRIPTION_DATE\": \"2026-11-06\",\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260002425\",\n    \"ABHA_ID\": null,\n    \"PATIENT_GENDER\": \"male\",\n    \"PATIENT_AGE\": 126,\n    \"NUMBER_OF_ITEMS\": 1\n  },\n  {\n    \"STORE_ID\": \"99901068\",\n    \"STORE_NAME\": \"Mandu_Chc\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"General OPD\",\n    \"PRESCRIPTION_ID\": \"RX0001626000001\",\n    \"PRESCRIPTION_DATE\": \"2026-11-06\",\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260000551\",\n    \"ABHA_ID\": null,\n    \"PATIENT_GENDER\": \"female\",\n    \"PATIENT_AGE\": 18,\n    \"NUMBER_OF_ITEMS\": 1\n  },\n  {\n    \"STORE_ID\": \"99901109\",\n    \"STORE_NAME\": \"Ramgarh_Chc\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Pharmacy - Counter 1\",\n    \"PRESCRIPTION_ID\": \"RX0000926000002\",\n    \"PRESCRIPTION_DATE\": \"2026-11-06\",\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260000606\",\n    \"ABHA_ID\": null,\n    \"PATIENT_GENDER\": \"male\",\n    \"PATIENT_AGE\": 30,\n    \"NUMBER_OF_ITEMS\": 1\n  },\n  {\n    \"STORE_ID\": \"99901109\",\n    \"STORE_NAME\": \"Ramgarh_Chc\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Pharmacy - Counter 2\",\n    \"PRESCRIPTION_ID\": \"RX0000926000001\",\n    \"PRESCRIPTION_DATE\": \"2026-11-06\",\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260000606\",\n    \"ABHA_ID\": null,\n    \"PATIENT_GENDER\": \"male\",\n    \"PATIENT_AGE\": 30,\n    \"NUMBER_OF_ITEMS\": 1\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Active DDC Issue Details (Patient and Drug Level)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              },
+              {
+                "key": "accept-language",
+                "value": "en-US,en;q=0.9,am;q=0.8,ar;q=0.7"
+              },
+              {
+                "key": "cache-control",
+                "value": "no-cache"
+              },
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
+              {
+                "key": "origin",
+                "value": "https://govt-staging-data.ohc.network"
+              },
+              {
+                "key": "pragma",
+                "value": "no-cache"
+              },
+              {
+                "key": "priority",
+                "value": "u=1, i"
+              },
+              {
+                "key": "referer",
+                "value": "https://govt-staging-data.ohc.network/dashboard/9-dvdms-stock-kpis-final-export-6-nov?date=2026-11-06&location=&store_id="
+              },
+              {
+                "key": "sec-ch-ua",
+                "value": "\"Not-A.Brand\";v=\"99\", \"Google Chrome\";v=\"157\", \"Chromium\";v=\"157\""
+              },
+              {
+                "key": "sec-ch-ua-mobile",
+                "value": "?0"
+              },
+              {
+                "key": "sec-ch-ua-platform",
+                "value": "\"macOS\""
+              },
+              {
+                "key": "sec-fetch-dest",
+                "value": "empty"
+              },
+              {
+                "key": "sec-fetch-mode",
+                "value": "cors"
+              },
+              {
+                "key": "sec-fetch-site",
+                "value": "same-origin"
+              },
+              {
+                "key": "user-agent",
+                "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36"
+              },
+              {
+                "key": "x-api-key",
+                "value": "{{metabase_api_key}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ignore_cache\": false,\n  \"collection_preview\": false,\n  \"parameters\": [\n    {\n      \"id\": \"ee0480ec-a3b5-467e-99d6-08406b632d79\",\n      \"type\": \"string/=\",\n      \"value\": null,\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"store_id\"\n        ]\n      ]\n    },\n    {\n      \"id\": \"46824bda-623e-4f60-81a2-6b843ca7aa26\",\n      \"type\": \"date/single\",\n      \"value\": \"2026-11-06\",\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"dispense_date\"\n        ]\n      ]\n    },\n    {\n      \"id\": \"54e1259d-17b5-4520-ae99-bb1ffd4ba661\",\n      \"type\": \"string/=\",\n      \"value\": null,\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"location_name\"\n        ]\n      ]\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://govt-staging-data.ohc.network/api/card/101/query/json",
+              "protocol": "https",
+              "host": [
+                "govt-staging-data",
+                "ohc",
+                "network"
+              ],
+              "path": [
+                "api",
+                "card",
+                "101",
+                "query",
+                "json"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Active DDC Issue Details (Patient and Drug Level)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "accept-language",
+                    "value": "en-US,en;q=0.9,am;q=0.8,ar;q=0.7"
+                  },
+                  {
+                    "key": "cache-control",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "content-type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "origin",
+                    "value": "https://govt-staging-data.ohc.network"
+                  },
+                  {
+                    "key": "pragma",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "priority",
+                    "value": "u=1, i"
+                  },
+                  {
+                    "key": "referer",
+                    "value": "https://govt-staging-data.ohc.network/dashboard/9-dvdms-stock-kpis-final-export-6-nov?date=2026-11-06&location=&store_id="
+                  },
+                  {
+                    "key": "sec-ch-ua",
+                    "value": "\"Not-A.Brand\";v=\"99\", \"Google Chrome\";v=\"157\", \"Chromium\";v=\"157\""
+                  },
+                  {
+                    "key": "sec-ch-ua-mobile",
+                    "value": "?0"
+                  },
+                  {
+                    "key": "sec-ch-ua-platform",
+                    "value": "\"macOS\""
+                  },
+                  {
+                    "key": "sec-fetch-dest",
+                    "value": "empty"
+                  },
+                  {
+                    "key": "sec-fetch-mode",
+                    "value": "cors"
+                  },
+                  {
+                    "key": "sec-fetch-site",
+                    "value": "same-origin"
+                  },
+                  {
+                    "key": "user-agent",
+                    "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36"
+                  },
+                  {
+                    "key": "x-api-key",
+                    "value": "{{metabase_api_key}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"ignore_cache\": false,\n  \"collection_preview\": false,\n  \"parameters\": [\n    {\n      \"id\": \"ee0480ec-a3b5-467e-99d6-08406b632d79\",\n      \"type\": \"string/=\",\n      \"value\": null,\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"store_id\"\n        ]\n      ]\n    },\n    {\n      \"id\": \"46824bda-623e-4f60-81a2-6b843ca7aa26\",\n      \"type\": \"date/single\",\n      \"value\": \"2026-11-06\",\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"dispense_date\"\n        ]\n      ]\n    },\n    {\n      \"id\": \"54e1259d-17b5-4520-ae99-bb1ffd4ba661\",\n      \"type\": \"string/=\",\n      \"value\": null,\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"location_name\"\n        ]\n      ]\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "https://govt-staging-data.ohc.network/api/card/101/query/json",
+                  "protocol": "https",
+                  "host": [
+                    "govt-staging-data",
+                    "ohc",
+                    "network"
+                  ],
+                  "path": [
+                    "api",
+                    "card",
+                    "101",
+                    "query",
+                    "json"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "date",
+                  "value": "Tue, 17 Nov 2026 09:37:29 GMT"
+                },
+                {
+                  "key": "x-frame-options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "access-control-allow-headers",
+                  "value": "*"
+                },
+                {
+                  "key": "access-control-max-age",
+                  "value": "60"
+                },
+                {
+                  "key": "x-accel-buffering",
+                  "value": "no"
+                },
+                {
+                  "key": "last-modified",
+                  "value": "Tue, 17 Nov 2026 09:37:29 GMT"
+                },
+                {
+                  "key": "strict-transport-security",
+                  "value": "max-age=31536000"
+                },
+                {
+                  "key": "content-disposition",
+                  "value": "attachment; filename=\"active_ddc_issue_details__patient_and_drug_level__2026-11-17T09:37:29.357071171Z.json\""
+                },
+                {
+                  "key": "x-permitted-cross-domain-policies",
+                  "value": "none"
+                },
+                {
+                  "key": "cache-control",
+                  "value": "max-age=0, no-cache, must-revalidate, proxy-revalidate"
+                },
+                {
+                  "key": "access-control-expose-headers",
+                  "value": "Content-Disposition, X-Metabase-Anti-CSRF-Token, X-Metabase-Version, Mcp-Session-Id"
+                },
+                {
+                  "key": "x-content-type-options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "content-security-policy",
+                  "value": "font-src 'self' data:; style-src-attr 'self'; script-src 'self' 'nonce-DfOHqxUoC6' https://maps.google.com https://accounts.google.com    'sha256-SxNB1/NQ1TUHWrwTi7scFI31VsahWQBj54W7KQZQs1Q=' 'sha256-isH538cVBUY8IMlGYGbWtBwr+cGqkc4mN6nLcA7lUjE=' 'sha256-3N2Z+Nu++/yNMVHIl863JigVmt2Nr9gt2doEMJT2Wzk='; style-src 'self' 'nonce-DfOHqxUoC6'   https://accounts.google.com; manifest-src 'self'; connect-src 'self' https://accounts.google.com metabase.us10.list-manage.com    ; img-src * 'self' data:; frame-src 'self' https://www.metabase.com/ https://metabase.com/ youtube.com *.youtube.com youtu.be *.youtu.be loom.com *.loom.com vimeo.com *.vimeo.com docs.google.com calendar.google.com airtable.com *.airtable.com typeform.com *.typeform.com canva.com *.canva.com codepen.io *.codepen.io figma.com *.figma.com grafana.com *.grafana.com miro.com *.miro.com excalidraw.com *.excalidraw.com notion.com *.notion.com atlassian.com *.atlassian.com trello.com *.trello.com asana.com *.asana.com gist.github.com linkedin.com *.linkedin.com twitter.com *.twitter.com x.com *.x.com; default-src 'none'; media-src www.metabase.com; child-src 'self' https://accounts.google.com;  frame-ancestors 'none';"
+                },
+                {
+                  "key": "x-metabase-version",
+                  "value": "v0.63.13"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json;charset=utf-8"
+                },
+                {
+                  "key": "content-encoding",
+                  "value": "gzip"
+                },
+                {
+                  "key": "expires",
+                  "value": "Tue, 03 Jul 2001 06:00:00 GMT"
+                },
+                {
+                  "key": "access-control-allow-methods",
+                  "value": "*"
+                },
+                {
+                  "key": "via",
+                  "value": "1.1 google"
+                },
+                {
+                  "key": "transfer-encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"STORE_ID\": \"99901068\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"General OPD\",\n    \"PRESCRIPTION_ID\": \"RX0001626000001\",\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260000551\",\n    \"ABHA_ID\": null,\n    \"DRUG_ID\": null,\n    \"PATIENT_WISE_DRUG_SENT\": \"Paracetamol 500 mg Tablet\",\n    \"DRUG_BRAND_DETAILS\": null,\n    \"BATCH_NUMBER\": \"BN26PAR0458\",\n    \"EXPIRY_DATE\": \"2029-10-31\",\n    \"SENT_COUNT\": 1,\n    \"STORES_AVAILABLE_STOCK\": 66,\n    \"QUANTITY_REQUESTED\": 10,\n    \"QUANTITY_SENT\": 10,\n    \"UPDATED_INVENTORY_QUANTITY\": 56\n  },\n  {\n    \"STORE_ID\": \"99901109\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Pharmacy - Counter 1\",\n    \"PRESCRIPTION_ID\": \"RX0000926000002\",\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260000606\",\n    \"ABHA_ID\": null,\n    \"DRUG_ID\": \"10000238\",\n    \"PATIENT_WISE_DRUG_SENT\": \"Paracetamol Tablet IP 500 mg\",\n    \"DRUG_BRAND_DETAILS\": \"10100238\",\n    \"BATCH_NUMBER\": \"BN26PAR0458\",\n    \"EXPIRY_DATE\": \"2029-10-31\",\n    \"SENT_COUNT\": 2,\n    \"STORES_AVAILABLE_STOCK\": 10,\n    \"QUANTITY_REQUESTED\": 15,\n    \"QUANTITY_SENT\": 10,\n    \"UPDATED_INVENTORY_QUANTITY\": 0\n  },\n  {\n    \"STORE_ID\": \"99901109\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Pharmacy - Counter 2\",\n    \"PRESCRIPTION_ID\": \"RX0000926000001\",\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260000606\",\n    \"ABHA_ID\": null,\n    \"DRUG_ID\": \"10000238\",\n    \"PATIENT_WISE_DRUG_SENT\": \"Paracetamol Tablet IP 500 mg\",\n    \"DRUG_BRAND_DETAILS\": \"10100238\",\n    \"BATCH_NUMBER\": \"BN26PAR0458\",\n    \"EXPIRY_DATE\": \"2029-10-31\",\n    \"SENT_COUNT\": 2,\n    \"STORES_AVAILABLE_STOCK\": 10,\n    \"QUANTITY_REQUESTED\": 21,\n    \"QUANTITY_SENT\": 10,\n    \"UPDATED_INVENTORY_QUANTITY\": 0\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Male Ward\",\n    \"PRESCRIPTION_ID\": null,\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260002381\",\n    \"ABHA_ID\": null,\n    \"DRUG_ID\": \"10000238\",\n    \"PATIENT_WISE_DRUG_SENT\": \"Paracetamol Tablet 500 mg\",\n    \"DRUG_BRAND_DETAILS\": \"10100238\",\n    \"BATCH_NUMBER\": \"BN26PAR0458\",\n    \"EXPIRY_DATE\": \"2029-10-31\",\n    \"SENT_COUNT\": 6,\n    \"STORES_AVAILABLE_STOCK\": 54,\n    \"QUANTITY_REQUESTED\": 7,\n    \"QUANTITY_SENT\": 7,\n    \"UPDATED_INVENTORY_QUANTITY\": 47\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Male Ward\",\n    \"PRESCRIPTION_ID\": null,\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260002381\",\n    \"ABHA_ID\": null,\n    \"DRUG_ID\": \"10000238\",\n    \"PATIENT_WISE_DRUG_SENT\": \"Paracetamol Tablet 500 mg\",\n    \"DRUG_BRAND_DETAILS\": \"10100238\",\n    \"BATCH_NUMBER\": \"BN26PAR0458\",\n    \"EXPIRY_DATE\": \"2029-10-31\",\n    \"SENT_COUNT\": 6,\n    \"STORES_AVAILABLE_STOCK\": 64,\n    \"QUANTITY_REQUESTED\": 10,\n    \"QUANTITY_SENT\": 10,\n    \"UPDATED_INVENTORY_QUANTITY\": 54\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Male Ward\",\n    \"PRESCRIPTION_ID\": null,\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260002381\",\n    \"ABHA_ID\": null,\n    \"DRUG_ID\": \"10000238\",\n    \"PATIENT_WISE_DRUG_SENT\": \"Paracetamol Tablet 500 mg\",\n    \"DRUG_BRAND_DETAILS\": \"10100238\",\n    \"BATCH_NUMBER\": \"BN26PAR0458\",\n    \"EXPIRY_DATE\": \"2029-10-31\",\n    \"SENT_COUNT\": 6,\n    \"STORES_AVAILABLE_STOCK\": 79,\n    \"QUANTITY_REQUESTED\": 15,\n    \"QUANTITY_SENT\": 15,\n    \"UPDATED_INVENTORY_QUANTITY\": 64\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Male Ward\",\n    \"PRESCRIPTION_ID\": null,\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260002381\",\n    \"ABHA_ID\": null,\n    \"DRUG_ID\": \"10000238\",\n    \"PATIENT_WISE_DRUG_SENT\": \"Paracetamol Tablet 500 mg\",\n    \"DRUG_BRAND_DETAILS\": \"10100238\",\n    \"BATCH_NUMBER\": \"BN26PAR0458\",\n    \"EXPIRY_DATE\": \"2029-10-31\",\n    \"SENT_COUNT\": 6,\n    \"STORES_AVAILABLE_STOCK\": 89,\n    \"QUANTITY_REQUESTED\": 10,\n    \"QUANTITY_SENT\": 10,\n    \"UPDATED_INVENTORY_QUANTITY\": 79\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Male Ward\",\n    \"PRESCRIPTION_ID\": null,\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260002381\",\n    \"ABHA_ID\": null,\n    \"DRUG_ID\": \"10000238\",\n    \"PATIENT_WISE_DRUG_SENT\": \"Paracetamol Tablet 500 mg\",\n    \"DRUG_BRAND_DETAILS\": \"10100238\",\n    \"BATCH_NUMBER\": \"BN26PAR0458\",\n    \"EXPIRY_DATE\": \"2029-10-31\",\n    \"SENT_COUNT\": 6,\n    \"STORES_AVAILABLE_STOCK\": 90,\n    \"QUANTITY_REQUESTED\": 5,\n    \"QUANTITY_SENT\": 1,\n    \"UPDATED_INVENTORY_QUANTITY\": 89\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Male Ward\",\n    \"PRESCRIPTION_ID\": null,\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260002381\",\n    \"ABHA_ID\": null,\n    \"DRUG_ID\": \"10000238\",\n    \"PATIENT_WISE_DRUG_SENT\": \"Paracetamol Tablet 500 mg\",\n    \"DRUG_BRAND_DETAILS\": \"10100238\",\n    \"BATCH_NUMBER\": \"BN26PAR0458\",\n    \"EXPIRY_DATE\": \"2029-10-31\",\n    \"SENT_COUNT\": 6,\n    \"STORES_AVAILABLE_STOCK\": 93,\n    \"QUANTITY_REQUESTED\": 2.5,\n    \"QUANTITY_SENT\": 3,\n    \"UPDATED_INVENTORY_QUANTITY\": 90\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Male Ward\",\n    \"PRESCRIPTION_ID\": \"RX0000626000004\",\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260002425\",\n    \"ABHA_ID\": null,\n    \"DRUG_ID\": \"10000238\",\n    \"PATIENT_WISE_DRUG_SENT\": \"Paracetamol Tablet 500 mg\",\n    \"DRUG_BRAND_DETAILS\": \"10100238\",\n    \"BATCH_NUMBER\": \"BN26PAR0458\",\n    \"EXPIRY_DATE\": \"2029-10-31\",\n    \"SENT_COUNT\": 1,\n    \"STORES_AVAILABLE_STOCK\": 40,\n    \"QUANTITY_REQUESTED\": 6,\n    \"QUANTITY_SENT\": 10,\n    \"UPDATED_INVENTORY_QUANTITY\": 30\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Male Ward\",\n    \"PRESCRIPTION_ID\": \"RX0000626000006\",\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260002430\",\n    \"ABHA_ID\": \"91-2320-0601-5175\",\n    \"DRUG_ID\": \"10000238\",\n    \"PATIENT_WISE_DRUG_SENT\": \"Paracetamol Tablet 500 mg\",\n    \"DRUG_BRAND_DETAILS\": \"10100238\",\n    \"BATCH_NUMBER\": \"BN26PAR0458\",\n    \"EXPIRY_DATE\": \"2029-10-31\",\n    \"SENT_COUNT\": 1,\n    \"STORES_AVAILABLE_STOCK\": 9,\n    \"QUANTITY_REQUESTED\": 30,\n    \"QUANTITY_SENT\": 9,\n    \"UPDATED_INVENTORY_QUANTITY\": 0\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Male Ward\",\n    \"PRESCRIPTION_ID\": null,\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260002445\",\n    \"ABHA_ID\": null,\n    \"DRUG_ID\": \"10000238\",\n    \"PATIENT_WISE_DRUG_SENT\": \"Paracetamol Tablet 500 mg\",\n    \"DRUG_BRAND_DETAILS\": \"10100238\",\n    \"BATCH_NUMBER\": \"BN26PAR0458\",\n    \"EXPIRY_DATE\": \"2029-10-31\",\n    \"SENT_COUNT\": 2,\n    \"STORES_AVAILABLE_STOCK\": 94,\n    \"QUANTITY_REQUESTED\": null,\n    \"QUANTITY_SENT\": 1,\n    \"UPDATED_INVENTORY_QUANTITY\": 93\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Male Ward\",\n    \"PRESCRIPTION_ID\": \"RX0000626000005\",\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260002445\",\n    \"ABHA_ID\": null,\n    \"DRUG_ID\": \"10000238\",\n    \"PATIENT_WISE_DRUG_SENT\": \"Paracetamol Tablet 500 mg\",\n    \"DRUG_BRAND_DETAILS\": \"10100238\",\n    \"BATCH_NUMBER\": \"BN26PAR0458\",\n    \"EXPIRY_DATE\": \"2029-10-31\",\n    \"SENT_COUNT\": 2,\n    \"STORES_AVAILABLE_STOCK\": 30,\n    \"QUANTITY_REQUESTED\": 15,\n    \"QUANTITY_SENT\": 15,\n    \"UPDATED_INVENTORY_QUANTITY\": 15\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Male Ward\",\n    \"PRESCRIPTION_ID\": \"RX0000626000002\",\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260002454\",\n    \"ABHA_ID\": null,\n    \"DRUG_ID\": \"10000238\",\n    \"PATIENT_WISE_DRUG_SENT\": \"Paracetamol Tablet 500 mg\",\n    \"DRUG_BRAND_DETAILS\": \"10100238\",\n    \"BATCH_NUMBER\": \"BN26PAR0458\",\n    \"EXPIRY_DATE\": \"2029-10-31\",\n    \"SENT_COUNT\": 2,\n    \"STORES_AVAILABLE_STOCK\": 100,\n    \"QUANTITY_REQUESTED\": 6,\n    \"QUANTITY_SENT\": 6,\n    \"UPDATED_INVENTORY_QUANTITY\": 94\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_TYPE\": null,\n    \"DDC_NAME\": \"Male Ward\",\n    \"PRESCRIPTION_ID\": \"RX0000626000003\",\n    \"DISPENSE_DATE\": \"2026-11-06\",\n    \"PATIENT_UHID\": \"20260002454\",\n    \"ABHA_ID\": null,\n    \"DRUG_ID\": \"10000238\",\n    \"PATIENT_WISE_DRUG_SENT\": \"Paracetamol Tablet 500 mg\",\n    \"DRUG_BRAND_DETAILS\": \"10100238\",\n    \"BATCH_NUMBER\": \"BN26PAR0458\",\n    \"EXPIRY_DATE\": \"2029-10-31\",\n    \"SENT_COUNT\": 2,\n    \"STORES_AVAILABLE_STOCK\": 15,\n    \"QUANTITY_REQUESTED\": 6,\n    \"QUANTITY_SENT\": 6,\n    \"UPDATED_INVENTORY_QUANTITY\": 9\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Hospital Inventory Position (CARE System)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              },
+              {
+                "key": "accept-language",
+                "value": "en-US,en;q=0.9,am;q=0.8,ar;q=0.7"
+              },
+              {
+                "key": "cache-control",
+                "value": "no-cache"
+              },
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
+              {
+                "key": "origin",
+                "value": "https://govt-staging-data.ohc.network"
+              },
+              {
+                "key": "pragma",
+                "value": "no-cache"
+              },
+              {
+                "key": "priority",
+                "value": "u=1, i"
+              },
+              {
+                "key": "referer",
+                "value": "https://govt-staging-data.ohc.network/dashboard/9-dvdms-stock-kpis-final-export-6-nov?date=2026-11-06&location=&store_id="
+              },
+              {
+                "key": "sec-ch-ua",
+                "value": "\"Not-A.Brand\";v=\"99\", \"Google Chrome\";v=\"157\", \"Chromium\";v=\"157\""
+              },
+              {
+                "key": "sec-ch-ua-mobile",
+                "value": "?0"
+              },
+              {
+                "key": "sec-ch-ua-platform",
+                "value": "\"macOS\""
+              },
+              {
+                "key": "sec-fetch-dest",
+                "value": "empty"
+              },
+              {
+                "key": "sec-fetch-mode",
+                "value": "cors"
+              },
+              {
+                "key": "sec-fetch-site",
+                "value": "same-origin"
+              },
+              {
+                "key": "user-agent",
+                "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36"
+              },
+              {
+                "key": "x-api-key",
+                "value": "{{metabase_api_key}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ignore_cache\": false,\n  \"collection_preview\": false,\n  \"parameters\": [\n    {\n      \"id\": \"f9359640-c042-4ac0-bf00-a2c22a74f3aa\",\n      \"type\": \"string/=\",\n      \"value\": null,\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"store_id\"\n        ]\n      ]\n    },\n    {\n      \"id\": \"f4ac67fe-f5d7-415e-af85-77dbfab7ded8\",\n      \"type\": \"date/single\",\n      \"value\": \"2026-11-06\",\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"report_date\"\n        ]\n      ]\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://govt-staging-data.ohc.network/api/card/102/query/json",
+              "protocol": "https",
+              "host": [
+                "govt-staging-data",
+                "ohc",
+                "network"
+              ],
+              "path": [
+                "api",
+                "card",
+                "102",
+                "query",
+                "json"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Hospital Inventory Position (CARE System)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "accept-language",
+                    "value": "en-US,en;q=0.9,am;q=0.8,ar;q=0.7"
+                  },
+                  {
+                    "key": "cache-control",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "content-type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "origin",
+                    "value": "https://govt-staging-data.ohc.network"
+                  },
+                  {
+                    "key": "pragma",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "priority",
+                    "value": "u=1, i"
+                  },
+                  {
+                    "key": "referer",
+                    "value": "https://govt-staging-data.ohc.network/dashboard/9-dvdms-stock-kpis-final-export-6-nov?date=2026-11-06&location=&store_id="
+                  },
+                  {
+                    "key": "sec-ch-ua",
+                    "value": "\"Not-A.Brand\";v=\"99\", \"Google Chrome\";v=\"157\", \"Chromium\";v=\"157\""
+                  },
+                  {
+                    "key": "sec-ch-ua-mobile",
+                    "value": "?0"
+                  },
+                  {
+                    "key": "sec-ch-ua-platform",
+                    "value": "\"macOS\""
+                  },
+                  {
+                    "key": "sec-fetch-dest",
+                    "value": "empty"
+                  },
+                  {
+                    "key": "sec-fetch-mode",
+                    "value": "cors"
+                  },
+                  {
+                    "key": "sec-fetch-site",
+                    "value": "same-origin"
+                  },
+                  {
+                    "key": "user-agent",
+                    "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36"
+                  },
+                  {
+                    "key": "x-api-key",
+                    "value": "{{metabase_api_key}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"ignore_cache\": false,\n  \"collection_preview\": false,\n  \"parameters\": [\n    {\n      \"id\": \"f9359640-c042-4ac0-bf00-a2c22a74f3aa\",\n      \"type\": \"string/=\",\n      \"value\": null,\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"store_id\"\n        ]\n      ]\n    },\n    {\n      \"id\": \"f4ac67fe-f5d7-415e-af85-77dbfab7ded8\",\n      \"type\": \"date/single\",\n      \"value\": \"2026-11-06\",\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"report_date\"\n        ]\n      ]\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "https://govt-staging-data.ohc.network/api/card/102/query/json",
+                  "protocol": "https",
+                  "host": [
+                    "govt-staging-data",
+                    "ohc",
+                    "network"
+                  ],
+                  "path": [
+                    "api",
+                    "card",
+                    "102",
+                    "query",
+                    "json"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "date",
+                  "value": "Tue, 17 Nov 2026 09:37:40 GMT"
+                },
+                {
+                  "key": "x-frame-options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "access-control-allow-headers",
+                  "value": "*"
+                },
+                {
+                  "key": "access-control-max-age",
+                  "value": "60"
+                },
+                {
+                  "key": "x-accel-buffering",
+                  "value": "no"
+                },
+                {
+                  "key": "last-modified",
+                  "value": "Tue, 17 Nov 2026 09:37:40 GMT"
+                },
+                {
+                  "key": "strict-transport-security",
+                  "value": "max-age=31536000"
+                },
+                {
+                  "key": "content-disposition",
+                  "value": "attachment; filename=\"hospital_inventory_position__care_system__2026-11-17T09:37:40.480688771Z.json\""
+                },
+                {
+                  "key": "x-permitted-cross-domain-policies",
+                  "value": "none"
+                },
+                {
+                  "key": "cache-control",
+                  "value": "max-age=0, no-cache, must-revalidate, proxy-revalidate"
+                },
+                {
+                  "key": "access-control-expose-headers",
+                  "value": "Content-Disposition, X-Metabase-Anti-CSRF-Token, X-Metabase-Version, Mcp-Session-Id"
+                },
+                {
+                  "key": "x-content-type-options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "content-security-policy",
+                  "value": "font-src 'self' data:; style-src-attr 'self'; script-src 'self' 'nonce-h9NhJWeGE7' https://maps.google.com https://accounts.google.com    'sha256-SxNB1/NQ1TUHWrwTi7scFI31VsahWQBj54W7KQZQs1Q=' 'sha256-isH538cVBUY8IMlGYGbWtBwr+cGqkc4mN6nLcA7lUjE=' 'sha256-3N2Z+Nu++/yNMVHIl863JigVmt2Nr9gt2doEMJT2Wzk='; style-src 'self' 'nonce-h9NhJWeGE7'   https://accounts.google.com; manifest-src 'self'; connect-src 'self' https://accounts.google.com metabase.us10.list-manage.com    ; img-src * 'self' data:; frame-src 'self' https://www.metabase.com/ https://metabase.com/ youtube.com *.youtube.com youtu.be *.youtu.be loom.com *.loom.com vimeo.com *.vimeo.com docs.google.com calendar.google.com airtable.com *.airtable.com typeform.com *.typeform.com canva.com *.canva.com codepen.io *.codepen.io figma.com *.figma.com grafana.com *.grafana.com miro.com *.miro.com excalidraw.com *.excalidraw.com notion.com *.notion.com atlassian.com *.atlassian.com trello.com *.trello.com asana.com *.asana.com gist.github.com linkedin.com *.linkedin.com twitter.com *.twitter.com x.com *.x.com; default-src 'none'; media-src www.metabase.com; child-src 'self' https://accounts.google.com;  frame-ancestors 'none';"
+                },
+                {
+                  "key": "x-metabase-version",
+                  "value": "v0.63.13"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json;charset=utf-8"
+                },
+                {
+                  "key": "content-encoding",
+                  "value": "gzip"
+                },
+                {
+                  "key": "expires",
+                  "value": "Tue, 03 Jul 2001 06:00:00 GMT"
+                },
+                {
+                  "key": "access-control-allow-methods",
+                  "value": "*"
+                },
+                {
+                  "key": "via",
+                  "value": "1.1 google"
+                },
+                {
+                  "key": "transfer-encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"STORE_ID\": \"99901223\",\n    \"STORE_NAME\": \"Gola_Chc\",\n    \"DISTRICT_NAME\": \"Alappuzha\",\n    \"DRUG_ITEM_ID\": \"10000441\",\n    \"DRUG_ITEM_NAME\": \"Methotrexate 7.5mg(7.5 Mg)\",\n    \"AVAILABLE_MAIN_STORE_QTY\": 1210,\n    \"AVAILABLE_SUBSTORE_QTY\": 0,\n    \"AVAILABLE_INHAND_QTY\": 1210\n  },\n  {\n    \"STORE_ID\": \"99901223\",\n    \"STORE_NAME\": \"Gola_Chc\",\n    \"DISTRICT_NAME\": \"Alappuzha\",\n    \"DRUG_ITEM_ID\": \"10000238\",\n    \"DRUG_ITEM_NAME\": \"Paracetamol 500 Mg Tablet(500 Mg),Tablet\",\n    \"AVAILABLE_MAIN_STORE_QTY\": 121,\n    \"AVAILABLE_SUBSTORE_QTY\": 0,\n    \"AVAILABLE_INHAND_QTY\": 121\n  },\n  {\n    \"STORE_ID\": \"99901223\",\n    \"STORE_NAME\": \"Gola_Chc\",\n    \"DISTRICT_NAME\": \"Alappuzha\",\n    \"DRUG_ITEM_ID\": \"10000482\",\n    \"DRUG_ITEM_NAME\": \"Prednisolone 25 Mg(As Sodium Phosphate Or Succinate)(25 Mg)\",\n    \"AVAILABLE_MAIN_STORE_QTY\": 100,\n    \"AVAILABLE_SUBSTORE_QTY\": 142,\n    \"AVAILABLE_INHAND_QTY\": 242\n  },\n  {\n    \"STORE_ID\": \"99901068\",\n    \"STORE_NAME\": \"Mandu_Chc\",\n    \"DISTRICT_NAME\": \"Bokaro\",\n    \"DRUG_ITEM_ID\": null,\n    \"DRUG_ITEM_NAME\": \"Paracetamol 500 mg Tablet\",\n    \"AVAILABLE_MAIN_STORE_QTY\": 0,\n    \"AVAILABLE_SUBSTORE_QTY\": 56,\n    \"AVAILABLE_INHAND_QTY\": 56\n  },\n  {\n    \"STORE_ID\": \"99901109\",\n    \"STORE_NAME\": \"Ramgarh_Chc\",\n    \"DISTRICT_NAME\": \"Ramgarh\",\n    \"DRUG_ITEM_ID\": \"10000238\",\n    \"DRUG_ITEM_NAME\": \"Paracetamol 500 Mg Tablet(500 Mg),Tablet\",\n    \"AVAILABLE_MAIN_STORE_QTY\": 80,\n    \"AVAILABLE_SUBSTORE_QTY\": 0,\n    \"AVAILABLE_INHAND_QTY\": 80\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_NAME\": \"Ramghar_DH\",\n    \"DISTRICT_NAME\": \"Ramgarh\",\n    \"DRUG_ITEM_ID\": \"10000357\",\n    \"DRUG_ITEM_NAME\": \"Amoxicillin Capsule 250 Mg(250 Mg),Capsule\",\n    \"AVAILABLE_MAIN_STORE_QTY\": 0,\n    \"AVAILABLE_SUBSTORE_QTY\": 0,\n    \"AVAILABLE_INHAND_QTY\": 0\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_NAME\": \"Ramghar_DH\",\n    \"DISTRICT_NAME\": \"Ramgarh\",\n    \"DRUG_ITEM_ID\": null,\n    \"DRUG_ITEM_NAME\": \"INJ PANTOPRAZOLE 40 MG\",\n    \"AVAILABLE_MAIN_STORE_QTY\": 50,\n    \"AVAILABLE_SUBSTORE_QTY\": 46,\n    \"AVAILABLE_INHAND_QTY\": 96\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_NAME\": \"Ramghar_DH\",\n    \"DISTRICT_NAME\": \"Ramgarh\",\n    \"DRUG_ITEM_ID\": null,\n    \"DRUG_ITEM_NAME\": \" MULTIVITAMIN\",\n    \"AVAILABLE_MAIN_STORE_QTY\": 0,\n    \"AVAILABLE_SUBSTORE_QTY\": 356,\n    \"AVAILABLE_INHAND_QTY\": 356\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_NAME\": \"Ramghar_DH\",\n    \"DISTRICT_NAME\": \"Ramgarh\",\n    \"DRUG_ITEM_ID\": \"10000238\",\n    \"DRUG_ITEM_NAME\": \"Paracetamol 500 Mg Tablet(500 Mg),Tablet\",\n    \"AVAILABLE_MAIN_STORE_QTY\": 122,\n    \"AVAILABLE_SUBSTORE_QTY\": 97,\n    \"AVAILABLE_INHAND_QTY\": 219\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_NAME\": \"Ramghar_DH\",\n    \"DISTRICT_NAME\": \"Ramgarh\",\n    \"DRUG_ITEM_ID\": null,\n    \"DRUG_ITEM_NAME\": \"TAB FOLIC ACID 5 MG\",\n    \"AVAILABLE_MAIN_STORE_QTY\": 0,\n    \"AVAILABLE_SUBSTORE_QTY\": 1,\n    \"AVAILABLE_INHAND_QTY\": 1\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_NAME\": \"Ramghar_DH\",\n    \"DISTRICT_NAME\": \"Ramgarh\",\n    \"DRUG_ITEM_ID\": null,\n    \"DRUG_ITEM_NAME\": \"TAB IRON FOLIC ACID(RED)\",\n    \"AVAILABLE_MAIN_STORE_QTY\": 0,\n    \"AVAILABLE_SUBSTORE_QTY\": 1055,\n    \"AVAILABLE_INHAND_QTY\": 1055\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Drug Receipt, Patient Dispensing and Available Inventory",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              },
+              {
+                "key": "accept-language",
+                "value": "en-US,en;q=0.9,am;q=0.8,ar;q=0.7"
+              },
+              {
+                "key": "cache-control",
+                "value": "no-cache"
+              },
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
+              {
+                "key": "origin",
+                "value": "https://govt-staging-data.ohc.network"
+              },
+              {
+                "key": "pragma",
+                "value": "no-cache"
+              },
+              {
+                "key": "priority",
+                "value": "u=1, i"
+              },
+              {
+                "key": "referer",
+                "value": "https://govt-staging-data.ohc.network/dashboard/9-dvdms-stock-kpis-final-export-6-nov?date=2026-11-06&location=&store_id="
+              },
+              {
+                "key": "sec-ch-ua",
+                "value": "\"Not-A.Brand\";v=\"99\", \"Google Chrome\";v=\"157\", \"Chromium\";v=\"157\""
+              },
+              {
+                "key": "sec-ch-ua-mobile",
+                "value": "?0"
+              },
+              {
+                "key": "sec-ch-ua-platform",
+                "value": "\"macOS\""
+              },
+              {
+                "key": "sec-fetch-dest",
+                "value": "empty"
+              },
+              {
+                "key": "sec-fetch-mode",
+                "value": "cors"
+              },
+              {
+                "key": "sec-fetch-site",
+                "value": "same-origin"
+              },
+              {
+                "key": "user-agent",
+                "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36"
+              },
+              {
+                "key": "x-api-key",
+                "value": "{{metabase_api_key}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ignore_cache\": false,\n  \"collection_preview\": false,\n  \"parameters\": [\n    {\n      \"id\": \"ec83d64b-1511-4a81-8f2c-195b5ede4bd7\",\n      \"type\": \"string/=\",\n      \"value\": null,\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"store_id\"\n        ]\n      ]\n    },\n    {\n      \"id\": \"7a551701-3e59-4f67-baa9-bb21e3544e52\",\n      \"type\": \"date/single\",\n      \"value\": \"2026-11-06\",\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"report_date\"\n        ]\n      ]\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://govt-staging-data.ohc.network/api/card/103/query/json",
+              "protocol": "https",
+              "host": [
+                "govt-staging-data",
+                "ohc",
+                "network"
+              ],
+              "path": [
+                "api",
+                "card",
+                "103",
+                "query",
+                "json"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Drug Receipt, Patient Dispensing and Available Inventory",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "accept-language",
+                    "value": "en-US,en;q=0.9,am;q=0.8,ar;q=0.7"
+                  },
+                  {
+                    "key": "cache-control",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "content-type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "origin",
+                    "value": "https://govt-staging-data.ohc.network"
+                  },
+                  {
+                    "key": "pragma",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "priority",
+                    "value": "u=1, i"
+                  },
+                  {
+                    "key": "referer",
+                    "value": "https://govt-staging-data.ohc.network/dashboard/9-dvdms-stock-kpis-final-export-6-nov?date=2026-11-06&location=&store_id="
+                  },
+                  {
+                    "key": "sec-ch-ua",
+                    "value": "\"Not-A.Brand\";v=\"99\", \"Google Chrome\";v=\"157\", \"Chromium\";v=\"157\""
+                  },
+                  {
+                    "key": "sec-ch-ua-mobile",
+                    "value": "?0"
+                  },
+                  {
+                    "key": "sec-ch-ua-platform",
+                    "value": "\"macOS\""
+                  },
+                  {
+                    "key": "sec-fetch-dest",
+                    "value": "empty"
+                  },
+                  {
+                    "key": "sec-fetch-mode",
+                    "value": "cors"
+                  },
+                  {
+                    "key": "sec-fetch-site",
+                    "value": "same-origin"
+                  },
+                  {
+                    "key": "user-agent",
+                    "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36"
+                  },
+                  {
+                    "key": "x-api-key",
+                    "value": "{{metabase_api_key}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"ignore_cache\": false,\n  \"collection_preview\": false,\n  \"parameters\": [\n    {\n      \"id\": \"ec83d64b-1511-4a81-8f2c-195b5ede4bd7\",\n      \"type\": \"string/=\",\n      \"value\": null,\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"store_id\"\n        ]\n      ]\n    },\n    {\n      \"id\": \"7a551701-3e59-4f67-baa9-bb21e3544e52\",\n      \"type\": \"date/single\",\n      \"value\": \"2026-11-06\",\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"report_date\"\n        ]\n      ]\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "https://govt-staging-data.ohc.network/api/card/103/query/json",
+                  "protocol": "https",
+                  "host": [
+                    "govt-staging-data",
+                    "ohc",
+                    "network"
+                  ],
+                  "path": [
+                    "api",
+                    "card",
+                    "103",
+                    "query",
+                    "json"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "date",
+                  "value": "Tue, 17 Nov 2026 09:37:49 GMT"
+                },
+                {
+                  "key": "x-frame-options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "access-control-allow-headers",
+                  "value": "*"
+                },
+                {
+                  "key": "access-control-max-age",
+                  "value": "60"
+                },
+                {
+                  "key": "x-accel-buffering",
+                  "value": "no"
+                },
+                {
+                  "key": "last-modified",
+                  "value": "Tue, 17 Nov 2026 09:37:49 GMT"
+                },
+                {
+                  "key": "strict-transport-security",
+                  "value": "max-age=31536000"
+                },
+                {
+                  "key": "content-disposition",
+                  "value": "attachment; filename=\"drug_receipt__patient_dispensing_and_available_inventory_2026-11-17T09:37:49.417591724Z.json\""
+                },
+                {
+                  "key": "x-permitted-cross-domain-policies",
+                  "value": "none"
+                },
+                {
+                  "key": "cache-control",
+                  "value": "max-age=0, no-cache, must-revalidate, proxy-revalidate"
+                },
+                {
+                  "key": "access-control-expose-headers",
+                  "value": "Content-Disposition, X-Metabase-Anti-CSRF-Token, X-Metabase-Version, Mcp-Session-Id"
+                },
+                {
+                  "key": "x-content-type-options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "content-security-policy",
+                  "value": "font-src 'self' data:; style-src-attr 'self'; script-src 'self' 'nonce-Bb9gs8dlOn' https://maps.google.com https://accounts.google.com    'sha256-SxNB1/NQ1TUHWrwTi7scFI31VsahWQBj54W7KQZQs1Q=' 'sha256-isH538cVBUY8IMlGYGbWtBwr+cGqkc4mN6nLcA7lUjE=' 'sha256-3N2Z+Nu++/yNMVHIl863JigVmt2Nr9gt2doEMJT2Wzk='; style-src 'self' 'nonce-Bb9gs8dlOn'   https://accounts.google.com; manifest-src 'self'; connect-src 'self' https://accounts.google.com metabase.us10.list-manage.com    ; img-src * 'self' data:; frame-src 'self' https://www.metabase.com/ https://metabase.com/ youtube.com *.youtube.com youtu.be *.youtu.be loom.com *.loom.com vimeo.com *.vimeo.com docs.google.com calendar.google.com airtable.com *.airtable.com typeform.com *.typeform.com canva.com *.canva.com codepen.io *.codepen.io figma.com *.figma.com grafana.com *.grafana.com miro.com *.miro.com excalidraw.com *.excalidraw.com notion.com *.notion.com atlassian.com *.atlassian.com trello.com *.trello.com asana.com *.asana.com gist.github.com linkedin.com *.linkedin.com twitter.com *.twitter.com x.com *.x.com; default-src 'none'; media-src www.metabase.com; child-src 'self' https://accounts.google.com;  frame-ancestors 'none';"
+                },
+                {
+                  "key": "x-metabase-version",
+                  "value": "v0.63.13"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json;charset=utf-8"
+                },
+                {
+                  "key": "content-encoding",
+                  "value": "gzip"
+                },
+                {
+                  "key": "expires",
+                  "value": "Tue, 03 Jul 2001 06:00:00 GMT"
+                },
+                {
+                  "key": "access-control-allow-methods",
+                  "value": "*"
+                },
+                {
+                  "key": "via",
+                  "value": "1.1 google"
+                },
+                {
+                  "key": "transfer-encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"STORE_ID\": \"99901223\",\n    \"STORE_NAME\": \"Gola_Chc\",\n    \"PARENT_STORE_ID\": \"99901012\",\n    \"PARENT_STORE_NAME\": \"Ramgarh_DWH\",\n    \"DRUG_ID\": \"10000441\",\n    \"DRUG_NAME\": \"Methotrexate 7.5mg(7.5 Mg)\",\n    \"QUANTITY_RECEIVED_FROM_DVDMS\": 0,\n    \"QUANTITY_ISSUED_TO_PATIENTS\": 1,\n    \"AVAILABLE_QUANTITY_IN_CARE\": 1210\n  },\n  {\n    \"STORE_ID\": \"99901223\",\n    \"STORE_NAME\": \"Gola_Chc\",\n    \"PARENT_STORE_ID\": \"99901012\",\n    \"PARENT_STORE_NAME\": \"Ramgarh_DWH\",\n    \"DRUG_ID\": \"10000238\",\n    \"DRUG_NAME\": \"Paracetamol 500 Mg Tablet(500 Mg),Tablet\",\n    \"QUANTITY_RECEIVED_FROM_DVDMS\": 1309,\n    \"QUANTITY_ISSUED_TO_PATIENTS\": 0,\n    \"AVAILABLE_QUANTITY_IN_CARE\": 121\n  },\n  {\n    \"STORE_ID\": \"99901223\",\n    \"STORE_NAME\": \"Gola_Chc\",\n    \"PARENT_STORE_ID\": \"99901012\",\n    \"PARENT_STORE_NAME\": \"Ramgarh_DWH\",\n    \"DRUG_ID\": \"10000482\",\n    \"DRUG_NAME\": \"Prednisolone 25 Mg(As Sodium Phosphate Or Succinate)(25 Mg)\",\n    \"QUANTITY_RECEIVED_FROM_DVDMS\": 0,\n    \"QUANTITY_ISSUED_TO_PATIENTS\": 66,\n    \"AVAILABLE_QUANTITY_IN_CARE\": 242\n  },\n  {\n    \"STORE_ID\": \"99901068\",\n    \"STORE_NAME\": \"Mandu_Chc\",\n    \"PARENT_STORE_ID\": \"99901012\",\n    \"PARENT_STORE_NAME\": \"Ramgarh_DWH\",\n    \"DRUG_ID\": \"10000238\",\n    \"DRUG_NAME\": \"Paracetamol 500 Mg Tablet [UD0687]\",\n    \"QUANTITY_RECEIVED_FROM_DVDMS\": 66,\n    \"QUANTITY_ISSUED_TO_PATIENTS\": 0,\n    \"AVAILABLE_QUANTITY_IN_CARE\": 0\n  },\n  {\n    \"STORE_ID\": \"99901109\",\n    \"STORE_NAME\": \"Ramgarh_Chc\",\n    \"PARENT_STORE_ID\": \"99901012\",\n    \"PARENT_STORE_NAME\": \"Ramgarh_DWH\",\n    \"DRUG_ID\": \"10000238\",\n    \"DRUG_NAME\": \"Paracetamol 500 Mg Tablet(500 Mg),Tablet\",\n    \"QUANTITY_RECEIVED_FROM_DVDMS\": 100,\n    \"QUANTITY_ISSUED_TO_PATIENTS\": 20,\n    \"AVAILABLE_QUANTITY_IN_CARE\": 80\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_NAME\": \"Ramghar_DH\",\n    \"PARENT_STORE_ID\": \"99901012\",\n    \"PARENT_STORE_NAME\": \"Ramgarh_DWH\",\n    \"DRUG_ID\": \"10000357\",\n    \"DRUG_NAME\": \"Amoxicillin Capsule 250 Mg(250 Mg),Capsule\",\n    \"QUANTITY_RECEIVED_FROM_DVDMS\": 0,\n    \"QUANTITY_ISSUED_TO_PATIENTS\": 0,\n    \"AVAILABLE_QUANTITY_IN_CARE\": 0\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"STORE_NAME\": \"Ramghar_DH\",\n    \"PARENT_STORE_ID\": \"99901012\",\n    \"PARENT_STORE_NAME\": \"Ramgarh_DWH\",\n    \"DRUG_ID\": \"10000238\",\n    \"DRUG_NAME\": \"Paracetamol 500 Mg Tablet(500 Mg),Tablet\",\n    \"QUANTITY_RECEIVED_FROM_DVDMS\": 312,\n    \"QUANTITY_ISSUED_TO_PATIENTS\": 93,\n    \"AVAILABLE_QUANTITY_IN_CARE\": 219\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Internal Transfers",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              },
+              {
+                "key": "accept-language",
+                "value": "en-US,en;q=0.9,am;q=0.8,ar;q=0.7"
+              },
+              {
+                "key": "cache-control",
+                "value": "no-cache"
+              },
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
+              {
+                "key": "origin",
+                "value": "https://govt-staging-data.ohc.network"
+              },
+              {
+                "key": "pragma",
+                "value": "no-cache"
+              },
+              {
+                "key": "priority",
+                "value": "u=1, i"
+              },
+              {
+                "key": "referer",
+                "value": "https://govt-staging-data.ohc.network/dashboard/9-dvdms-stock-kpis-final-export-6-nov?date=2026-11-06&location=&store_id="
+              },
+              {
+                "key": "sec-ch-ua",
+                "value": "\"Not-A.Brand\";v=\"99\", \"Google Chrome\";v=\"157\", \"Chromium\";v=\"157\""
+              },
+              {
+                "key": "sec-ch-ua-mobile",
+                "value": "?0"
+              },
+              {
+                "key": "sec-ch-ua-platform",
+                "value": "\"macOS\""
+              },
+              {
+                "key": "sec-fetch-dest",
+                "value": "empty"
+              },
+              {
+                "key": "sec-fetch-mode",
+                "value": "cors"
+              },
+              {
+                "key": "sec-fetch-site",
+                "value": "same-origin"
+              },
+              {
+                "key": "user-agent",
+                "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36"
+              },
+              {
+                "key": "x-api-key",
+                "value": "{{metabase_api_key}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ignore_cache\": false,\n  \"collection_preview\": false,\n  \"parameters\": [\n    {\n      \"id\": \"995b2b15-9436-430f-98bd-0bf0ab96b2f1\",\n      \"type\": \"string/=\",\n      \"value\": null,\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"store_id\"\n        ]\n      ]\n    },\n    {\n      \"id\": \"d9282c6d-a50b-48bc-baae-580fbcb4dc21\",\n      \"type\": \"date/single\",\n      \"value\": \"2026-11-06\",\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"transfer_date\"\n        ]\n      ]\n    },\n    {\n      \"id\": \"ee77b6b5-71e3-4e74-8dd5-41a200d0c8aa\",\n      \"type\": \"string/=\",\n      \"value\": null,\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"location_name\"\n        ]\n      ]\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://govt-staging-data.ohc.network/api/card/104/query/json",
+              "protocol": "https",
+              "host": [
+                "govt-staging-data",
+                "ohc",
+                "network"
+              ],
+              "path": [
+                "api",
+                "card",
+                "104",
+                "query",
+                "json"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Internal Transfers",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "accept-language",
+                    "value": "en-US,en;q=0.9,am;q=0.8,ar;q=0.7"
+                  },
+                  {
+                    "key": "cache-control",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "content-type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "origin",
+                    "value": "https://govt-staging-data.ohc.network"
+                  },
+                  {
+                    "key": "pragma",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "priority",
+                    "value": "u=1, i"
+                  },
+                  {
+                    "key": "referer",
+                    "value": "https://govt-staging-data.ohc.network/dashboard/9-dvdms-stock-kpis-final-export-6-nov?date=2026-11-06&location=&store_id="
+                  },
+                  {
+                    "key": "sec-ch-ua",
+                    "value": "\"Not-A.Brand\";v=\"99\", \"Google Chrome\";v=\"157\", \"Chromium\";v=\"157\""
+                  },
+                  {
+                    "key": "sec-ch-ua-mobile",
+                    "value": "?0"
+                  },
+                  {
+                    "key": "sec-ch-ua-platform",
+                    "value": "\"macOS\""
+                  },
+                  {
+                    "key": "sec-fetch-dest",
+                    "value": "empty"
+                  },
+                  {
+                    "key": "sec-fetch-mode",
+                    "value": "cors"
+                  },
+                  {
+                    "key": "sec-fetch-site",
+                    "value": "same-origin"
+                  },
+                  {
+                    "key": "user-agent",
+                    "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36"
+                  },
+                  {
+                    "key": "x-api-key",
+                    "value": "{{metabase_api_key}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"ignore_cache\": false,\n  \"collection_preview\": false,\n  \"parameters\": [\n    {\n      \"id\": \"995b2b15-9436-430f-98bd-0bf0ab96b2f1\",\n      \"type\": \"string/=\",\n      \"value\": null,\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"store_id\"\n        ]\n      ]\n    },\n    {\n      \"id\": \"d9282c6d-a50b-48bc-baae-580fbcb4dc21\",\n      \"type\": \"date/single\",\n      \"value\": \"2026-11-06\",\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"transfer_date\"\n        ]\n      ]\n    },\n    {\n      \"id\": \"ee77b6b5-71e3-4e74-8dd5-41a200d0c8aa\",\n      \"type\": \"string/=\",\n      \"value\": null,\n      \"target\": [\n        \"variable\",\n        [\n          \"template-tag\",\n          \"location_name\"\n        ]\n      ]\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "https://govt-staging-data.ohc.network/api/card/104/query/json",
+                  "protocol": "https",
+                  "host": [
+                    "govt-staging-data",
+                    "ohc",
+                    "network"
+                  ],
+                  "path": [
+                    "api",
+                    "card",
+                    "104",
+                    "query",
+                    "json"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "date",
+                  "value": "Tue, 17 Nov 2026 09:37:55 GMT"
+                },
+                {
+                  "key": "x-frame-options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "access-control-allow-headers",
+                  "value": "*"
+                },
+                {
+                  "key": "access-control-max-age",
+                  "value": "60"
+                },
+                {
+                  "key": "x-accel-buffering",
+                  "value": "no"
+                },
+                {
+                  "key": "last-modified",
+                  "value": "Tue, 17 Nov 2026 09:37:55 GMT"
+                },
+                {
+                  "key": "strict-transport-security",
+                  "value": "max-age=31536000"
+                },
+                {
+                  "key": "content-disposition",
+                  "value": "attachment; filename=\"internal_transfers_2026-11-17T09:37:55.848161653Z.json\""
+                },
+                {
+                  "key": "x-permitted-cross-domain-policies",
+                  "value": "none"
+                },
+                {
+                  "key": "cache-control",
+                  "value": "max-age=0, no-cache, must-revalidate, proxy-revalidate"
+                },
+                {
+                  "key": "access-control-expose-headers",
+                  "value": "Content-Disposition, X-Metabase-Anti-CSRF-Token, X-Metabase-Version, Mcp-Session-Id"
+                },
+                {
+                  "key": "x-content-type-options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "content-security-policy",
+                  "value": "font-src 'self' data:; style-src-attr 'self'; script-src 'self' 'nonce-ACcTDr7Kz1' https://maps.google.com https://accounts.google.com    'sha256-SxNB1/NQ1TUHWrwTi7scFI31VsahWQBj54W7KQZQs1Q=' 'sha256-isH538cVBUY8IMlGYGbWtBwr+cGqkc4mN6nLcA7lUjE=' 'sha256-3N2Z+Nu++/yNMVHIl863JigVmt2Nr9gt2doEMJT2Wzk='; style-src 'self' 'nonce-ACcTDr7Kz1'   https://accounts.google.com; manifest-src 'self'; connect-src 'self' https://accounts.google.com metabase.us10.list-manage.com    ; img-src * 'self' data:; frame-src 'self' https://www.metabase.com/ https://metabase.com/ youtube.com *.youtube.com youtu.be *.youtu.be loom.com *.loom.com vimeo.com *.vimeo.com docs.google.com calendar.google.com airtable.com *.airtable.com typeform.com *.typeform.com canva.com *.canva.com codepen.io *.codepen.io figma.com *.figma.com grafana.com *.grafana.com miro.com *.miro.com excalidraw.com *.excalidraw.com notion.com *.notion.com atlassian.com *.atlassian.com trello.com *.trello.com asana.com *.asana.com gist.github.com linkedin.com *.linkedin.com twitter.com *.twitter.com x.com *.x.com; default-src 'none'; media-src www.metabase.com; child-src 'self' https://accounts.google.com;  frame-ancestors 'none';"
+                },
+                {
+                  "key": "x-metabase-version",
+                  "value": "v0.63.13"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json;charset=utf-8"
+                },
+                {
+                  "key": "content-encoding",
+                  "value": "gzip"
+                },
+                {
+                  "key": "expires",
+                  "value": "Tue, 03 Jul 2001 06:00:00 GMT"
+                },
+                {
+                  "key": "access-control-allow-methods",
+                  "value": "*"
+                },
+                {
+                  "key": "via",
+                  "value": "1.1 google"
+                },
+                {
+                  "key": "transfer-encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"STORE_ID\": \"99901036\",\n    \"TRANSFER_DATE\": \"2026-11-06\",\n    \"FROM_STORE\": \"Drug Store\",\n    \"TO_STORE\": \"Male Ward\",\n    \"PRODUCT\": \"Paracetamol Tablet 500 mg\",\n    \"DRUG_NAME\": \"Paracetamol 500 Mg Tablet(500 Mg),Tablet\",\n    \"QUANTITY\": 100,\n    \"BATCH_NO\": \"BN26PAR0458\",\n    \"EXPIRY\": \"2029-10-31\",\n    \"DRUG_ID\": \"10000238\",\n    \"DRUG_BRAND_ID\": \"10100238\",\n    \"FROM_STORE_INVENTORY_STOCK_COUNT_BEFORE_TRANSACTION\": 222,\n    \"FROM_STORE_INVENTORY_STOCK_COUNT_AFTER_TRANSACTION\": 122,\n    \"TO_STORE_INVENTORY_STOCK_COUNT_BEFORE_TRANSACTION\": 0,\n    \"TO_STORE_INVENTORY_STOCK_COUNT_AFTER_TRANSACTION\": 100\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"TRANSFER_DATE\": \"2026-11-06\",\n    \"FROM_STORE\": \"Drug Store\",\n    \"TO_STORE\": \"Male Ward\",\n    \"PRODUCT\": \"Paracetamol Tablet 500 mg\",\n    \"DRUG_NAME\": \"Paracetamol 500 Mg Tablet(500 Mg),Tablet\",\n    \"QUANTITY\": 40,\n    \"BATCH_NO\": \"BN26PAR0458\",\n    \"EXPIRY\": \"2029-10-31\",\n    \"DRUG_ID\": \"10000238\",\n    \"DRUG_BRAND_ID\": \"10100238\",\n    \"FROM_STORE_INVENTORY_STOCK_COUNT_BEFORE_TRANSACTION\": 40,\n    \"FROM_STORE_INVENTORY_STOCK_COUNT_AFTER_TRANSACTION\": 0,\n    \"TO_STORE_INVENTORY_STOCK_COUNT_BEFORE_TRANSACTION\": 0,\n    \"TO_STORE_INVENTORY_STOCK_COUNT_AFTER_TRANSACTION\": 40\n  },\n  {\n    \"STORE_ID\": \"99901068\",\n    \"TRANSFER_DATE\": \"2026-11-06\",\n    \"FROM_STORE\": \"Pharmacy\",\n    \"TO_STORE\": \"General OPD\",\n    \"PRODUCT\": \"Paracetamol 500 mg Tablet\",\n    \"DRUG_NAME\": null,\n    \"QUANTITY\": 66,\n    \"BATCH_NO\": \"BN26PAR0458\",\n    \"EXPIRY\": \"2029-10-31\",\n    \"DRUG_ID\": null,\n    \"DRUG_BRAND_ID\": null,\n    \"FROM_STORE_INVENTORY_STOCK_COUNT_BEFORE_TRANSACTION\": 66,\n    \"FROM_STORE_INVENTORY_STOCK_COUNT_AFTER_TRANSACTION\": 0,\n    \"TO_STORE_INVENTORY_STOCK_COUNT_BEFORE_TRANSACTION\": 0,\n    \"TO_STORE_INVENTORY_STOCK_COUNT_AFTER_TRANSACTION\": 66\n  },\n  {\n    \"STORE_ID\": \"99901109\",\n    \"TRANSFER_DATE\": \"2026-11-06\",\n    \"FROM_STORE\": \"Pharmacy - Main Store\",\n    \"TO_STORE\": \"Pharmacy - Counter 2\",\n    \"PRODUCT\": \"Paracetamol Tablet IP 500 mg\",\n    \"DRUG_NAME\": \"Paracetamol 500 Mg Tablet(500 Mg),Tablet\",\n    \"QUANTITY\": 10,\n    \"BATCH_NO\": \"BN26PAR0458\",\n    \"EXPIRY\": \"2029-10-31\",\n    \"DRUG_ID\": \"10000238\",\n    \"DRUG_BRAND_ID\": \"10100238\",\n    \"FROM_STORE_INVENTORY_STOCK_COUNT_BEFORE_TRANSACTION\": 90,\n    \"FROM_STORE_INVENTORY_STOCK_COUNT_AFTER_TRANSACTION\": 80,\n    \"TO_STORE_INVENTORY_STOCK_COUNT_BEFORE_TRANSACTION\": 0,\n    \"TO_STORE_INVENTORY_STOCK_COUNT_AFTER_TRANSACTION\": 10\n  },\n  {\n    \"STORE_ID\": \"99901109\",\n    \"TRANSFER_DATE\": \"2026-11-06\",\n    \"FROM_STORE\": \"Pharmacy - Main Store\",\n    \"TO_STORE\": \"Pharmacy - Counter 1\",\n    \"PRODUCT\": \"Paracetamol Tablet IP 500 mg\",\n    \"DRUG_NAME\": \"Paracetamol 500 Mg Tablet(500 Mg),Tablet\",\n    \"QUANTITY\": 10,\n    \"BATCH_NO\": \"BN26PAR0458\",\n    \"EXPIRY\": \"2029-10-31\",\n    \"DRUG_ID\": \"10000238\",\n    \"DRUG_BRAND_ID\": \"10100238\",\n    \"FROM_STORE_INVENTORY_STOCK_COUNT_BEFORE_TRANSACTION\": 100,\n    \"FROM_STORE_INVENTORY_STOCK_COUNT_AFTER_TRANSACTION\": 90,\n    \"TO_STORE_INVENTORY_STOCK_COUNT_BEFORE_TRANSACTION\": 0,\n    \"TO_STORE_INVENTORY_STOCK_COUNT_AFTER_TRANSACTION\": 10\n  },\n  {\n    \"STORE_ID\": \"99901036\",\n    \"TRANSFER_DATE\": \"2026-11-06\",\n    \"FROM_STORE\": \"Drug Store\",\n    \"TO_STORE\": \"Pharmacy\",\n    \"PRODUCT\": \"Paracetamol Tablet 500 mg\",\n    \"DRUG_NAME\": \"Paracetamol 500 Mg Tablet(500 Mg),Tablet\",\n    \"QUANTITY\": 50,\n    \"BATCH_NO\": \"BN26PAR0458\",\n    \"EXPIRY\": \"2029-10-31\",\n    \"DRUG_ID\": \"10000238\",\n    \"DRUG_BRAND_ID\": \"10100238\",\n    \"FROM_STORE_INVENTORY_STOCK_COUNT_BEFORE_TRANSACTION\": 90,\n    \"FROM_STORE_INVENTORY_STOCK_COUNT_AFTER_TRANSACTION\": 40,\n    \"TO_STORE_INVENTORY_STOCK_COUNT_BEFORE_TRANSACTION\": 0,\n    \"TO_STORE_INVENTORY_STOCK_COUNT_AFTER_TRANSACTION\": 50\n  }\n]"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
