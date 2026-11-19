@@ -33,13 +33,15 @@ class DVDMSRecordOrderStatus(models.TextChoices):
     rejected = "rejected"
     completed = "completed"
     failed = "failed"
-    cancelled = "cancelled"
+    entered_in_error = "entered_in_error"
+    abandoned = "abandoned"
 
 
 # Statuses that free up a RequestOrder to be mapped to a new record order.
 # Mirrors uniq_order_active_record_order below - keep both in sync.
 INACTIVE_RECORD_ORDER_STATUSES = [
-    DVDMSRecordOrderStatus.cancelled,
+    DVDMSRecordOrderStatus.entered_in_error,
+    DVDMSRecordOrderStatus.abandoned,
 ]
 
 

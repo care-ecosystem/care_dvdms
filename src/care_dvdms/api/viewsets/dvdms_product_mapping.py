@@ -45,6 +45,7 @@ class DVDMSProductMappingFilters(filters.FilterSet):
     product_knowledge_id = filters.UUIDFilter(field_name="product_knowledge__external_id")
     mapping_type = filters.CharFilter(field_name="mapping_type")
     archived = filters.BooleanFilter(field_name="archived")
+    name = filters.CharFilter(field_name="product_knowledge__name", lookup_expr="icontains")
 
 
 @extend_schema(tags=["DVDMS: Product Mapping"])

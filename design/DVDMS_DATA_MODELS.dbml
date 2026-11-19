@@ -129,7 +129,7 @@ Table dvdms_record_order {
   care_indent_no VARCHAR(32) [not null, unique, note: 'CARE-generated unique indent number sent to DVDMS as hstnumCareIndentNo. Format: {financial_year}{facility_id, 3-digit zero-padded}{sequence, min 4-digit zero-padded}, e.g. 2026270010001. Sequence portion comes from dvdms_care_indent_sequence, scoped per (institute, financial_year); 4 digits is a minimum width, not a hard cap - it grows past 9999 rather than failing or wrapping']
 
   status VARCHAR(20) [not null, default: 'draft',
-    note: 'Order status: draft, pending, approved, rejected, completed, failed, cancelled']
+    note: 'Order status: draft, pending, approved, rejected, completed, failed, entered_in_error, abandoned']
 
   created_date TIMESTAMP [not null, note: "indexed"]
   modified_date TIMESTAMP [not null, note: "indexed"]
@@ -293,7 +293,7 @@ Table dvdms_outward_record_order {
   external_id UUID [unique, not null, note: 'Exposed via API as id']
 
   record_order_id INTEGER [not null, unique, note: 'FK to dvdms_record_order.id (1:1)']
-  status VARCHAR(20) [not null, default: 'created', note: 'Outwards record status: created, submitted, cancelled, failed']
+  status VARCHAR(20) [not null, default: 'created', note: 'Outwards record status: created, submitted, failed']
   eaushadhi_indent_no VARCHAR(255) [null, note: 'e-Aushadhi indent number']
   eaushadhi_indent_status VARCHAR(255) [null, note: 'Current status of the e-Aushadhi indent']
   sync_log_id INTEGER [null, note: 'FK to dvdms_sync_log.id. ON DELETE SET NULL']

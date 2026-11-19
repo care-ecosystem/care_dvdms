@@ -1372,14 +1372,13 @@ paths:
         order yet are also listed (as draft rows with `id: null`, `institute_store: null`,
         `institute_supplier: null`, `care_indent_no: null`).
 
-        The `status` and `tab` filters match the effective status, the status shown to users (first match wins):
-        `draft` when there is no record order, the record order is draft/pending, or its outward
-        record is only `created`; `issued` / `issue_in_process` from DVDMS' indent status on an
-        approved record order; the outward record status (`submitted`, `failed`, `cancelled`)
-        for an approved record order; otherwise the record order status.
+        The `status` and `tab` filters match the status shown in the table's Status column:
+        `draft` when there is no record order; `issued` / `issue_in_process` from DVDMS' indent
+        status on an approved record order; otherwise the record order status.
 
-        A cancelled record order is hidden once its request order has been linked to a new
-        non-cancelled record order, unless filtering by `order`.
+        Each request order appears once. A record order that is entered in error or abandoned is
+        hidden once its request order has a newer record order, unless filtering by `order`, which returns all
+        of the order's record orders.
       operationId: listRecordOrders
       parameters:
         - name: institute_id
@@ -1406,7 +1405,7 @@ paths:
         - name: order
           in: query
           required: false
-          description: Filter by request order UUID. Only rows that have a record order are returned (including cancelled ones).
+          description: Filter by request order UUID. Only rows that have a record order are returned (including entered in error and abandoned ones).
           schema:
             type: string
             format: uuid
@@ -1421,7 +1420,7 @@ paths:
           in: query
           required: false
           description: |
-            Filter by one or more `effective_status` values. Pass multiple values as a
+            Filter by one or more statuses shown in the table's Status column. Pass multiple values as a
             comma-separated list, e.g. `?status=draft,failed`.
           style: form
           explode: false
@@ -1429,15 +1428,15 @@ paths:
             type: array
             items:
               type: string
-              enum: [draft, approved, submitted, issue_in_process, issued, rejected, completed, failed, cancelled]
+              enum: [draft, pending, approved, issue_in_process, issued, rejected, completed, failed, entered_in_error, abandoned]
           example: [draft, failed]
         - name: tab
           in: query
           required: false
           description: |
-            Filter by tab, by `effective_status`:
-            `unsent` = draft, failed, cancelled; `sent` = approved, submitted, issue_in_process, issued;
-            `completed` = completed, rejected.
+            Filter by tab: `completed` = record order status completed, rejected, entered_in_error or
+            abandoned; `sent` = not one of those and the outward record has an indent number
+            (`eaushadhi_indent_no`); `unsent` = not one of those and no indent number yet.
           schema:
             type: string
             enum: [unsent, sent, completed]
@@ -4829,12 +4828,12 @@ components:
           example: "IND-2026-001234"
         status:
           type: string
-          enum: [created, submitted, cancelled]
+          enum: [created, submitted, failed]
           description: |
             Outwards record status:
             - created: Indent created in DVDMS
             - submitted: Indent submitted for processing
-            - cancelled: Indent cancelled
+            - failed: Sending the indent to DVDMS failed
           example: "created"
         eaushadhi_indent_status:
           type: string

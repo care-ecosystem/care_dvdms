@@ -3,11 +3,12 @@ from care.emr.models.supply_request import RequestOrder
 from care.emr.resources.inventory.supply_request.request_order import (
     SupplyRequestIntentOptions,
     SupplyRequestOrderReadSpec,
+    SupplyRequestOrderStatusOptions,
 )
 from care.security.authorization.base import AuthorizationController
 from care.utils.filters.multiselect import MultiSelectFilter
 from care.utils.shortcuts import get_object_or_404
-from django.db import IntegrityError, transaction
+from django.db import IntegrityError, models, transaction
 from django.db.models import Case, CharField, Exists, F, FilteredRelation, OuterRef, Q, Value, When
 from django.db.models.functions import Coalesce
 from django_filters import rest_framework as filters
@@ -23,82 +24,87 @@ from care_dvdms.api.specs.dvdms_record_order import (
     DVDMSRecordOrderUpdateSpec,
 )
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
-from care_dvdms.models.dvdms_outward_record_order import DVDMSOutwardRecordOrder, DVDMSOutwardRecordOrderStatus
-from care_dvdms.models.dvdms_record_order import DVDMSRecordOrder, DVDMSRecordOrderStatus
+from care_dvdms.models.dvdms_outward_record_order import (
+    DVDMSIndentStatus,
+    DVDMSOutwardRecordOrder,
+    DVDMSOutwardRecordOrderStatus,
+)
+from care_dvdms.models.dvdms_record_order import (
+    INACTIVE_RECORD_ORDER_STATUSES,
+    DVDMSRecordOrder,
+    DVDMSRecordOrderStatus,
+)
 from care_dvdms.models.dvdms_store import DVDMSStore
 from care_dvdms.models.dvdms_supplier import DVDMSSupplier
 from care_dvdms.tasks import save_indent_task
 from care_dvdms.utils.request_order import require_pending_request_order
 
 
-# Tabs, by the status shown (see EFFECTIVE_STATUS): unsent is on our side, sent is with DVDMS.
-TAB_STATUSES = {
-    "unsent": ["draft", "failed", "cancelled"],
-    "sent": ["approved", "submitted", "issue_in_process", "issued"],
-    "completed": ["completed", "rejected"],
-}
+TERMINAL_RECORD_ORDER_STATUSES = [
+    DVDMSRecordOrderStatus.completed,
+    DVDMSRecordOrderStatus.rejected,
+    *INACTIVE_RECORD_ORDER_STATUSES,
+]
 
-# Request orders that are listed even without a record order, and count as draft.
-UNSENT_REQUEST_ORDER_STATUSES = ["draft", "pending"]
+DISCARDABLE_RECORD_ORDER_STATUSES = [DVDMSRecordOrderStatus.draft, DVDMSRecordOrderStatus.pending, DVDMSRecordOrderStatus.failed]
 
-# The list is built from Care request orders, left-joined to their DVDMS record orders as "rec".
-#
-# The status shown to users, first match wins:
-# - draft: no record order yet, or the record order is draft or pending, or its outward record is only created
-# - issued / issue_in_process: DVDMS' own indent status on the outward record of an approved record order
-# - the outward record status (submitted, failed, cancelled) for an approved record order
-# - else the record order status
-EFFECTIVE_STATUS = Case(
-    When(rec__isnull=True, then=Value("draft")),
+LISTED_WITHOUT_RECORD_ORDER_STATUSES = [
+    SupplyRequestOrderStatusOptions.draft.value,
+    SupplyRequestOrderStatusOptions.pending.value,
+]
+
+DISPLAYED_STATUS = Case(
+    When(record_order__isnull=True, status__in=INACTIVE_RECORD_ORDER_STATUSES, then=F("status")),
+    When(record_order__isnull=True, then=Value(DVDMSRecordOrderStatus.draft.value)),
     When(
-        rec__status__in=[DVDMSRecordOrderStatus.draft, DVDMSRecordOrderStatus.pending],
-        then=Value("draft"),
+        record_order__status=DVDMSRecordOrderStatus.approved,
+        record_order__outward_record__eaushadhi_indent_status__iexact=DVDMSIndentStatus.issued.value,
+        then=Value(DVDMSIndentStatus.issued.name),
     ),
     When(
-        rec__status=DVDMSRecordOrderStatus.approved,
-        rec__outward_record__eaushadhi_indent_status__iexact="issued",
-        then=Value("issued"),
+        record_order__status=DVDMSRecordOrderStatus.approved,
+        record_order__outward_record__eaushadhi_indent_status__iexact=DVDMSIndentStatus.issue_in_process.value,
+        then=Value(DVDMSIndentStatus.issue_in_process.name),
     ),
-    When(
-        rec__status=DVDMSRecordOrderStatus.approved,
-        rec__outward_record__eaushadhi_indent_status__iexact="issue in process",
-        then=Value("issue_in_process"),
-    ),
-    When(
-        rec__status=DVDMSRecordOrderStatus.approved,
-        rec__outward_record__status=DVDMSOutwardRecordOrderStatus.created,
-        then=Value("draft"),
-    ),
-    When(
-        rec__status=DVDMSRecordOrderStatus.approved,
-        rec__outward_record__status__isnull=False,
-        then=F("rec__outward_record__status"),
-    ),
-    default=F("rec__status"),
+    default=F("record_order__status"),
     output_field=CharField(),
 )
 
 
+class RecordOrderTab(models.TextChoices):
+    unsent = "unsent"
+    sent = "sent"
+    completed = "completed"
+
+
 class DVDMSRecordOrderFilters(filters.FilterSet):
-    # Looking up the record orders of one request order never returns an unlinked draft.
     order = filters.UUIDFilter(method="filter_order")
     location = filters.UUIDFilter(field_name="destination__external_id")
-    # Matches the effective status above, not the raw record order status.
-    status = MultiSelectFilter(field_name="effective_status")
-    tab = filters.ChoiceFilter(choices=[(tab, tab) for tab in TAB_STATUSES], method="filter_tab")
-    care_indent_no = filters.CharFilter(field_name="rec__care_indent_no")
-    indent_no = filters.CharFilter(field_name="rec__outward_record__eaushadhi_indent_no", lookup_expr="icontains")
+    status = MultiSelectFilter(field_name="displayed_status")
+    tab = filters.ChoiceFilter(choices=RecordOrderTab.choices, method="filter_tab")
+    care_indent_no = filters.CharFilter(field_name="record_order__care_indent_no")
+    indent_no = filters.CharFilter(field_name="record_order__outward_record__eaushadhi_indent_no", lookup_expr="icontains")
     priority = filters.CharFilter(field_name="priority", lookup_expr="iexact")
-    created_by = filters.UUIDFilter(field_name="row_created_by")
-    created_date_after = filters.DateFilter(field_name="row_created_date", lookup_expr="date__gte")
-    created_date_before = filters.DateFilter(field_name="row_created_date", lookup_expr="date__lte")
-    supplier = filters.UUIDFilter(field_name="rec__institute_supplier__supplier__external_id")
+    created_by = filters.UUIDFilter(field_name="listed_created_by")
+    created_date_after = filters.DateFilter(field_name="listed_created_date", lookup_expr="date__gte")
+    created_date_before = filters.DateFilter(field_name="listed_created_date", lookup_expr="date__lte")
+    supplier = filters.UUIDFilter(field_name="record_order__institute_supplier__supplier__external_id")
 
     def filter_order(self, queryset, name, value):
-        return queryset.filter(external_id=value, record_pk__isnull=False)
+        return queryset.filter(external_id=value, record_order_pk__isnull=False)
 
     def filter_tab(self, queryset, name, value):
-        return queryset.filter(effective_status__in=TAB_STATUSES[value])
+        if value == RecordOrderTab.completed:
+            return queryset.filter(
+                Q(record_order_status__in=TERMINAL_RECORD_ORDER_STATUSES)
+                | Q(record_order_status__isnull=True, status__in=INACTIVE_RECORD_ORDER_STATUSES)
+            )
+        discarded_without_record_order = Q(record_order_status__isnull=True, status__in=INACTIVE_RECORD_ORDER_STATUSES)
+        not_terminal = (
+            Q(record_order_status__isnull=True) | ~Q(record_order_status__in=TERMINAL_RECORD_ORDER_STATUSES)
+        ) & ~discarded_without_record_order
+        no_indent_no = Q(eaushadhi_indent_no__isnull=True) | Q(eaushadhi_indent_no="")
+        return queryset.filter(not_terminal & (~no_indent_no if value == RecordOrderTab.sent else no_indent_no))
 
 
 @extend_schema(tags=["DVDMS: Record Order"])
@@ -138,32 +144,36 @@ class DVDMSRecordOrderViewSet(EMRBaseViewSet):
                 deleted=False,
             )
             .annotate(
-                rec=FilteredRelation(
+                record_order=FilteredRelation(
                     "dvdms_record_order",
                     condition=Q(dvdms_record_order__institute=institute, dvdms_record_order__deleted=False),
                 )
             )
-            .filter(Q(rec__isnull=False) | Q(status__in=UNSENT_REQUEST_ORDER_STATUSES))
+            .filter(
+                Q(record_order__isnull=False)
+                | Q(status__in=LISTED_WITHOUT_RECORD_ORDER_STATUSES)
+                | Q(status__in=INACTIVE_RECORD_ORDER_STATUSES)
+            )
             .annotate(
-                record_pk=F("rec__id"),
-                record_status=F("rec__status"),
-                effective_status=EFFECTIVE_STATUS,
-                row_created_by=Coalesce("rec__created_by__external_id", "created_by__external_id"),
-                row_created_date=Coalesce("rec__created_date", "created_date"),
+                record_order_pk=F("record_order__id"),
+                record_order_status=F("record_order__status"),
+                eaushadhi_indent_no=F("record_order__outward_record__eaushadhi_indent_no"),
+                displayed_status=DISPLAYED_STATUS,
+                listed_created_by=Coalesce("record_order__created_by__external_id", "created_by__external_id"),
+                listed_created_date=Coalesce("record_order__created_date", "created_date"),
             )
             .select_related("destination", "supplier", "origin", "created_by", "updated_by")
         )
         if "order" not in self.request.query_params:
-            # A cancelled record order frees its request order to be linked again. Once it has been, the cancelled
-            # one is history, so the list shows only the new one. Looking up an order's records still returns both.
-            relinked = DVDMSRecordOrder.objects.filter(
-                order=OuterRef("pk"), institute=institute, deleted=False
-            ).exclude(status=DVDMSRecordOrderStatus.cancelled)
-            queryset = queryset.exclude(Q(record_status=DVDMSRecordOrderStatus.cancelled) & Exists(relinked))
+            superseded_by = (
+                DVDMSRecordOrder.objects.filter(order=OuterRef("pk"), institute=institute, deleted=False)
+                .filter(~Q(status__in=INACTIVE_RECORD_ORDER_STATUSES) | Q(id__gt=OuterRef("record_order_pk")))
+            )
+            queryset = queryset.exclude(Q(record_order_status__in=INACTIVE_RECORD_ORDER_STATUSES) & Exists(superseded_by))
         return queryset
 
     def list(self, request, *args, **kwargs):
-        """GET /institute/{institute_id}/record_order/ - List record orders, plus draft orders without one yet"""
+        """GET /institute/{institute_id}/record_order/ - List record orders"""
         queryset = self.filter_queryset(self.get_queryset())
         paginator = self.pagination_class()
         page = paginator.paginate_queryset(queryset, request)
@@ -176,22 +186,16 @@ class DVDMSRecordOrderViewSet(EMRBaseViewSet):
             "institute_supplier__supplier",
             "created_by",
             "updated_by",
-        ).in_bulk([o.record_pk for o in page if o.record_pk])
+        ).in_bulk([o.record_order_pk for o in page if o.record_order_pk])
         results = [
-            {
-                **(
-                    DVDMSRecordOrderListSpec.serialize(records[o.record_pk]).to_json()
-                    if o.record_pk
-                    else self._draft_json(o)
-                ),
-                "effective_status": o.effective_status,
-            }
+            DVDMSRecordOrderListSpec.serialize(records[o.record_order_pk]).to_json()
+            if o.record_order_pk
+            else self._draft_json(o)
             for o in page
         ]
         return paginator.get_paginated_response(results)
 
     def _draft_json(self, order):
-        """A draft request order with no record order yet, in the record order list shape (id is null)."""
         order_json = SupplyRequestOrderReadSpec.serialize(order).to_json()
         return {
             "id": None,
@@ -201,7 +205,7 @@ class DVDMSRecordOrderViewSet(EMRBaseViewSet):
             "institute_store": None,
             "institute_supplier": None,
             "care_indent_no": None,
-            "status": "draft",
+            "status": order.status if order.status in INACTIVE_RECORD_ORDER_STATUSES else DVDMSRecordOrderStatus.draft.value,
             "created_by": order_json.get("created_by"),
             "updated_by": order_json.get("updated_by"),
             "created_date": order_json["created_date"],
@@ -278,12 +282,18 @@ class DVDMSRecordOrderViewSet(EMRBaseViewSet):
             )
 
 
-            if spec.status != DVDMSRecordOrderStatus.cancelled:
+            if record_order.status in TERMINAL_RECORD_ORDER_STATUSES:
+                return Response(
+                    {"error": f"A {record_order.status} record order cannot be changed"},
+                    status=status.HTTP_409_CONFLICT,
+                )
+
+            if spec.status not in INACTIVE_RECORD_ORDER_STATUSES:
                 require_pending_request_order(record_order.order)
 
-            if spec.status == DVDMSRecordOrderStatus.cancelled and record_order.status != DVDMSRecordOrderStatus.draft:
+            if spec.status in INACTIVE_RECORD_ORDER_STATUSES and record_order.status not in DISCARDABLE_RECORD_ORDER_STATUSES:
                 return Response(
-                    {"error": "Only a draft record order can be cancelled"},
+                    {"error": "Only a draft, pending or failed record order can be marked entered in error or abandoned"},
                     status=status.HTTP_409_CONFLICT,
                 )
 

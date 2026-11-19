@@ -8,8 +8,14 @@ from care_dvdms.models.dvdms_sync_log import DVDMSSyncLog
 class DVDMSOutwardRecordOrderStatus(models.TextChoices):
     created = "created"
     submitted = "submitted"
-    cancelled = "cancelled"
     failed = "failed"
+
+
+class DVDMSIndentStatus(models.TextChoices):
+    """What DVDMS reports in `eaushadhi_indent_status` (free text, matched case-insensitively)."""
+
+    issue_in_process = "issue in process"
+    issued = "issued"
 
 
 class DVDMSOutwardRecordOrder(EMRBaseModel):
