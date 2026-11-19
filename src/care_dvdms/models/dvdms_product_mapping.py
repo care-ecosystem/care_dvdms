@@ -10,6 +10,7 @@ class DVDMSProductMappingArchiveReason(models.TextChoices):
     """Why a mapping was archived, recorded in `archived_reason`."""
 
     product_archived = "PRODUCT_ARCHIVED"
+    dvdms_config_changed = "DVDMS_CONFIG_CHANGED"
 
 
 class DVDMSProductMappingType(models.TextChoices):

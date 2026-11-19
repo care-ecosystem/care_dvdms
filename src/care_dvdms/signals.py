@@ -7,7 +7,7 @@ from care.emr.resources.inventory.product_knowledge.spec import ProductKnowledge
 from care.emr.resources.inventory.supply_request.request_order import SupplyRequestOrderStatusOptions
 from django.db import connection, transaction
 from django.db.models import Q
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 
@@ -94,6 +94,51 @@ def deactivate_product_mappings_on_archive(sender, instance, **kwargs):
             archived,
             instance.external_id,
             instance.status,
+        )
+
+
+DVDMS_CONFIG_FIELDS = ("eaushadhi_institute_id", "eaushadhi_user_ref_id")
+
+ARCHIVE_CHUNK_SIZE = 1000
+
+
+@receiver(pre_save, sender=DVDMSInstitute)
+def detect_dvdms_config_change(sender, instance, **kwargs):
+    instance._dvdms_ids_changed = False  # noqa: SLF001
+    if instance._state.adding:  # noqa: SLF001
+        return
+    current = DVDMSInstitute.objects.filter(pk=instance.pk).values(*DVDMS_CONFIG_FIELDS).first()
+    instance._dvdms_ids_changed = bool(  # noqa: SLF001
+        current and any(current[field] != getattr(instance, field) for field in DVDMS_CONFIG_FIELDS)
+    )
+
+
+@receiver(post_save, sender=DVDMSInstitute)
+def deactivate_product_mappings_on_config_change(sender, instance, created, **kwargs):
+    """Archive the mappings that existed at the change; ones created afterwards are left alone."""
+    if created or not getattr(instance, "_dvdms_ids_changed", False):
+        return
+    instance._dvdms_ids_changed = False  # noqa: SLF001
+
+    snapshot = list(
+        DVDMSProductMapping.objects.filter(institute=instance, deleted=False, archived=False).values_list(
+            "pk", flat=True
+        )
+    )
+    archived = 0
+    for start in range(0, len(snapshot), ARCHIVE_CHUNK_SIZE):
+        archived += DVDMSProductMapping.objects.filter(
+            pk__in=snapshot[start : start + ARCHIVE_CHUNK_SIZE], archived=False
+        ).update(
+            archived=True,
+            archived_reason=DVDMSProductMappingArchiveReason.dvdms_config_changed,
+            modified_date=timezone.now(),
+        )
+    if archived:
+        logger.info(
+            "Archived %s DVDMS product mapping(s): DVDMS config of institute %s changed",
+            archived,
+            instance.external_id,
         )
 
 
