@@ -26,7 +26,11 @@ from care_dvdms.models.dvdms_outward_record_order import (
     DVDMSOutwardRecordOrder,
     DVDMSOutwardRecordOrderStatus,
 )
-from care_dvdms.models.dvdms_record_order import DVDMSRecordOrder, DVDMSRecordOrderStatus
+from care_dvdms.models.dvdms_record_order import (
+    INACTIVE_RECORD_ORDER_STATUSES,
+    DVDMSRecordOrder,
+    DVDMSRecordOrderStatus,
+)
 from care_dvdms.models.dvdms_sync_log import (
     DVDMSSyncLog,
     DVDMSSyncRequestStatus,
@@ -65,6 +69,22 @@ def _upsert_outward_record(record_order, sync_log, user, outward_status, indent_
     return outward_record
 
 
+def _set_record_order_status(record_order, new_status):
+    """Set the status unless the record order was entered in error / abandoned meanwhile."""
+    with transaction.atomic():
+        locked = DVDMSRecordOrder.objects.select_for_update().get(pk=record_order.pk)
+        if locked.status in INACTIVE_RECORD_ORDER_STATUSES:
+            logger.warning(
+                "Record order %s is %s - not moving it to %s", locked.external_id, locked.status, new_status
+            )
+            record_order.status = locked.status
+            return False
+        locked.status = new_status
+        locked.save(update_fields=["status", "modified_date"])
+    record_order.status = new_status
+    return True
+
+
 @shared_task(
     bind=True,
     name="care_dvdms.tasks.save_indent_task",
@@ -85,6 +105,10 @@ def save_indent_task(self, institute_id, record_order_id, user_id):
     institute = get_object_or_404(DVDMSInstitute, external_id=institute_id)
     record_order = get_object_or_404(DVDMSRecordOrder, external_id=record_order_id, institute=institute)
     user = get_object_or_404(User, external_id=user_id)
+
+    if record_order.status in INACTIVE_RECORD_ORDER_STATUSES:
+        logger.warning("save_indent_task skipped | record_order=%s is %s", record_order_id, record_order.status)
+        return
 
     payload = build_save_indent_payload(record_order)
 
@@ -110,8 +134,7 @@ def save_indent_task(self, institute_id, record_order_id, user_id):
             error["message"],
         )
 
-        record_order.status = DVDMSRecordOrderStatus.failed
-        record_order.save(update_fields=["status", "modified_date"])
+        _set_record_order_status(record_order, DVDMSRecordOrderStatus.failed)
 
         _upsert_outward_record(
             record_order,
@@ -127,8 +150,7 @@ def save_indent_task(self, institute_id, record_order_id, user_id):
         sync_log.http_status_code = http_status_code
         sync_log.save(update_fields=["request_status", "response_payload", "http_status_code", "modified_date"])
 
-        record_order.status = DVDMSRecordOrderStatus.approved
-        record_order.save(update_fields=["status", "modified_date"])
+        _set_record_order_status(record_order, DVDMSRecordOrderStatus.approved)
 
         _upsert_outward_record(
             record_order, sync_log, user, DVDMSOutwardRecordOrderStatus.submitted, indent_no=indent_no

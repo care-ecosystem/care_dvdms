@@ -9,6 +9,12 @@ def backfill_cancelled(apps, schema_editor):
     apps.get_model("care_dvdms", "DVDMSOutwardRecordOrder").objects.filter(status="cancelled").update(status="failed")
 
 
+def restore_cancelled(apps, schema_editor):
+    apps.get_model("care_dvdms", "DVDMSRecordOrder").objects.filter(
+        status__in=["abandoned", "entered_in_error"]
+    ).update(status="cancelled")
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -32,7 +38,7 @@ class Migration(migrations.Migration):
             name='status',
             field=models.CharField(choices=[('draft', 'Draft'), ('pending', 'Pending'), ('approved', 'Approved'), ('rejected', 'Rejected'), ('completed', 'Completed'), ('failed', 'Failed'), ('entered_in_error', 'Entered In Error'), ('abandoned', 'Abandoned')], default='draft', max_length=20),
         ),
-        migrations.RunPython(backfill_cancelled, migrations.RunPython.noop),
+        migrations.RunPython(backfill_cancelled, restore_cancelled),
         migrations.AddConstraint(
             model_name='dvdmsrecordorder',
             constraint=models.UniqueConstraint(condition=models.Q(('deleted', False), models.Q(('status__in', ['entered_in_error', 'abandoned']), _negated=True)), fields=('order',), name='uniq_order_active_record_order'),
