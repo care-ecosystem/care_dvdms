@@ -3,6 +3,8 @@ from care.emr.models.organization import Organization
 from care.security.authorization.base import AuthorizationController
 from care.utils.shortcuts import get_object_or_404
 from django.db import IntegrityError, transaction
+from django.utils import timezone
+from django_filters import rest_framework as filters
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.exceptions import NotFound, PermissionDenied
@@ -18,6 +20,10 @@ from care_dvdms.models.dvdms_institute import DVDMSInstitute
 from care_dvdms.models.dvdms_supplier import DVDMSSupplier
 
 
+class DVDMSSupplierFilters(filters.FilterSet):
+    is_default = filters.BooleanFilter()
+
+
 @extend_schema(tags=["DVDMS: Supplier"])
 class DVDMSSupplierViewSet(EMRBaseViewSet):
     """
@@ -27,7 +33,8 @@ class DVDMSSupplierViewSet(EMRBaseViewSet):
 
     database_model = DVDMSSupplier
     lookup_field = "external_id"
-    filter_backends = [OrderingFilter]
+    filterset_class = DVDMSSupplierFilters
+    filter_backends = [filters.DjangoFilterBackend, OrderingFilter]
     ordering_fields = ["created_date", "modified_date"]
 
     def get_institute(self):
@@ -153,14 +160,20 @@ class DVDMSSupplierViewSet(EMRBaseViewSet):
                     status=status.HTTP_409_CONFLICT,
                 )
 
+        # A different supplier or warehouse is a different mapping: orders keep pointing at the old row.
+        replaces_mapping = False
         update_fields = ["updated_by", "modified_date"]
         if spec.supplier is not None:
             supplier, error = self._resolve_supplier(institute, spec.supplier, exclude_pk=supplier_mapping.pk)
             if error:
                 return error
+            replaces_mapping = supplier.pk != supplier_mapping.supplier_id
             supplier_mapping.supplier = supplier
             update_fields.append("supplier")
         if spec.eaushadhi_warehouse_id is not None:
+            replaces_mapping = replaces_mapping or (
+                spec.eaushadhi_warehouse_id != supplier_mapping.eaushadhi_warehouse_id
+            )
             supplier_mapping.eaushadhi_warehouse_id = spec.eaushadhi_warehouse_id
             update_fields.append("eaushadhi_warehouse_id")
         if spec.eaushadhi_warehouse_name is not None:
@@ -173,7 +186,21 @@ class DVDMSSupplierViewSet(EMRBaseViewSet):
 
         try:
             with transaction.atomic():
-                supplier_mapping.save(update_fields=update_fields)
+                if replaces_mapping:
+                    DVDMSSupplier.objects.filter(pk=supplier_mapping.pk).update(
+                        deleted=True, updated_by=request.user, modified_date=timezone.now()
+                    )
+                    supplier_mapping = DVDMSSupplier.objects.create(
+                        institute=institute,
+                        supplier=supplier_mapping.supplier,
+                        eaushadhi_warehouse_id=supplier_mapping.eaushadhi_warehouse_id,
+                        eaushadhi_warehouse_name=supplier_mapping.eaushadhi_warehouse_name,
+                        is_default=supplier_mapping.is_default,
+                        created_by=request.user,
+                        updated_by=request.user,
+                    )
+                else:
+                    supplier_mapping.save(update_fields=update_fields)
         except IntegrityError as exc:
             if "uniq_default_supplier_per_institute" in str(exc):
                 return Response(
