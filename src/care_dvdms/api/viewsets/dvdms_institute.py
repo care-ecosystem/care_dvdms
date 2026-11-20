@@ -141,7 +141,9 @@ class DVDMSInstituteViewSet(EMRBaseViewSet):
         if update_fields:
             instance.updated_by = request.user
             update_fields += ["updated_by", "modified_date"]
-            instance.save(update_fields=update_fields)
+            # Signals on save (e.g. archiving product mappings) must commit or roll back with it.
+            with transaction.atomic():
+                instance.save(update_fields=update_fields)
 
         instance = DVDMSInstitute.objects.select_related("facility", "created_by", "updated_by").get(pk=instance.pk)
 

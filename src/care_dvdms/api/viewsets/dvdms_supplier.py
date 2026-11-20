@@ -3,6 +3,8 @@ from care.emr.models.organization import Organization
 from care.security.authorization.base import AuthorizationController
 from care.utils.shortcuts import get_object_or_404
 from django.db import IntegrityError, transaction
+from django.utils import timezone
+from django_filters import rest_framework as filters
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.exceptions import NotFound, PermissionDenied
@@ -14,8 +16,13 @@ from care_dvdms.api.specs.dvdms_supplier import (
     DVDMSSupplierListSpec,
     DVDMSSupplierUpdateSpec,
 )
+from care_dvdms.api.viewsets.mixins import lock_institute
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
 from care_dvdms.models.dvdms_supplier import DVDMSSupplier
+
+
+class DVDMSSupplierFilters(filters.FilterSet):
+    is_default = filters.BooleanFilter()
 
 
 @extend_schema(tags=["DVDMS: Supplier"])
@@ -27,7 +34,8 @@ class DVDMSSupplierViewSet(EMRBaseViewSet):
 
     database_model = DVDMSSupplier
     lookup_field = "external_id"
-    filter_backends = [OrderingFilter]
+    filterset_class = DVDMSSupplierFilters
+    filter_backends = [filters.DjangoFilterBackend, OrderingFilter]
     ordering_fields = ["created_date", "modified_date"]
 
     def get_institute(self):
@@ -99,6 +107,9 @@ class DVDMSSupplierViewSet(EMRBaseViewSet):
 
         try:
             with transaction.atomic():
+                institute, error = lock_institute(institute)
+                if error:
+                    return error
                 supplier_mapping = DVDMSSupplier.objects.create(
                     institute=institute,
                     supplier=supplier,
@@ -132,48 +143,73 @@ class DVDMSSupplierViewSet(EMRBaseViewSet):
         self._authorize_manage_facility(institute)
 
         supplier_mapping_id = self.kwargs.get(self.lookup_field)
-        supplier_mapping = get_object_or_404(
-            DVDMSSupplier.objects.select_related("institute", "supplier", "created_by", "updated_by"),
-            external_id=supplier_mapping_id,
-            institute=institute,
-            deleted=False,
-        )
-
         spec = DVDMSSupplierUpdateSpec(**request.data)
-
-        if spec.is_default:
-            existing_default = (
-                DVDMSSupplier.objects.filter(institute=institute, is_default=True, deleted=False)
-                .exclude(pk=supplier_mapping.pk)
-                .first()
-            )
-            if existing_default:
-                return Response(
-                    {"error": "Only one supplier can be marked as default per institute"},
-                    status=status.HTTP_409_CONFLICT,
-                )
-
-        update_fields = ["updated_by", "modified_date"]
-        if spec.supplier is not None:
-            supplier, error = self._resolve_supplier(institute, spec.supplier, exclude_pk=supplier_mapping.pk)
-            if error:
-                return error
-            supplier_mapping.supplier = supplier
-            update_fields.append("supplier")
-        if spec.eaushadhi_warehouse_id is not None:
-            supplier_mapping.eaushadhi_warehouse_id = spec.eaushadhi_warehouse_id
-            update_fields.append("eaushadhi_warehouse_id")
-        if spec.eaushadhi_warehouse_name is not None:
-            supplier_mapping.eaushadhi_warehouse_name = spec.eaushadhi_warehouse_name
-            update_fields.append("eaushadhi_warehouse_name")
-        if spec.is_default is not None:
-            supplier_mapping.is_default = spec.is_default
-            update_fields.append("is_default")
-        supplier_mapping.updated_by = request.user
 
         try:
             with transaction.atomic():
-                supplier_mapping.save(update_fields=update_fields)
+                institute, error = lock_institute(institute)
+                if error:
+                    return error
+                supplier_mapping = get_object_or_404(
+                    DVDMSSupplier.objects.select_for_update(of=("self",)).select_related(
+                        "institute", "supplier", "created_by", "updated_by"
+                    ),
+                    external_id=supplier_mapping_id,
+                    institute=institute,
+                    deleted=False,
+                )
+
+                if spec.is_default:
+                    existing_default = (
+                        DVDMSSupplier.objects.filter(institute=institute, is_default=True, deleted=False)
+                        .exclude(pk=supplier_mapping.pk)
+                        .first()
+                    )
+                    if existing_default:
+                        return Response(
+                            {"error": "Only one supplier can be marked as default per institute"},
+                            status=status.HTTP_409_CONFLICT,
+                        )
+
+                # A different supplier or warehouse is a different mapping: orders keep pointing at the old row.
+                replaces_mapping = False
+                update_fields = ["updated_by", "modified_date"]
+                if spec.supplier is not None:
+                    supplier, error = self._resolve_supplier(institute, spec.supplier, exclude_pk=supplier_mapping.pk)
+                    if error:
+                        return error
+                    replaces_mapping = supplier.pk != supplier_mapping.supplier_id
+                    supplier_mapping.supplier = supplier
+                    update_fields.append("supplier")
+                if spec.eaushadhi_warehouse_id is not None:
+                    replaces_mapping = replaces_mapping or (
+                        spec.eaushadhi_warehouse_id != supplier_mapping.eaushadhi_warehouse_id
+                    )
+                    supplier_mapping.eaushadhi_warehouse_id = spec.eaushadhi_warehouse_id
+                    update_fields.append("eaushadhi_warehouse_id")
+                if spec.eaushadhi_warehouse_name is not None:
+                    supplier_mapping.eaushadhi_warehouse_name = spec.eaushadhi_warehouse_name
+                    update_fields.append("eaushadhi_warehouse_name")
+                if spec.is_default is not None:
+                    supplier_mapping.is_default = spec.is_default
+                    update_fields.append("is_default")
+                supplier_mapping.updated_by = request.user
+
+                if replaces_mapping:
+                    DVDMSSupplier.objects.filter(pk=supplier_mapping.pk).update(
+                        deleted=True, updated_by=request.user, modified_date=timezone.now()
+                    )
+                    supplier_mapping = DVDMSSupplier.objects.create(
+                        institute=institute,
+                        supplier=supplier_mapping.supplier,
+                        eaushadhi_warehouse_id=supplier_mapping.eaushadhi_warehouse_id,
+                        eaushadhi_warehouse_name=supplier_mapping.eaushadhi_warehouse_name,
+                        is_default=supplier_mapping.is_default,
+                        created_by=request.user,
+                        updated_by=request.user,
+                    )
+                else:
+                    supplier_mapping.save(update_fields=update_fields)
         except IntegrityError as exc:
             if "uniq_default_supplier_per_institute" in str(exc):
                 return Response(

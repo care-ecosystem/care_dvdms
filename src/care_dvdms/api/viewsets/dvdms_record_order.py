@@ -88,7 +88,15 @@ class DVDMSRecordOrderFilters(filters.FilterSet):
     created_by = filters.UUIDFilter(field_name="listed_created_by")
     created_date_after = filters.DateFilter(field_name="listed_created_date", lookup_expr="date__gte")
     created_date_before = filters.DateFilter(field_name="listed_created_date", lookup_expr="date__lte")
-    supplier = filters.UUIDFilter(field_name="record_order__institute_supplier__supplier__external_id")
+    supplier = filters.UUIDFilter(method="filter_supplier")
+
+    def filter_supplier(self, queryset, name, value):
+        record_order_with_supplier = DVDMSRecordOrder.objects.filter(
+            pk=OuterRef("record_order_pk"), institute_supplier__supplier__external_id=value
+        )
+        return queryset.filter(
+            Q(Exists(record_order_with_supplier)) | Q(record_order_pk__isnull=True, supplier__external_id=value)
+        )
 
     def filter_order(self, queryset, name, value):
         return queryset.filter(external_id=value, record_order_pk__isnull=False)
@@ -165,6 +173,16 @@ class DVDMSRecordOrderViewSet(EMRBaseViewSet):
             .select_related("destination", "supplier", "origin", "created_by", "updated_by")
         )
         if "order" not in self.request.query_params:
+            active_store_ids = DVDMSStore.objects.filter(institute=institute, deleted=False).values(
+                "eaushadhi_store_id"
+            )
+            institute_record_orders = DVDMSRecordOrder.objects.filter(
+                order=OuterRef("pk"), institute=institute, deleted=False
+            )
+            queryset = queryset.exclude(
+                Exists(institute_record_orders)
+                & ~Exists(institute_record_orders.filter(institute_store__eaushadhi_store_id__in=active_store_ids))
+            )
             superseded_by = (
                 DVDMSRecordOrder.objects.filter(order=OuterRef("pk"), institute=institute, deleted=False)
                 .filter(~Q(status__in=INACTIVE_RECORD_ORDER_STATUSES) | Q(id__gt=OuterRef("record_order_pk")))
