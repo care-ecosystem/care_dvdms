@@ -11,6 +11,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='dvdmsproductmapping',
             name='archived_reason',
-            field=models.CharField(blank=True, choices=[('PRODUCT_ARCHIVED', 'Product Archived'), ('DVDMS_CONFIG_CHANGED', 'Dvdms Config Changed')], max_length=50, null=True),
+            field=models.TextField(blank=True, null=True),
         ),
     ]
