@@ -14,10 +14,7 @@ from django.utils import timezone
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
 from care_dvdms.models.dvdms_outward_record_order import DVDMSOutwardRecordOrderStatus
 from care_dvdms.models.dvdms_prescription_sequence import DVDMSPrescriptionSequence
-from care_dvdms.models.dvdms_product_mapping import (
-    DVDMSProductMapping,
-    DVDMSProductMappingArchiveReason,
-)
+from care_dvdms.models.dvdms_product_mapping import DVDMSProductMapping
 from care_dvdms.models.dvdms_record_order import (
     INACTIVE_RECORD_ORDER_STATUSES,
     DVDMSRecordOrder,
@@ -87,7 +84,7 @@ def deactivate_product_mappings_on_archive(sender, instance, **kwargs):
 
     archived = DVDMSProductMapping.objects.filter(product_knowledge=instance, archived=False).update(
         archived=True,
-        archived_reason=DVDMSProductMappingArchiveReason.product_archived,
+        archived_reason="PRODUCT_ARCHIVED",
         modified_date=timezone.now(),
     )
     if archived:
@@ -135,7 +132,7 @@ def reset_mappings_on_config_change(sender, instance, created, **kwargs):
             pk__in=snapshot[start : start + ARCHIVE_CHUNK_SIZE], archived=False
         ).update(
             archived=True,
-            archived_reason=DVDMSProductMappingArchiveReason.dvdms_config_changed,
+            archived_reason="DVDMS_CONFIG_CHANGED",
             modified_date=timezone.now(),
         )
     if archived:
