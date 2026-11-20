@@ -23,6 +23,8 @@ from care_dvdms.models.dvdms_record_order import (
     DVDMSRecordOrder,
     DVDMSRecordOrderStatus,
 )
+from care_dvdms.models.dvdms_store import DVDMSStore
+from care_dvdms.models.dvdms_supplier import DVDMSSupplier
 
 logger = logging.getLogger(__name__)
 
@@ -116,8 +118,8 @@ def detect_dvdms_config_change(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender=DVDMSInstitute)
-def deactivate_product_mappings_on_config_change(sender, instance, created, **kwargs):
-    """Archive the mappings that existed at the change; ones created afterwards are left alone."""
+def reset_mappings_on_config_change(sender, instance, created, **kwargs):
+    """Archive product mappings and delete store/supplier mappings; ones created afterwards are left alone."""
     if created or not getattr(instance, "_dvdms_ids_changed", False):
         return
     instance._dvdms_ids_changed = False  # noqa: SLF001
@@ -141,6 +143,11 @@ def deactivate_product_mappings_on_config_change(sender, instance, created, **kw
             "Archived %s DVDMS product mapping(s): DVDMS config of institute %s changed",
             archived,
             instance.external_id,
+        )
+
+    for mapping_model in (DVDMSStore, DVDMSSupplier):
+        mapping_model.objects.filter(institute=instance, deleted=False).update(
+            deleted=True, modified_date=timezone.now()
         )
 
 
