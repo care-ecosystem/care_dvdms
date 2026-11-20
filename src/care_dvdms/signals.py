@@ -107,9 +107,11 @@ def detect_dvdms_config_change(sender, instance, **kwargs):
     instance._dvdms_ids_changed = False  # noqa: SLF001
     if instance._state.adding:  # noqa: SLF001
         return
-    current = DVDMSInstitute.objects.filter(pk=instance.pk).values(*DVDMS_CONFIG_FIELDS).first()
+    update_fields = kwargs.get("update_fields")
+    fields = [f for f in DVDMS_CONFIG_FIELDS if update_fields is None or f in update_fields]
+    current = DVDMSInstitute.objects.filter(pk=instance.pk).values(*fields).first() if fields else None
     instance._dvdms_ids_changed = bool(  # noqa: SLF001
-        current and any(current[field] != getattr(instance, field) for field in DVDMS_CONFIG_FIELDS)
+        current and any(current[field] != getattr(instance, field) for field in fields)
     )
 
 
