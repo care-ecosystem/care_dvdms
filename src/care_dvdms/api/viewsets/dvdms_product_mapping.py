@@ -29,6 +29,7 @@ from care_dvdms.models.dvdms_drug import DVDMSDrug
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
 from care_dvdms.models.dvdms_product_mapping import DVDMSProductMapping, DVDMSProductMappingType
 from care_dvdms.models.dvdms_record_order import DVDMSRecordOrder
+from care_dvdms.signals import INSTITUTE_ID_FIELDS
 
 SELECT_RELATED_FIELDS = (
     "institute",
@@ -139,7 +140,13 @@ class DVDMSProductMappingViewSet(DVDMSDrugLookupMixin, EMRBaseViewSet):
             return error
 
         with transaction.atomic():
-            institute = DVDMSInstitute.objects.select_for_update().get(pk=institute.pk)
+            locked = DVDMSInstitute.objects.select_for_update().get(pk=institute.pk)
+            if any(getattr(locked, field) != getattr(institute, field) for field in INSTITUTE_ID_FIELDS):
+                return Response(
+                    {"error": "The DVDMS configuration changed while this request was running, please retry"},
+                    status=status.HTTP_409_CONFLICT
+                )
+            institute = locked
 
             if DVDMSProductMapping.objects.filter(
                 institute=institute, eaushadhi_drug_id=details.drug_id, deleted=False, archived=False
@@ -184,7 +191,15 @@ class DVDMSProductMappingViewSet(DVDMSDrugLookupMixin, EMRBaseViewSet):
                 return error
 
         with transaction.atomic():
-            institute = DVDMSInstitute.objects.select_for_update().get(pk=institute.pk)
+            locked = DVDMSInstitute.objects.select_for_update().get(pk=institute.pk)
+            if details is not None and any(
+                getattr(locked, field) != getattr(institute, field) for field in INSTITUTE_ID_FIELDS
+            ):
+                return Response(
+                    {"error": "The DVDMS configuration changed while this request was running, please retry"},
+                    status=status.HTTP_409_CONFLICT
+                )
+            institute = locked
 
             product_mapping = get_object_or_404(
                 DVDMSProductMapping.objects.select_related(*SELECT_RELATED_FIELDS),
