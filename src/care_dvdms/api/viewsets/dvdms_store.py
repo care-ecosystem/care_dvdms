@@ -4,6 +4,8 @@ from care.facility.models import Facility
 from care.security.authorization.base import AuthorizationController
 from care.utils.shortcuts import get_object_or_404
 from django.db import IntegrityError, transaction
+from django.utils import timezone
+from django_filters import rest_framework as filters
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.exceptions import NotFound, PermissionDenied
@@ -15,8 +17,13 @@ from care_dvdms.api.specs.dvdms_store import (
     DVDMSStoreListSpec,
     DVDMSStoreUpdateSpec,
 )
+from care_dvdms.api.viewsets.mixins import lock_institute
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
 from care_dvdms.models.dvdms_store import DVDMSStore
+
+
+class DVDMSStoreFilters(filters.FilterSet):
+    is_default = filters.BooleanFilter()
 
 
 @extend_schema(tags=["DVDMS: Store"])
@@ -28,7 +35,8 @@ class DVDMSStoreViewSet(EMRBaseViewSet):
 
     database_model = DVDMSStore
     lookup_field = "external_id"
-    filter_backends = [OrderingFilter]
+    filterset_class = DVDMSStoreFilters
+    filter_backends = [filters.DjangoFilterBackend, OrderingFilter]
     ordering_fields = ["created_date", "modified_date"]
 
     def get_institute(self):
@@ -103,6 +111,9 @@ class DVDMSStoreViewSet(EMRBaseViewSet):
 
         try:
             with transaction.atomic():
+                institute, error = lock_institute(institute)
+                if error:
+                    return error
                 store_mapping = DVDMSStore.objects.create(
                     institute=institute,
                     location=location,
@@ -142,51 +153,75 @@ class DVDMSStoreViewSet(EMRBaseViewSet):
         self._authorize_manage_facility(institute)
 
         store_mapping_id = self.kwargs.get(self.lookup_field)
-        store_mapping = get_object_or_404(
-            DVDMSStore.objects.select_related("institute", "location", "created_by", "updated_by"),
-            external_id=store_mapping_id,
-            institute=institute,
-            deleted=False,
-        )
-
         spec = DVDMSStoreUpdateSpec(**request.data)
-
-        if spec.is_default:
-            existing_default = (
-                DVDMSStore.objects.filter(institute=institute, is_default=True, deleted=False)
-                .exclude(pk=store_mapping.pk)
-                .first()
-            )
-            if existing_default:
-                return Response(
-                    {"error": "Only one store can be marked as default per institute"},
-                    status=status.HTTP_409_CONFLICT,
-                )
-
-        update_fields = ["updated_by", "modified_date"]
-        if spec.store is not None:
-            location, error = self._resolve_location(institute, spec.store, exclude_pk=store_mapping.pk)
-            if error:
-                return error
-            store_mapping.location = location
-            update_fields.append("location")
-        if spec.eaushadhi_store_id is not None:
-            store_mapping.eaushadhi_store_id = spec.eaushadhi_store_id
-            update_fields.append("eaushadhi_store_id")
-        if spec.eaushadhi_store_name is not None:
-            store_mapping.eaushadhi_store_name = spec.eaushadhi_store_name
-            update_fields.append("eaushadhi_store_name")
-        if spec.is_default is not None:
-            store_mapping.is_default = spec.is_default
-            update_fields.append("is_default")
-        if spec.meta is not None:
-            store_mapping.meta = spec.meta
-            update_fields.append("meta")
-        store_mapping.updated_by = request.user
 
         try:
             with transaction.atomic():
-                store_mapping.save(update_fields=update_fields)
+                institute, error = lock_institute(institute)
+                if error:
+                    return error
+                store_mapping = get_object_or_404(
+                    DVDMSStore.objects.select_for_update(of=("self",)).select_related(
+                        "institute", "location", "created_by", "updated_by"
+                    ),
+                    external_id=store_mapping_id,
+                    institute=institute,
+                    deleted=False,
+                )
+
+                if spec.is_default:
+                    existing_default = (
+                        DVDMSStore.objects.filter(institute=institute, is_default=True, deleted=False)
+                        .exclude(pk=store_mapping.pk)
+                        .first()
+                    )
+                    if existing_default:
+                        return Response(
+                            {"error": "Only one store can be marked as default per institute"},
+                            status=status.HTTP_409_CONFLICT,
+                        )
+
+                # A different eAushadhi store is a different mapping: orders keep pointing at the old row.
+                replaces_mapping = (
+                    spec.eaushadhi_store_id is not None and spec.eaushadhi_store_id != store_mapping.eaushadhi_store_id
+                )
+                update_fields = ["updated_by", "modified_date"]
+                if spec.store is not None:
+                    location, error = self._resolve_location(institute, spec.store, exclude_pk=store_mapping.pk)
+                    if error:
+                        return error
+                    store_mapping.location = location
+                    update_fields.append("location")
+                if spec.eaushadhi_store_id is not None:
+                    store_mapping.eaushadhi_store_id = spec.eaushadhi_store_id
+                    update_fields.append("eaushadhi_store_id")
+                if spec.eaushadhi_store_name is not None:
+                    store_mapping.eaushadhi_store_name = spec.eaushadhi_store_name
+                    update_fields.append("eaushadhi_store_name")
+                if spec.is_default is not None:
+                    store_mapping.is_default = spec.is_default
+                    update_fields.append("is_default")
+                if spec.meta is not None:
+                    store_mapping.meta = spec.meta
+                    update_fields.append("meta")
+                store_mapping.updated_by = request.user
+
+                if replaces_mapping:
+                    DVDMSStore.objects.filter(pk=store_mapping.pk).update(
+                        deleted=True, updated_by=request.user, modified_date=timezone.now()
+                    )
+                    store_mapping = DVDMSStore.objects.create(
+                        institute=institute,
+                        location=store_mapping.location,
+                        eaushadhi_store_id=store_mapping.eaushadhi_store_id,
+                        eaushadhi_store_name=store_mapping.eaushadhi_store_name,
+                        is_default=store_mapping.is_default,
+                        meta=store_mapping.meta,
+                        created_by=request.user,
+                        updated_by=request.user,
+                    )
+                else:
+                    store_mapping.save(update_fields=update_fields)
         except IntegrityError as exc:
             if "uniq_default_store_per_institute" in str(exc):
                 return Response(

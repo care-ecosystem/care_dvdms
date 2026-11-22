@@ -7,22 +7,21 @@ from care.emr.resources.inventory.product_knowledge.spec import ProductKnowledge
 from care.emr.resources.inventory.supply_request.request_order import SupplyRequestOrderStatusOptions
 from django.db import connection, transaction
 from django.db.models import Q
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
 from care_dvdms.models.dvdms_outward_record_order import DVDMSOutwardRecordOrderStatus
 from care_dvdms.models.dvdms_prescription_sequence import DVDMSPrescriptionSequence
-from care_dvdms.models.dvdms_product_mapping import (
-    DVDMSProductMapping,
-    DVDMSProductMappingArchiveReason,
-)
+from care_dvdms.models.dvdms_product_mapping import DVDMSProductMapping
 from care_dvdms.models.dvdms_record_order import (
     INACTIVE_RECORD_ORDER_STATUSES,
     DVDMSRecordOrder,
     DVDMSRecordOrderStatus,
 )
+from care_dvdms.models.dvdms_store import DVDMSStore
+from care_dvdms.models.dvdms_supplier import DVDMSSupplier
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +84,7 @@ def deactivate_product_mappings_on_archive(sender, instance, **kwargs):
 
     archived = DVDMSProductMapping.objects.filter(product_knowledge=instance, archived=False).update(
         archived=True,
-        archived_reason=DVDMSProductMappingArchiveReason.product_archived,
+        archived_reason="PRODUCT_ARCHIVED",
         modified_date=timezone.now(),
     )
     if archived:
@@ -94,6 +93,58 @@ def deactivate_product_mappings_on_archive(sender, instance, **kwargs):
             archived,
             instance.external_id,
             instance.status,
+        )
+
+
+DVDMS_CONFIG_FIELDS = ("eaushadhi_institute_id", "eaushadhi_user_ref_id")
+
+ARCHIVE_CHUNK_SIZE = 1000
+
+
+@receiver(pre_save, sender=DVDMSInstitute)
+def detect_dvdms_config_change(sender, instance, **kwargs):
+    instance._dvdms_ids_changed = False  # noqa: SLF001
+    if instance._state.adding:  # noqa: SLF001
+        return
+    update_fields = kwargs.get("update_fields")
+    fields = [f for f in DVDMS_CONFIG_FIELDS if update_fields is None or f in update_fields]
+    current = DVDMSInstitute.objects.filter(pk=instance.pk).values(*fields).first() if fields else None
+    instance._dvdms_ids_changed = bool(  # noqa: SLF001
+        current and any(current[field] != getattr(instance, field) for field in fields)
+    )
+
+
+@receiver(post_save, sender=DVDMSInstitute)
+def reset_mappings_on_config_change(sender, instance, created, **kwargs):
+    """Archive product mappings and delete store/supplier mappings; ones created afterwards are left alone."""
+    if created or not getattr(instance, "_dvdms_ids_changed", False):
+        return
+    instance._dvdms_ids_changed = False  # noqa: SLF001
+
+    snapshot = list(
+        DVDMSProductMapping.objects.filter(institute=instance, deleted=False, archived=False).values_list(
+            "pk", flat=True
+        )
+    )
+    archived = 0
+    for start in range(0, len(snapshot), ARCHIVE_CHUNK_SIZE):
+        archived += DVDMSProductMapping.objects.filter(
+            pk__in=snapshot[start : start + ARCHIVE_CHUNK_SIZE], archived=False
+        ).update(
+            archived=True,
+            archived_reason="DVDMS_CONFIG_CHANGED",
+            modified_date=timezone.now(),
+        )
+    if archived:
+        logger.info(
+            "Archived %s DVDMS product mapping(s): DVDMS config of institute %s changed",
+            archived,
+            instance.external_id,
+        )
+
+    for mapping_model in (DVDMSStore, DVDMSSupplier):
+        mapping_model.objects.filter(institute=instance, deleted=False).update(
+            deleted=True, modified_date=timezone.now()
         )
 
 
