@@ -188,7 +188,9 @@ class DVDMSRecordOrderViewSet(EMRBaseViewSet):
                 .filter(~Q(status__in=INACTIVE_RECORD_ORDER_STATUSES) | Q(id__gt=OuterRef("record_order_pk")))
             )
             queryset = queryset.exclude(Q(record_order_status__in=INACTIVE_RECORD_ORDER_STATUSES) & Exists(superseded_by))
-        return queryset
+        # This list is built on core's RequestOrder, so DVDMSRecordOrder.Meta.ordering does not
+        # reach it; without an explicit order the paginator would return unstable pages.
+        return queryset.order_by("-listed_created_date", "-id")
 
     def list(self, request, *args, **kwargs):
         """GET /institute/{institute_id}/record_order/ - List record orders"""

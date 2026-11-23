@@ -41,6 +41,8 @@ class DVDMSInwardItemRecord(EMRBaseModel):
 
     class Meta:
         verbose_name_plural = "DVDMS Inward Item Records"
+        # Line items read in the order they were added, not newest first.
+        ordering = ["id"]
         constraints = [
             #  DVDMS may return multiple stock lots for one item, differing by manufacturer.
             #  A lot is split into one row per item order when several item orders share its drug.

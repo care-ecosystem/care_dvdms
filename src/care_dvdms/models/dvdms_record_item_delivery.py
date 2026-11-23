@@ -42,6 +42,8 @@ class DVDMSRecordItemDelivery(EMRBaseModel):
 
     class Meta:
         verbose_name_plural = "DVDMS Record Item Deliveries"
+        # Line items read in the order they were added, not newest first.
+        ordering = ["id"]
         constraints = [
             models.CheckConstraint(
                 condition=models.Q(quantity_dispatched__gte=0),

@@ -52,9 +52,8 @@ CARE backend plugin. PRs are reviewed by care_ci; the rules live in
   financial year. `max() + 1` or a Python-side counter collides under concurrency.
 
 ## Deliberate deviations and known gaps
-- Deviations: none recorded. Everything below is a gap, not a decision — flagging it is correct.
-- No tests anywhere in the repo, and no CI lint or test gate.
-- `pyproject.toml` declares only `django`, `celery`, `djangorestframework`, all unbounded, while the
-  code imports `requests`, `django-environ`, `pydantic`, `django-filter`, `drf-spectacular`; four
-  template `TODO` markers remain.
-- No model defines `Meta.ordering` or `Meta.indexes`.
+- Deliberate: line-item models order ascending (`Meta.ordering = ["id"]`) to keep entry order; every
+  other model is newest-first; the two sequence counters have no ordering.
+- Gaps, not decisions — flagging them is correct: no tests and no CI lint/test gate; `pyproject.toml`
+  declares only `django`, `celery`, `djangorestframework`, all unbounded, while the code imports
+  `requests`, `django-environ`, `pydantic`, `django-filter`, `drf-spectacular`; four `TODO` markers.

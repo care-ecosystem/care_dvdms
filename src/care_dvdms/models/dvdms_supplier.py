@@ -24,6 +24,7 @@ class DVDMSSupplier(EMRBaseModel):
 
     class Meta:
         verbose_name_plural = "DVDMS Suppliers"
+        ordering = ["-created_date", "-id"]
         constraints = [
             models.UniqueConstraint(
                 fields=["institute", "supplier"],

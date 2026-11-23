@@ -23,6 +23,7 @@ class DVDMSStore(EMRBaseModel):
 
     class Meta:
         verbose_name_plural = "DVDMS Stores"
+        ordering = ["-created_date", "-id"]
         constraints = [
             models.UniqueConstraint(
                 fields=["eaushadhi_store_id"],

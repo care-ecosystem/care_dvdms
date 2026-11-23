@@ -41,6 +41,10 @@ class DVDMSProductMapping(EMRBaseModel):
 
     class Meta:
         verbose_name_plural = "DVDMS Product Mappings"
+        ordering = ["-created_date", "-id"]
+        indexes = [
+            models.Index(fields=["institute", "-created_date", "-id"], name="dvdms_prodmap_inst_created"),
+        ]
         constraints = [
             models.UniqueConstraint(
                 fields=["institute", "eaushadhi_drug_id"],

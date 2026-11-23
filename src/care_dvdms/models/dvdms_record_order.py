@@ -76,6 +76,11 @@ class DVDMSRecordOrder(EMRBaseModel):
 
     class Meta:
         verbose_name_plural = "DVDMS Record Orders"
+        ordering = ["-created_date", "-id"]
+        indexes = [
+            models.Index(fields=["institute", "-created_date", "-id"], name="dvdms_recorder_inst_created"),
+            models.Index(fields=["institute", "status"], name="dvdms_recorder_inst_status"),
+        ]
         constraints = [
             models.UniqueConstraint(
                 fields=["order"],

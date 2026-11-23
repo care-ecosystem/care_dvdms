@@ -41,6 +41,7 @@ class DVDMSOutwardRecordOrder(EMRBaseModel):
 
     class Meta:
         verbose_name_plural = "DVDMS Outward Record Orders"
+        ordering = ["-created_date", "-id"]
 
     def __str__(self):
         return f"{self.record_order} - {self.eaushadhi_indent_no}"
