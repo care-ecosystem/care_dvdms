@@ -30,6 +30,8 @@ class DVDMSRecordItemOrder(EMRBaseModel):
 
     class Meta:
         verbose_name_plural = "DVDMS Record Item Orders"
+        # Line items read in the order they were added, not newest first.
+        ordering = ["id"]
 
     def __str__(self):
         return f"{self.record_order} - {self.supply_request_id}"

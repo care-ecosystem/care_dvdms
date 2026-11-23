@@ -49,6 +49,14 @@ class DVDMSSyncLog(EMRBaseModel):
 
     class Meta:
         verbose_name_plural = "DVDMS Sync Logs"
+        ordering = ["-created_date", "-id"]
+        indexes = [
+            models.Index(fields=["institute", "-created_date", "-id"], name="dvdms_synclog_inst_created"),
+            models.Index(
+                fields=["institute", "sync_type", "request_status"],
+                name="dvdms_synclog_inst_type_stat",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.institute} - {self.sync_type} - {self.request_status}"

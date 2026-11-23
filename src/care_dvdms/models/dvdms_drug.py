@@ -15,6 +15,12 @@ class DVDMSDrug(EMRBaseModel):
 
     class Meta:
         verbose_name_plural = "DVDMS Drugs"
+        # Line items read in the order they were added, not newest first.
+        ordering = ["id"]
+        indexes = [
+            # Product mappings are filtered by drug__drug_id.
+            models.Index(fields=["drug_id"], name="dvdms_drug_drug_id"),
+        ]
 
     def __str__(self):
         return f"{self.drug_id} - {self.name}"

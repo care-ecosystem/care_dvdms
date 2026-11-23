@@ -7,6 +7,10 @@ from care_dvdms.api.services.constants import (
     DVDMS_ACKNOWLEDGE_SAVE_SUCCESS_STATUS,
 )
 from care_dvdms.api.services.dvdms_client import dvdms_get, dvdms_post_full
+from care_dvdms.api.services.dvdms_response_schemas import (
+    DVDMSAcknowledgeDetailsResponse,
+    DVDMSAcknowledgeSaveResponse,
+)
 
 
 def fetch_acknowledge_details(issue_no, store_id):
@@ -15,6 +19,7 @@ def fetch_acknowledge_details(issue_no, store_id):
         DVDMS_ACKNOWLEDGE_DETAILS_PATH,
         DVDMS_ACKNOWLEDGE_DETAILS_SUCCESS_STATUS,
         params={"issueNo": issue_no, "storeId": store_id},
+        schema=DVDMSAcknowledgeDetailsResponse,
     )
 
 
@@ -115,7 +120,9 @@ def build_acknowledge_save_payload(inward_record):
 
 def save_acknowledgement(payload):
     """Call the DVDMS acknowledge-save API. Returns (raw_response, http_status_code)."""
-    return dvdms_post_full(DVDMS_ACKNOWLEDGE_SAVE_PATH, DVDMS_ACKNOWLEDGE_SAVE_SUCCESS_STATUS, payload)
+    return dvdms_post_full(
+        DVDMS_ACKNOWLEDGE_SAVE_PATH, DVDMS_ACKNOWLEDGE_SAVE_SUCCESS_STATUS, payload, schema=DVDMSAcknowledgeSaveResponse
+    )
 
 
 def parse_item_pk_key(pk_key):

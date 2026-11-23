@@ -17,6 +17,7 @@ class DVDMSInstitute(EMRBaseModel):
 
     class Meta:
         verbose_name_plural = "DVDMS Institutes"
+        ordering = ["-created_date", "-id"]
 
     def __str__(self):
         return f"DVDMS Institute - {self.facility.name}"

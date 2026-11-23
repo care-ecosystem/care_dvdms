@@ -5,20 +5,23 @@ from care.emr.models.product_knowledge import ProductKnowledge
 from care.emr.models.supply_request import RequestOrder
 from care.emr.resources.inventory.product_knowledge.spec import ProductKnowledgeStatusOptions
 from care.emr.resources.inventory.supply_request.request_order import SupplyRequestOrderStatusOptions
-from django.db import connection
+from django.db import connection, transaction
 from django.db.models import Q
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 
 from care_dvdms.models.dvdms_institute import DVDMSInstitute
 from care_dvdms.models.dvdms_outward_record_order import DVDMSOutwardRecordOrderStatus
 from care_dvdms.models.dvdms_prescription_sequence import DVDMSPrescriptionSequence
-from care_dvdms.models.dvdms_product_mapping import (
-    DVDMSProductMapping,
-    DVDMSProductMappingArchiveReason,
+from care_dvdms.models.dvdms_product_mapping import DVDMSProductMapping
+from care_dvdms.models.dvdms_record_order import (
+    INACTIVE_RECORD_ORDER_STATUSES,
+    DVDMSRecordOrder,
+    DVDMSRecordOrderStatus,
 )
-from care_dvdms.models.dvdms_record_order import DVDMSRecordOrder, DVDMSRecordOrderStatus
+from care_dvdms.models.dvdms_store import DVDMSStore
+from care_dvdms.models.dvdms_supplier import DVDMSSupplier
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +84,7 @@ def deactivate_product_mappings_on_archive(sender, instance, **kwargs):
 
     archived = DVDMSProductMapping.objects.filter(product_knowledge=instance, archived=False).update(
         archived=True,
-        archived_reason=DVDMSProductMappingArchiveReason.product_archived,
+        archived_reason="PRODUCT_ARCHIVED",
         modified_date=timezone.now(),
     )
     if archived:
@@ -93,31 +96,85 @@ def deactivate_product_mappings_on_archive(sender, instance, **kwargs):
         )
 
 
+DVDMS_CONFIG_FIELDS = ("eaushadhi_institute_id", "eaushadhi_user_ref_id")
+
+ARCHIVE_CHUNK_SIZE = 1000
+
+
+@receiver(pre_save, sender=DVDMSInstitute)
+def detect_dvdms_config_change(sender, instance, **kwargs):
+    instance._dvdms_ids_changed = False  # noqa: SLF001
+    if instance._state.adding:  # noqa: SLF001
+        return
+    update_fields = kwargs.get("update_fields")
+    fields = [f for f in DVDMS_CONFIG_FIELDS if update_fields is None or f in update_fields]
+    current = DVDMSInstitute.objects.filter(pk=instance.pk).values(*fields).first() if fields else None
+    instance._dvdms_ids_changed = bool(  # noqa: SLF001
+        current and any(current[field] != getattr(instance, field) for field in fields)
+    )
+
+
+@receiver(post_save, sender=DVDMSInstitute)
+def reset_mappings_on_config_change(sender, instance, created, **kwargs):
+    """Archive product mappings and delete store/supplier mappings; ones created afterwards are left alone."""
+    if created or not getattr(instance, "_dvdms_ids_changed", False):
+        return
+    instance._dvdms_ids_changed = False  # noqa: SLF001
+
+    snapshot = list(
+        DVDMSProductMapping.objects.filter(institute=instance, deleted=False, archived=False).values_list(
+            "pk", flat=True
+        )
+    )
+    archived = 0
+    for start in range(0, len(snapshot), ARCHIVE_CHUNK_SIZE):
+        archived += DVDMSProductMapping.objects.filter(
+            pk__in=snapshot[start : start + ARCHIVE_CHUNK_SIZE], archived=False
+        ).update(
+            archived=True,
+            archived_reason="DVDMS_CONFIG_CHANGED",
+            modified_date=timezone.now(),
+        )
+    if archived:
+        logger.info(
+            "Archived %s DVDMS product mapping(s): DVDMS config of institute %s changed",
+            archived,
+            instance.external_id,
+        )
+
+    for mapping_model in (DVDMSStore, DVDMSSupplier):
+        mapping_model.objects.filter(institute=instance, deleted=False).update(
+            deleted=True, modified_date=timezone.now()
+        )
+
+
 #: Outward states in which the indent is with DVDMS, so the record order is no longer ours
 IN_FLIGHT_OUTWARD_STATUSES = {
     DVDMSOutwardRecordOrderStatus.created,
     DVDMSOutwardRecordOrderStatus.submitted,
 }
 
-#: A request order in one of these states will never be fulfilled.
-DEAD_REQUEST_ORDER_STATUSES = {
-    SupplyRequestOrderStatusOptions.abandoned.value,
-    SupplyRequestOrderStatusOptions.entered_in_error.value,
+#: A request order or record order in one of these states will never be fulfilled.
+DISCARDED_STATUSES = set(INACTIVE_RECORD_ORDER_STATUSES)
+
+#: Record orders that have run their course; their status is not rewritten.
+FINISHED_RECORD_ORDER_STATUSES = {
+    DVDMSRecordOrderStatus.completed,
+    DVDMSRecordOrderStatus.rejected,
+    *DISCARDED_STATUSES,
 }
 
 
 @receiver(post_save, sender=RequestOrder)
-def cancel_record_order_on_dead_order(sender, instance, **kwargs):
-    """Cancel the DVDMS record order once its request order can no longer be fulfilled.
+def sync_record_order_with_discarded_request_order(sender, instance, **kwargs):
+    """Give the DVDMS record order the same status once its request order is entered in error or abandoned.
 
-    A record order already handed to DVDMS is left alone - see below. Cancelling the rest releases
-    the request order under `uniq_order_active_record_order`, so a replacement record order can be
-    raised against it if the order is later revived.
+    A record order already handed to DVDMS is left alone - see below.
     """
-    if instance.status not in DEAD_REQUEST_ORDER_STATUSES:
+    if instance.status not in DISCARDED_STATUSES:
         return
 
-    candidates = DVDMSRecordOrder.objects.filter(order=instance).exclude(status=DVDMSRecordOrderStatus.cancelled)
+    candidates = DVDMSRecordOrder.objects.filter(order=instance).exclude(status__in=FINISHED_RECORD_ORDER_STATUSES)
 
     with_dvdms = Q(outward_record__status__in=IN_FLIGHT_OUTWARD_STATUSES)
     for record_order in candidates.filter(with_dvdms).select_related("outward_record"):
@@ -132,13 +189,31 @@ def cancel_record_order_on_dead_order(sender, instance, **kwargs):
             record_order.status,
         )
 
-    cancelled = candidates.exclude(with_dvdms).update(
-        status=DVDMSRecordOrderStatus.cancelled, modified_date=timezone.now()
-    )
-    if cancelled:
+    with transaction.atomic():
+        updated = candidates.exclude(with_dvdms).update(
+            status=instance.status, updated_by_id=instance.updated_by_id, modified_date=timezone.now()
+        )
+    if updated:
         logger.info(
-            "Cancelled %s DVDMS record order(s): request order %s is %s",
-            cancelled,
+            "Marked %s DVDMS record order(s) %s: request order %s is %s",
+            updated,
+            instance.status,
             instance.external_id,
             instance.status,
         )
+
+
+@receiver(post_save, sender=DVDMSRecordOrder)
+def sync_request_order_with_discarded_record_order(sender, instance, **kwargs):
+    """Give the request order the same status once its DVDMS record order is entered in error or abandoned."""
+    if instance.status not in DISCARDED_STATUSES:
+        return
+
+    with transaction.atomic():
+        order = RequestOrder.objects.select_for_update().get(pk=instance.order_id)
+        if order.status in DISCARDED_STATUSES or order.status == SupplyRequestOrderStatusOptions.completed.value:
+            return
+
+        order.status = instance.status
+        order.updated_by_id = instance.updated_by_id
+        order.save(update_fields=["status", "updated_by", "modified_date"])

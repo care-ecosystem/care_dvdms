@@ -9,7 +9,9 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 
+from care_dvdms.api.services.constants import DVDMS_ERROR_CODE_RESPONSE_CHANGED
 from care_dvdms.api.services.dvdms_indent_services import build_track_indent_params, track_indent
+from care_dvdms.api.services.dvdms_response_schemas import DVDMSResponseChangedError
 from care_dvdms.api.specs.dvdms_outward_record_order import (
     DVDMSOutwardRecordOrderListSpec,
 )
@@ -133,6 +135,12 @@ class DVDMSOutwardRecordOrderViewSet(EMRBaseViewSet):
             return Response(
                 {"error": "DVDMS did not respond in time. Please try again.", "code": "DVDMS_TIMEOUT"},
                 status=status.HTTP_504_GATEWAY_TIMEOUT,
+            )
+        except DVDMSResponseChangedError as exc:
+            store_record_error(outward_record, request.user, record_sync_failure(sync_log, exc))
+            return Response(
+                {"error": "DVDMS sent a response in an unexpected format.", "code": DVDMS_ERROR_CODE_RESPONSE_CHANGED},
+                status=status.HTTP_502_BAD_GATEWAY,
             )
         except requests.exceptions.RequestException as exc:
             error = record_sync_failure(sync_log, exc)

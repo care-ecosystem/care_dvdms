@@ -16,6 +16,7 @@ class DVDMSStoreListSpec(EMRResource):
     eaushadhi_store_name: str | None = None
     is_default: bool | None = None
     store: dict | None = None
+    meta: dict | None = None
     created_by: dict | None = None
     updated_by: dict | None = None
     created_date: datetime.datetime | None = None
@@ -37,6 +38,7 @@ class DVDMSStoreListSpec(EMRResource):
             if obj.location
             else None
         )
+        mapping["meta"] = dict(obj.meta) if obj.meta else None
         cls.serialize_audit_users(mapping, obj)
 
 
@@ -60,6 +62,7 @@ class DVDMSStoreCreateSpec(EMRResource):
     eaushadhi_store_id: str = Field(max_length=50)
     eaushadhi_store_name: str = Field(max_length=255)
     is_default: bool = False
+    meta: dict | None = None
 
 
 class DVDMSStoreUpdateSpec(EMRResource):
@@ -83,3 +86,4 @@ class DVDMSStoreUpdateSpec(EMRResource):
     eaushadhi_store_id: str | None = Field(default=None, max_length=50)
     eaushadhi_store_name: str | None = None
     is_default: bool | None = None
+    meta: dict | None = None

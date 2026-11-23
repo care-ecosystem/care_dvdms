@@ -40,6 +40,10 @@ class DVDMSRecordDelivery(EMRBaseModel):
 
     class Meta:
         verbose_name_plural = "DVDMS Record Deliveries"
+        ordering = ["-created_date", "-id"]
+        indexes = [
+            models.Index(fields=["record_order", "-created_date", "-id"], name="dvdms_recdeliv_order_created"),
+        ]
 
     def __str__(self):
         return f"{self.inward_record} - {self.delivery_order_id}"
